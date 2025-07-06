@@ -94,6 +94,22 @@ void RpgMeshSkinnedResource::UpdateResources() noexcept
 		SkinnedIndexCount += data.IndexCount * data.InstanceCount;
 	}
 
+	int skinnedVtxOffset = 0;
+	int skinnedIdxOffset = 0;
+
+	for (int i = 0; i < ObjectParameters.GetCount(); ++i)
+	{
+		RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
+		param.SkinnedVertexStart = skinnedVtxOffset;
+		param.SkinnedIndexStart = skinnedIdxOffset;
+
+		skinnedVtxOffset += param.VertexCount;
+		skinnedIdxOffset += param.IndexCount;
+	}
+
+	RPG_PLATFORM_Check(skinnedVtxOffset == SkinnedVertexCount);
+	RPG_PLATFORM_Check(skinnedIdxOffset == SkinnedIndexCount);
+
 	RpgD3D12::ResizeBuffer(SkinnedVertexPositionBuffer, sizeof(RpgVertex::FMeshPosition) * SkinnedVertexCount, false);
 	RPG_D3D12_SetDebugNameAllocation(SkinnedVertexPositionBuffer, "RES_MeshSkin_SkinnedVtxPos");
 
@@ -189,34 +205,32 @@ void RpgMeshSkinnedResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noe
 
 
 	// transition original vertex (texcoord, index) to COPY_SOURCE
-	D3D12_RESOURCE_BARRIER transitionToCopySourceBarriers[] =
+	D3D12_RESOURCE_BARRIER copySourceTransitionBarriers[] =
 	{
 		RpgD3D12::CreateResourceBarrier_Transition(VertexTexCoordBuffer->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE),
 		RpgD3D12::CreateResourceBarrier_Transition(IndexBuffer->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE),
 	};
-	cmdList->ResourceBarrier(ARRAYSIZE(transitionToCopySourceBarriers), transitionToCopySourceBarriers);
+	cmdList->ResourceBarrier(ARRAYSIZE(copySourceTransitionBarriers), copySourceTransitionBarriers);
 
-	// copy original vertex (texcoord, index) to skinned
-	int skinnedVtxOffset = 0;
-	int skinnedIdxOffset = 0;
-
+	// copy original vertex texcoord to skinned
 	for (int i = 0; i < ObjectParameters.GetCount(); ++i)
 	{
-		RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
-		param.SkinnedVertexStart = skinnedVtxOffset;
-		param.SkinnedIndexStart = skinnedIdxOffset;
+		const RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
 
-		// copy skinned vertex texcoord
 		const size_t dstTexCoordOffset = sizeof(RpgVertex::FMeshTexCoord) * param.SkinnedVertexStart;
 		const size_t srcTexCoordOffset = sizeof(RpgVertex::FMeshTexCoord) * param.VertexStart;
-		cmdList->CopyBufferRegion(SkinnedVertexTexCoordBuffer->GetResource(), dstTexCoordOffset, VertexTexCoordBuffer->GetResource(), srcTexCoordOffset, sizeof(RpgVertex::FMeshTexCoord) * param.VertexCount);
+		const size_t texCoordSizeBytes = sizeof(RpgVertex::FMeshTexCoord) * param.VertexCount;
+		cmdList->CopyBufferRegion(SkinnedVertexTexCoordBuffer->GetResource(), dstTexCoordOffset, VertexTexCoordBuffer->GetResource(), srcTexCoordOffset, texCoordSizeBytes);
+	}
 
-		// copy skinned vertex index
+	// copy original vertex index to skinned
+	for (int i = 0; i < ObjectParameters.GetCount(); ++i)
+	{
+		const RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
+
 		const size_t dstIndexOffset = sizeof(RpgVertex::FIndex) * param.SkinnedIndexStart;
 		const size_t srcIndexOffset = sizeof(RpgVertex::FIndex) * param.IndexStart;
-		cmdList->CopyBufferRegion(SkinnedIndexBuffer->GetResource(), dstIndexOffset, IndexBuffer->GetResource(), srcIndexOffset, sizeof(RpgVertex::FIndex) * param.IndexCount);
-
-		skinnedVtxOffset += param.VertexCount;
-		skinnedIdxOffset += param.IndexCount;
+		const size_t indexSizeBytes = sizeof(RpgVertex::FIndex) * param.IndexCount;
+		cmdList->CopyBufferRegion(SkinnedIndexBuffer->GetResource(), dstIndexOffset, IndexBuffer->GetResource(), srcIndexOffset, indexSizeBytes);
 	}
 }

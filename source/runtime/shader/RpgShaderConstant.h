@@ -155,6 +155,7 @@ RPG_SHADER_CONSTANT_STATIC_ASSERT_LIMIT(RpgShaderConstantObjectParameter, 4, 16)
 
 struct RpgShaderConstantSkinnedObjectParameter
 {
+    int ObjectIndex;
     int SkeletonIndex;
     int VertexStart;
     int VertexCount;

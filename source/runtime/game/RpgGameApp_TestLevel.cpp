@@ -148,7 +148,7 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 void RpgGameApp::CreateTestLevel() noexcept
 {
 	//TestLevel_PrimitiveShapes(MainWorld);
-	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sponza_phong/sponza.obj", 1.0f);
+	TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sponza_phong/sponza.obj", 1.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/san_miguel/san-miguel-low-poly.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/lost_empire/lost_empire.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sibenik/sibenik.obj", 100.0f);

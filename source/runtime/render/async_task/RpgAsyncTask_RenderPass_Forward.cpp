@@ -117,7 +117,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 		RPG_PLATFORM_Assert(DrawSkinnedMeshCount > 0);
 
 		// Bind vertex buffers
-		D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[3] =
+		const D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[3] =
 		{
 			MeshSkinnedResource->GetVertexBufferView_SkinnedPosition(),
 			MeshSkinnedResource->GetVertexBufferView_SkinnedNormalTangent(),

@@ -12,7 +12,6 @@ namespace RpgRenderPipeline
         GRPI_MATERIAL_PARAM,
         GRPI_VIEWPORT_PARAM,
         GRPI_WORLD_DATA,
-        GRPI_SKELETON_DATA,
         GRPI_TRANSFORM_DATA,
         GRPI_MATERIAL_VECTOR_SCALAR_DATA,
         GRPI_TEXTURES,

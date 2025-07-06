@@ -41,9 +41,9 @@ namespace RpgAssimp
 	{
 		switch (assimpTextureType)
 		{
-			case aiTextureType_DIFFUSE: return RpgTextureFormat::TEX_2D_BC3;
-			case aiTextureType_SPECULAR: return RpgTextureFormat::TEX_2D_BC4;
-			case aiTextureType_NORMALS: return RpgTextureFormat::TEX_2D_BC5;
+			case aiTextureType_DIFFUSE: return RpgTextureFormat::TEX_2D_BC3U;
+			case aiTextureType_SPECULAR: return RpgTextureFormat::TEX_2D_BC4U;
+			case aiTextureType_NORMALS: return RpgTextureFormat::TEX_2D_BC5S;
 
 			/*
 			case aiTextureType_AMBIENT:

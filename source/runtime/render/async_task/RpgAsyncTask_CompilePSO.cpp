@@ -85,6 +85,8 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 			case RpgMaterialVertexMode::SKELETAL_MESH:
 			{
+				RPG_PLATFORM_CheckV(0, "Not using this anymore!");
+
 				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_SKINNED_NAME;
 
 				// Position

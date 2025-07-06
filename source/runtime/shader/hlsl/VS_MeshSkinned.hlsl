@@ -66,10 +66,8 @@ VS_Output VS_Main(VS_Input input)
     float4 vertexBlendTangent = mul(input.Tangent, boneVertexBlendMatrix);
     
     output.WorldPosition = mul(vertexBlendPosition, worldTransformMatrix);
-    
-    float3x3 normWorldMatrix = transpose(inverse((float3x3) worldTransformMatrix));
-    output.WorldNormal = normalize(mul(vertexBlendNormal, normWorldMatrix));
-    output.WorldTangent = normalize(mul(vertexBlendTangent, normWorldMatrix));
+    output.WorldNormal = normalize(mul(vertexBlendNormal, worldTransformMatrix));
+    output.WorldTangent = normalize(mul(vertexBlendTangent, worldTransformMatrix));
     
     //output.WorldPosition = mul(vertexPosition, worldTransformMatrix).xyz;
     //output.WorldNormal = normalize(mul(vertexNormal, worldTransformMatrix).xyz);

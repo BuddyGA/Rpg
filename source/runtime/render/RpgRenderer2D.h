@@ -106,7 +106,7 @@ private:
 		ComPtr<D3D12MA::Allocation> LineVertexBuffer;
 		ComPtr<D3D12MA::Allocation> LineIndexBuffer;
 	};
-	FFrameData FrameDatas[RPG_RENDER_FRAME_BUFFERING];
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 
 public:

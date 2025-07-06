@@ -1,6 +1,10 @@
 #pragma once
 
 
+// Number of frame buffering
+#define RPG_FRAME_BUFFERING		3
+
+
 // Maximum model meshes/materials 
 #define RPG_MODEL_MAX_MESH	8
 
@@ -46,9 +50,11 @@
 
 
 
-#define RPG_RENDER_FRAME_BUFFERING		3
+// Spawn dedicated render thread
+#define RPG_RENDER_MULTITHREADED					0
 
-#define RPG_RENDER_MULTITHREADED		1
+// All copy, compute, render execute in async task threadpool
+#define RPG_RENDER_ASYNC_TASK						1
 
 // Maximum view per world in single frame rendering
 #define RPG_RENDER_CAMERA_MAX_COUNT                 4

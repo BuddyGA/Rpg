@@ -13,11 +13,11 @@ namespace RpgCompressonator
 		switch (format)
 		{
 			case RpgTextureFormat::TEX_2D_RGBA: return CMP_FORMAT_RGBA_8888;
-			case RpgTextureFormat::TEX_2D_BC3: return CMP_FORMAT_BC3;
-			case RpgTextureFormat::TEX_2D_BC4: return CMP_FORMAT_BC4;
-			case RpgTextureFormat::TEX_2D_BC5: return CMP_FORMAT_BC5;
+			case RpgTextureFormat::TEX_2D_BC3U: return CMP_FORMAT_BC3;
+			case RpgTextureFormat::TEX_2D_BC4U: return CMP_FORMAT_BC4;
+			case RpgTextureFormat::TEX_2D_BC5S: return CMP_FORMAT_BC5;
 			case RpgTextureFormat::TEX_2D_BC6H: return CMP_FORMAT_BC6H;
-			case RpgTextureFormat::TEX_2D_BC7: return CMP_FORMAT_BC7;
+			case RpgTextureFormat::TEX_2D_BC7U: return CMP_FORMAT_BC7;
 
 			default:
 				RPG_NotImplementedYet();
@@ -60,7 +60,7 @@ namespace RpgCompressonator
 
 		// Compress texture?
 		CMP_MipSet compressedMipSet{};
-		const bool bCompressTexture = (format >= RpgTextureFormat::TEX_2D_BC3 && format <= RpgTextureFormat::TEX_2D_BC7);
+		const bool bCompressTexture = (format >= RpgTextureFormat::TEX_2D_BC3U && format <= RpgTextureFormat::TEX_2D_BC7U);
 
 		if (bCompressTexture)
 		{

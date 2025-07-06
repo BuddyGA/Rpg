@@ -102,10 +102,12 @@ public:
 
 		const wchar_t* args[] =
 		{
+			L"-HV", L"2021",		// Compiler version
 			L"-Ges",				// Enable strict mode
 			L"-Zpr",				// Matrix in row_major
 
 		#ifdef RPG_BUILD_DEBUG
+			L"-Qembed_debug",       // Embed PDB
 			L"-Od",					// Disable optimizations
 			L"-WX",					// Treat warnings as errors
 			L"-Zi",					// Enable debug information
@@ -122,6 +124,25 @@ public:
 		#endif // RPG_BUILD_DEBUG
 		};
 
+
+	#ifdef RPG_BUILD_DEBUG
+		const DWORD fileVersionSize = GetFileVersionInfoSizeA("dxcompiler.dll", NULL);
+		void* fileVersionData = RpgPlatformMemory::MemMalloc(fileVersionSize);
+		if (GetFileVersionInfoA("dxcompiler.dll", 0, fileVersionSize, fileVersionData))
+		{
+			VS_FIXEDFILEINFO* ffi = nullptr;
+			UINT len = 0;
+
+			if (VerQueryValueA(fileVersionData, "\\", (LPVOID*)&ffi, &len) && len >= sizeof(VS_FIXEDFILEINFO))
+			{
+				DWORD major = HIWORD(ffi->dwFileVersionMS);
+				DWORD minor = LOWORD(ffi->dwFileVersionMS);
+				DWORD build = HIWORD(ffi->dwFileVersionLS);
+				DWORD revision = LOWORD(ffi->dwFileVersionLS);
+				RPG_PLATFORM_Check(major >= 1 && minor >= 8);
+			}
+		}
+	#endif // RPG_BUILD_DEBUG
 
 		ComPtr<IDxcUtils> dxcUtils;
 		RPG_SHADER_Check(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils)));

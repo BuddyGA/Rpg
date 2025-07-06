@@ -6,7 +6,7 @@
 RpgAsyncTask_Compute::RpgAsyncTask_Compute() noexcept
 {
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE, IID_PPV_ARGS(&CmdAllocCompute)));
-	RPG_D3D12_SetDebugName(CmdAllocCompute, "CmdAllocCompute_AsyncTasCompute");
+	RPG_D3D12_SetDebugName(CmdAllocCompute, "CmdAllocCompute_AsyncTaskCompute");
 
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&CmdListCompute)));
 	RPG_D3D12_SetDebugName(CmdListCompute, "CmdListCompute_AsyncTaskCompute");

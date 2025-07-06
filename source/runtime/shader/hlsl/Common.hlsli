@@ -23,9 +23,6 @@ StructuredBuffer<RpgShaderConstantMaterialVectorScalarData> MaterialVectorScalar
 // Transform data
 StructuredBuffer<RpgShaderConstantObjectTransform> ObjectTransforms : register(t1, space2);
 
-// Skeleton data
-StructuredBuffer<RpgShaderConstantSkeletonBoneSkinningTransform> SkeletonBoneSkinningTransforms : register(t2, space2);
-
 // World data
 ConstantBuffer<RpgShaderConstantWorldData> WorldData : register(b0, space0);
 

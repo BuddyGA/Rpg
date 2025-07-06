@@ -147,7 +147,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 		// Begin frame
-		const int frameIndex = FrameCounter % RPG_RENDER_FRAME_BUFFERING;
+		const int frameIndex = FrameCounter % RPG_FRAME_BUFFERING;
 		const uint64_t fpsTickStart = SDL_GetPerformanceCounter();
 
 		RpgD3D12::BeginFrame(frameIndex);

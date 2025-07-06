@@ -141,13 +141,6 @@ namespace RpgRenderPipeline
         srvWorldTransformData.Descriptor.ShaderRegister = 1;	// t1
         srvWorldTransformData.Descriptor.RegisterSpace = 2;		// space2
 
-        D3D12_ROOT_PARAMETER1& srvObjectSkeletonData = rootParameters[GRPI_SKELETON_DATA];
-        srvObjectSkeletonData.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
-        srvObjectSkeletonData.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        srvObjectSkeletonData.Descriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAG_NONE;
-        srvObjectSkeletonData.Descriptor.ShaderRegister = 2;	// t2
-        srvObjectSkeletonData.Descriptor.RegisterSpace = 2;		// space2
-
         D3D12_ROOT_PARAMETER1& cbvWorldData = rootParameters[GRPI_WORLD_DATA];
         cbvWorldData.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
         cbvWorldData.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

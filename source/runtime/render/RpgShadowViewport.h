@@ -12,7 +12,7 @@ private:
 		RpgSharedTexture2D DepthTexture;
 		RpgArray<RpgDrawIndexed> DrawIndexeds;
 	};
-	FFrameData FrameDatas[RPG_RENDER_FRAME_BUFFERING];
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 public:
 	RpgPointInt RenderTargetDimension;

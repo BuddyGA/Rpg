@@ -27,7 +27,7 @@ RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 
 	BackbufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameData& frame = FrameDatas[f];
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&frame.Fence)));
@@ -52,7 +52,7 @@ RpgRenderer::~RpgRenderer() noexcept
 	SwapchainWaitAllPresents();
 	SwapchainReleaseResources(false);
 
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		WaitFrameFinished(f);
 
@@ -81,10 +81,10 @@ RpgRenderer::~RpgRenderer() noexcept
 
 void RpgRenderer::SwapchainWaitAllPresents() noexcept
 {
-	HANDLE waitCompletedEvents[RPG_RENDER_FRAME_BUFFERING];
+	HANDLE waitCompletedEvents[RPG_FRAME_BUFFERING];
 	int waitCount = 0;
 
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameData& frame = FrameDatas[f];
 		
@@ -104,7 +104,7 @@ void RpgRenderer::SwapchainWaitAllPresents() noexcept
 
 void RpgRenderer::SwapchainReleaseResources(bool bResize) noexcept
 {
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		BackbufferResources[f].Reset();
 	}
@@ -163,7 +163,7 @@ void RpgRenderer::SwapchainResize() noexcept
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDesc{};
 		swapchainDesc.Flags = flags;
-		swapchainDesc.BufferCount = RPG_RENDER_FRAME_BUFFERING;
+		swapchainDesc.BufferCount = RPG_FRAME_BUFFERING;
 		swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapchainDesc.Format = BackbufferFormat;
 		swapchainDesc.SampleDesc.Count = 1;
@@ -186,10 +186,10 @@ void RpgRenderer::SwapchainResize() noexcept
 		SwapchainReleaseResources(true);
 
 		RPG_PLATFORM_LogDebug(RpgLogD3D12, "Resize swapchain %i, %i", windowDimension.X, windowDimension.Y);
-		RPG_D3D12_Validate(SwapChain->ResizeBuffers(RPG_RENDER_FRAME_BUFFERING, static_cast<UINT>(windowDimension.X), static_cast<UINT>(windowDimension.Y), BackbufferFormat, flags));
+		RPG_D3D12_Validate(SwapChain->ResizeBuffers(RPG_FRAME_BUFFERING, static_cast<UINT>(windowDimension.X), static_cast<UINT>(windowDimension.Y), BackbufferFormat, flags));
 	}
 
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		RPG_D3D12_Validate(SwapChain->GetBuffer(f, IID_PPV_ARGS(&BackbufferResources[f])));
 		RPG_D3D12_SetDebugName(BackbufferResources[f], "_%i_RES_SwapBackbuffer", f);
@@ -221,7 +221,7 @@ void RpgRenderer::RegisterWorld(const RpgWorld* world) noexcept
 {
 	RPG_PLATFORM_Assert(world);
 
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameData& frame = FrameDatas[f];
 
@@ -337,11 +337,7 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 			asyncCopy->WorldResources.AddValue(worldContexts[w].Resource);
 		}
 
-	#if RPG_RENDER_MULTITHREADED
-		RpgThreadPool::SubmitTasks((RpgThreadTask**)&asyncCopy, 1);
-	#else
-		asyncCopy->Execute();
-	#endif // RPG_RENDER_MULTITHREADED
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&asyncCopy, 1);
 	}
 
 
@@ -355,38 +351,25 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 		asyncCompute->MeshResource = frame.MeshResource;
 		asyncCompute->MeshSkinnedResource = frame.MeshSkinnedResource;
 
-	#if RPG_RENDER_MULTITHREADED
-		RpgThreadPool::SubmitTasks((RpgThreadTask**)&asyncCompute, 1);
-	#else
-		asyncCompute->Execute();
-	#endif // RPG_RENDER_MULTITHREADED
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&asyncCompute, 1);
 	}
 
 
 	// async render pass
 	RpgAsyncTask_RenderPassArray asyncRenderPasses;
-
-	for (int w = 0; w < worldContexts.GetCount(); ++w)
 	{
-		FWorldContext& context = worldContexts[w];
-
-		for (int v = 0; v < context.Viewports.GetCount(); ++v)
+		for (int w = 0; w < worldContexts.GetCount(); ++w)
 		{
-			context.Viewports[v]->SetupRenderPasses(frameIndex, asyncRenderPasses, materialResource, meshResource, meshSkinnedResource, context.Resource);
-		}
-	}
+			FWorldContext& context = worldContexts[w];
 
-#if RPG_RENDER_MULTITHREADED
-	if (!asyncRenderPasses.IsEmpty())
-	{
-		RpgThreadPool::SubmitTasks((RpgThreadTask**)asyncRenderPasses.GetData(), asyncRenderPasses.GetCount());
+			for (int v = 0; v < context.Viewports.GetCount(); ++v)
+			{
+				context.Viewports[v]->SetupRenderPasses(frameIndex, asyncRenderPasses, materialResource, meshResource, meshSkinnedResource, context.Resource);
+			}
+		}
+
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)asyncRenderPasses.GetData(), asyncRenderPasses.GetCount());
 	}
-#else
-	for (int r = 0; r < asyncRenderPasses.GetCount(); ++r)
-	{
-		asyncRenderPasses[r]->Execute();
-	}
-#endif // RPG_RENDER_MULTITHREADED
 
 	
 	// Begin swapchain rendering
@@ -448,11 +431,7 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 	for (int i = 0; i < asyncRenderPasses.GetCount(); ++i)
 	{
 		RpgAsyncTask_RenderPass* renderPass = asyncRenderPasses[i];
-
-	#if RPG_RENDER_MULTITHREADED
 		renderPass->Wait();
-	#endif // RPG_RENDER_MULTITHREADED
-
 		directCommandLists.AddValue(renderPass->GetCommandList());
 	}
 
@@ -498,11 +477,8 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 	}
 
 
-#if RPG_RENDER_MULTITHREADED
 	asyncCopy->Wait();
 	asyncCompute->Wait();
-#endif // RPG_RENDER_MULTITHREADED
-
 }
 
 

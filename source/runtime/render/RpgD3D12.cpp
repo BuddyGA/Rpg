@@ -3,7 +3,7 @@
 #include "core/RpgCommandLine.h"
 
 
-extern "C" __declspec(dllexport) const UINT D3D12SDKVersion = 614;
+extern "C" __declspec(dllexport) const UINT D3D12SDKVersion = 616;
 extern "C" __declspec(dllexport) const char* D3D12SDKPath = ".\\D3D12\\";
 
 
@@ -57,7 +57,7 @@ namespace RpgD3D12
         FResourceDescriptorPool* DescriptorPool_CBV_SRV_UAV;
         FResourceDescriptorPool* DescriptorPool_TDI;
     };
-    static FFrameData FrameDatas[RPG_RENDER_FRAME_BUFFERING];
+    static FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 
     static void* D3D12MA_Alloc(size_t size, size_t alignment, void*) noexcept
@@ -271,7 +271,7 @@ void RpgD3D12::Initialize() noexcept
     }
 
 
-    for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+    for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
     {
         FFrameData& frame = FrameDatas[f];
 
@@ -302,7 +302,7 @@ void RpgD3D12::Shutdown() noexcept
 
     RPG_PLATFORM_Log(RpgLogD3D12, "Shutdown D3D12");
 
-    for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+    for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
     {
         FFrameData& frame = FrameDatas[f];
         delete frame.DescriptorPool_RTV;

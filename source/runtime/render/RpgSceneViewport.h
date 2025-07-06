@@ -32,7 +32,7 @@ private:
 
 		RpgAsyncTask_RenderPass_Forward* AsyncTaskRenderPassForward;
 	};
-	FFrameData FrameDatas[RPG_RENDER_FRAME_BUFFERING];
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 
 public:
@@ -85,7 +85,7 @@ private:
 		RpgMaterialResource::FMaterialID LineNoDepthMaterialId;
 		RpgWorldResource::FCameraID CameraId;
 	};
-	FFrameDebug FrameDebugs[RPG_RENDER_FRAME_BUFFERING];
+	FFrameDebug FrameDebugs[RPG_FRAME_BUFFERING];
 #endif // !RPG_BUILD_SHIPPING
 
 };

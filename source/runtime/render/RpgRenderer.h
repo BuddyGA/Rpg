@@ -27,7 +27,7 @@ private:
 	ComPtr<IDXGISwapChain4> SwapChain;
 
 	DXGI_FORMAT BackbufferFormat;
-	ComPtr<ID3D12Resource> BackbufferResources[RPG_RENDER_FRAME_BUFFERING];
+	ComPtr<ID3D12Resource> BackbufferResources[RPG_FRAME_BUFFERING];
 	uint32_t BackbufferIndex;
 
 
@@ -98,7 +98,7 @@ private:
 		ComPtr<ID3D12GraphicsCommandList> SwapChainCmdList;
 		HANDLE PresentCompletedEvent;
 	};
-	FFrameData FrameDatas[RPG_RENDER_FRAME_BUFFERING];
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 
 public:

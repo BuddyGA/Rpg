@@ -459,14 +459,14 @@ namespace RpgTextureFormat
 	{
 		NONE = 0,
 
-		TEX_2D_R,		// Uncompressed, Red (Ex: Font, Mask, Specular, AO, Metallic, Roughness)
-		TEX_2D_RG,		// Uncompressed, Red-Green (Ex: Normal)
-		TEX_2D_RGBA,	// Uncompressed, Red-Green-Blue-Alpha (Ex: Base color)
-		TEX_2D_BC3,		// Compressed, Red-Green-Blue-(Alpha) (Ex: Base color)
-		TEX_2D_BC4,		// Compressed, Red (Ex: Mask, Specular, AO, Metallic, Roughness)
-		TEX_2D_BC5,		// Compressed, Red-Green (Normal, Motion)
+		TEX_2D_R,		// Uncompressed, Red8 (Ex: Font, Mask, Specular, AO, Metallic, Roughness)
+		TEX_2D_RG,		// Uncompressed, Red8-Green8
+		TEX_2D_RGBA,	// Uncompressed, Red8-Green8-Blue8-Alpha8 (Ex: Base color, UI)
+		TEX_2D_BC3U,	// Compressed, Red-Green-Blue-(Alpha) (Ex: Base color)
+		TEX_2D_BC4U,	// Compressed, Red (Ex: Mask, Specular, AO, Metallic, Roughness)
+		TEX_2D_BC5S,	// Compressed, Red-Green (Normal, Motion)
 		TEX_2D_BC6H,	// Compressed, HDR
-		TEX_2D_BC7,		// Compressed, Red-Green-Blue-(Alpha)
+		TEX_2D_BC7U,	// Compressed, Red-Green-Blue-(Alpha)
 
 		TEX_RT_RGBA,
 		TEX_RT_BGRA,

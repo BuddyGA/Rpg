@@ -12,11 +12,11 @@ const DXGI_FORMAT RPG_TEXTURE_FORMAT_TO_DXGI_FORMAT[static_cast<uint8_t>(RpgText
 	DXGI_FORMAT_R8_UNORM,				// TEX_2D_R,
 	DXGI_FORMAT_R8G8_UNORM,				// TEX_2D_RG,
 	DXGI_FORMAT_R8G8B8A8_UNORM,			// TEX_2D_RGBA,
-	DXGI_FORMAT_BC3_UNORM,				// TEX_2D_BC3,
-	DXGI_FORMAT_BC4_UNORM,				// TEX_2D_BC4,
-	DXGI_FORMAT_BC5_UNORM,				// TEX_2D_BC5,
+	DXGI_FORMAT_BC3_UNORM,				// TEX_2D_BC3U,
+	DXGI_FORMAT_BC4_UNORM,				// TEX_2D_BC4U,
+	DXGI_FORMAT_BC5_SNORM,				// TEX_2D_BC5S,
 	DXGI_FORMAT_BC6H_UF16,				// TEX_2D_BC6H,
-	DXGI_FORMAT_BC7_UNORM,				// TEX_2D_BC7,
+	DXGI_FORMAT_BC7_UNORM,				// TEX_2D_BC7U,
 	DXGI_FORMAT_R8G8B8A8_UNORM,			// TEX_RT_RGBA,
 	DXGI_FORMAT_B8G8R8A8_UNORM,			// TEX_RT_BGRA,
 	DXGI_FORMAT_D16_UNORM,				// TEX_DS_16,
@@ -49,7 +49,7 @@ RpgTexture2D::RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, 
 	}
 	else
 	{
-		RPG_PLATFORM_Check(format >= RpgTextureFormat::TEX_2D_R && format <= RpgTextureFormat::TEX_2D_BC7);
+		RPG_PLATFORM_Check(format >= RpgTextureFormat::TEX_2D_R && format <= RpgTextureFormat::TEX_2D_BC7U);
 	}
 
 	Format = format;
@@ -151,20 +151,18 @@ void RpgTexture2D::GPU_UpdateResource() noexcept
 	if (bShouldCreateNew)
 	{
 		const DXGI_FORMAT dxgiFormat = RPG_TEXTURE_FORMAT_TO_DXGI_FORMAT[static_cast<uint8_t>(Format)];
+		GpuState = D3D12_RESOURCE_STATE_COMMON;
 
 		if (bIsRenderTarget)
 		{
-			GpuState = D3D12_RESOURCE_STATE_COMMON;
 			GpuAlloc = RpgD3D12::CreateRenderTarget(dxgiFormat, GpuState, Width, Height, RpgColorLinear(0.0f, 0.0f, 0.0f, 1.0f));
 		}
 		else if (bIsDepthStencil)
 		{
-			GpuState = D3D12_RESOURCE_STATE_COMMON;
 			GpuAlloc = RpgD3D12::CreateDepthStencil(dxgiFormat, GpuState, Width, Height, 1.0f, 0);
 		}
 		else
 		{
-			GpuState = D3D12_RESOURCE_STATE_COPY_DEST;
 			GpuAlloc = RpgD3D12::CreateTexture2D(dxgiFormat, GpuState, Width, Height, MipCount);
 		}
 

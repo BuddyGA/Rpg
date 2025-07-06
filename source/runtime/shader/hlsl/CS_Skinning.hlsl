@@ -57,10 +57,10 @@ RWStructuredBuffer<RpgVertexMeshNormalTangent> SkinnedVertexNormalTangents : reg
 inline uint4 Rpg_UnpackBoneIndices(uint packedBoneIndices)
 {
     return uint4(
-        packedBoneIndices & 0xFFu,
-        (packedBoneIndices >> 8) & 0xFFu,
-        (packedBoneIndices >> 16) & 0xFFu,
-        (packedBoneIndices >> 24) & 0xFFu);
+        packedBoneIndices & 0xFF,
+        (packedBoneIndices >> 8) & 0xFF,
+        (packedBoneIndices >> 16) & 0xFF,
+        (packedBoneIndices >> 24) & 0xFF);
 }
 
 
@@ -75,16 +75,18 @@ void CS_Main(uint3 GroupID : SV_GroupID,                    // 3D index of the t
              uint GroupIndex : SV_GroupIndex                // Flattened local index of the thread within a thread group.
 )
 {
-    const int vtxId = DispatchThreadID.x;
-    if (vtxId >= ObjectParameter.VertexCount)
+    const int vtxId = DispatchThreadID.x + ObjectParameter.VertexStart;
+    if (vtxId >= (ObjectParameter.VertexStart + ObjectParameter.VertexCount))
     {
         return;
     }
     
+    // fetch input vertex
     const float4 vtxPos = VertexPositions[vtxId];
     const RpgVertexMeshNormalTangent vtxNormTan = VertexNormalTangents[vtxId];
     const RpgVertexMeshSkin vtxSkin = VertexSkins[vtxId];
     
+    // perform vertex skinning
     const int skelId = ObjectParameter.SkeletonIndex;
     uint4 boneIndices0 = Rpg_UnpackBoneIndices(vtxSkin.PackedBoneIndices0);
     uint4 boneIndices1 = Rpg_UnpackBoneIndices(vtxSkin.PackedBoneIndices1);
@@ -98,7 +100,8 @@ void CS_Main(uint3 GroupID : SV_GroupID,                    // 3D index of the t
         boneWeightSkinningMatrix += mul(boneWeight, boneSkinningTransform);
     }
     
-    const int skinnedVtxId = vtxId + ObjectParameter.SkinnedVertexStart;
+    // output skinned vertex
+    const int skinnedVtxId = DispatchThreadID.x + ObjectParameter.SkinnedVertexStart;
     SkinnedVertexPositions[skinnedVtxId] = mul(vtxPos, boneWeightSkinningMatrix);
     SkinnedVertexNormalTangents[skinnedVtxId].Normal = mul(vtxNormTan.Normal, boneWeightSkinningMatrix);
     SkinnedVertexNormalTangents[skinnedVtxId].Tangent = mul(vtxNormTan.Tangent, boneWeightSkinningMatrix);

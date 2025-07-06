@@ -19,7 +19,7 @@ RpgSceneViewport::RpgSceneViewport() noexcept
 	RenderTargetDimension = RpgPointInt(1600, 900);
 	bFrustumCulling = false;
 
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameData& frame = FrameDatas[f];
 		frame.AsyncTaskRenderPassForward = RpgThreadPool::CreateTask<RpgAsyncTask_RenderPass_Forward>();
@@ -27,7 +27,7 @@ RpgSceneViewport::RpgSceneViewport() noexcept
 
 
 #ifndef RPG_BUILD_SHIPPING
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameDebug& debug = FrameDebugs[f];
 		debug.LineMaterialId = RPG_INDEX_INVALID;
@@ -40,7 +40,7 @@ RpgSceneViewport::RpgSceneViewport() noexcept
 
 RpgSceneViewport::~RpgSceneViewport() noexcept
 {
-	for (int f = 0; f < RPG_RENDER_FRAME_BUFFERING; ++f)
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameData& frame = FrameDatas[f];
 		RpgThreadPool::DestroyTask(frame.AsyncTaskRenderPassForward);

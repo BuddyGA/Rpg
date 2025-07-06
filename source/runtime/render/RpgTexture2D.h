@@ -1,0 +1,215 @@
+#pragma once
+
+#include "core/RpgConfig.h"
+#include "core/RpgString.h"
+#include "core/RpgSharedPtr.h"
+#include "RpgRenderTypes.h"
+
+
+
+typedef RpgSharedPtr<class RpgTexture2D> RpgSharedTexture2D;
+
+class RpgTexture2D
+{
+	RPG_NOCOPY(RpgTexture2D)
+
+public:
+	struct FMipData
+	{
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT Subresource{};
+		int RowCount{ 0 };
+		uint32_t RowBytes{ 0 };
+		uint32_t SizeBytes{ 0 };
+		uint16_t Width{ 0 };
+		uint16_t Height{ 0 };
+	};
+
+
+protected:
+	RpgName Name;
+	RpgTextureFormat::EType Format;
+	uint16_t Width;
+	uint16_t Height;
+	uint8_t MipCount;
+	size_t TotalSizeBytes;
+	RpgArrayInline<FMipData, RPG_TEXTURE_MAX_MIP> MipDatas;
+	RpgArrayInline<SDL_RWLock*, RPG_TEXTURE_MAX_MIP> MipLocks;
+	ComPtr<D3D12MA::Allocation> PixelStagingBuffer;
+	uint8_t* PixelData;
+
+
+	enum EFlag : uint16_t
+	{
+		FLAG_None				= (0),
+		FLAG_Loading			= (1 << 0),
+		FLAG_Loaded				= (1 << 1),
+		FLAG_PendingDestroy		= (1 << 2),
+		FLAG_Dirty				= (1 << 3),
+		FLAG_IsRenderTarget		= (1 << 4),
+		FLAG_IsDepthStencil		= (1 << 5),
+		FLAG_GPU_Loading		= (1 << 6),
+		FLAG_GPU_Loaded			= (1 << 7),
+	};
+	uint16_t Flags;
+
+
+private:
+	RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height, uint8_t mipCount, uint16_t flags) noexcept;
+
+public:
+	~RpgTexture2D() noexcept;
+
+private:
+	void InitializeMips() noexcept;
+
+public:
+	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	{
+		return Name;
+	}
+
+	[[nodiscard]] inline RpgTextureFormat::EType GetFormat() const noexcept
+	{
+		return Format;
+	}
+
+	[[nodiscard]] inline RpgPointInt GetDimension() const noexcept
+	{
+		return RpgPointInt(static_cast<int>(Width), static_cast<int>(Height));
+	}
+
+	[[nodiscard]] inline uint8_t GetMipCount() const noexcept
+	{
+		return MipCount;
+	}
+
+	[[nodiscard]] inline size_t GetTotalSizeBytes() const noexcept
+	{
+		return TotalSizeBytes;
+	}
+
+
+	inline void Resize(uint16_t newWidth, uint16_t newHeight) noexcept
+	{
+		RPG_PLATFORM_Check(newWidth >= RPG_TEXTURE_MIN_DIM && newWidth <= RPG_TEXTURE_MAX_DIM);
+		RPG_PLATFORM_Check(newHeight >= RPG_TEXTURE_MIN_DIM && newHeight <= RPG_TEXTURE_MAX_DIM);
+		RPG_PLATFORM_Check((Flags & (FLAG_IsRenderTarget | FLAG_IsDepthStencil)));
+
+		Width = newWidth;
+		Height = newHeight;
+	}
+
+
+	[[nodiscard]] inline const uint8_t* MipReadLock(uint8_t mipLevel, FMipData& out_MipData) const noexcept
+	{
+		RPG_PLATFORM_Check(mipLevel >= 0 && mipLevel < MipCount);
+		RPG_PLATFORM_Check(!(Flags & (FLAG_IsRenderTarget | FLAG_IsDepthStencil)));
+
+		SDL_LockRWLockForReading(MipLocks[mipLevel]);
+		out_MipData = MipDatas[mipLevel];
+
+		return PixelData + out_MipData.Subresource.Offset;
+	}
+
+
+	[[nodiscard]] inline uint8_t* MipWriteLock(uint8_t mipLevel, FMipData& out_MipData) noexcept
+	{
+		RPG_PLATFORM_Check(mipLevel >= 0 && mipLevel < MipCount);
+		RPG_PLATFORM_Check(!(Flags & (FLAG_IsRenderTarget | FLAG_IsDepthStencil)));
+
+		SDL_LockRWLockForWriting(MipLocks[mipLevel]);
+		out_MipData = MipDatas[mipLevel];
+		Flags |= FLAG_Dirty;
+
+		return PixelData + out_MipData.Subresource.Offset;
+	}
+
+
+	inline void MipReadWriteUnlock(uint8_t mipLevel) noexcept
+	{
+		RPG_PLATFORM_Check(mipLevel >= 0 && mipLevel < MipCount);
+		RPG_PLATFORM_Check(!(Flags & (FLAG_IsRenderTarget | FLAG_IsDepthStencil)));
+
+		SDL_UnlockRWLock(MipLocks[mipLevel]);
+	}
+
+
+	[[nodiscard]] inline bool IsDirty() const noexcept
+	{
+		return (Flags & FLAG_Dirty);
+	}
+
+	[[nodiscard]] inline bool IsRenderTarget() const noexcept
+	{
+		return (Flags & FLAG_IsRenderTarget);
+	}
+
+	[[nodiscard]] inline bool IsDepthStencil() const noexcept
+	{
+		return (Flags & FLAG_IsDepthStencil);
+	}
+
+
+private:
+	ComPtr<D3D12MA::Allocation> GpuAlloc;
+	D3D12_RESOURCE_STATES GpuState;
+
+
+public:
+	void GPU_UpdateResource() noexcept;
+	void GPU_CommandCopy(ID3D12GraphicsCommandList* cmdList) const noexcept;
+
+
+	[[nodiscard]] inline ID3D12Resource* GPU_GetResource() const noexcept
+	{
+		return GpuAlloc->GetResource();
+	}
+
+	[[nodiscard]] inline D3D12_RESOURCE_STATES GPU_GetState() const noexcept
+	{
+		return GpuState;
+	}
+
+	inline void GPU_SetState(D3D12_RESOURCE_STATES newState) noexcept
+	{
+		GpuState = newState;
+	}
+
+	inline void GPU_SetLoading() noexcept
+	{
+		RPG_PLATFORM_Check(!IsRenderTarget() && !IsDepthStencil());
+		RPG_PLATFORM_Check(Flags & FLAG_Dirty);
+
+		Flags = (Flags & ~FLAG_GPU_Loaded) | FLAG_GPU_Loading;
+	}
+
+	[[nodiscard]] inline bool GPU_IsLoading() const noexcept
+	{
+		return (Flags & FLAG_GPU_Loading);
+	}
+
+	inline void GPU_SetLoaded() noexcept
+	{
+		RPG_PLATFORM_Check(!IsRenderTarget() && !IsDepthStencil());
+		RPG_PLATFORM_Check(Flags & FLAG_GPU_Loading);
+
+		Flags = (Flags & ~(FLAG_Dirty | FLAG_GPU_Loading)) | FLAG_GPU_Loaded;
+	}
+
+	[[nodiscard]] inline bool GPU_IsLoaded() const noexcept
+	{
+		return (Flags & FLAG_GPU_Loaded);
+	}
+
+
+public:
+	[[nodiscard]] static RpgSharedTexture2D s_CreateShared2D(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height, uint8_t mipCount) noexcept;
+	[[nodiscard]] static RpgSharedTexture2D s_CreateSharedRenderTarget(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
+	[[nodiscard]] static RpgSharedTexture2D s_CreateSharedDepthStencil(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
+
+	static void s_CreateDefaults() noexcept;
+	static void s_DestroyDefaults() noexcept;
+
+	[[nodiscard]] static const RpgSharedTexture2D& s_GetDefault_White() noexcept;
+
+};

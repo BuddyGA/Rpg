@@ -1,0 +1,65 @@
+#define RPG_SHADER_HLSL
+#include "../RpgShaderConstant.h"
+
+
+// ================================================================================================================================= //
+// RESOURCE BINDINGS
+// ================================================================================================================================= //
+
+// Static samplers
+SamplerState SamplerMipMapLinear : register(s0, space0);
+SamplerState SamplerPoint : register(s1, space0);
+SamplerComparisonState SamplerShadow : register(s2, space0);
+
+// Texture2D (Dynamic indexing)
+Texture2D DynamicIndexingTexture2Ds[] : register(t0, space0);
+
+// TextureCube (Dynamic indexing) 
+TextureCube DynamicIndexingTextureCubes[] : register(t0, space1);
+
+// Material vector/scalar values
+StructuredBuffer<RpgShaderConstantMaterialVectorScalarData> MaterialVectorScalars : register(t0, space2);
+
+// Transform data
+StructuredBuffer<RpgShaderConstantObjectTransform> ObjectTransforms : register(t1, space2);
+
+// Skeleton data
+StructuredBuffer<RpgShaderConstantSkeletonBoneSkinningTransform> SkeletonBoneSkinningTransforms : register(t2, space2);
+
+// World data
+ConstantBuffer<RpgShaderConstantWorldData> WorldData : register(b0, space0);
+
+// Viewport parameter
+ConstantBuffer<RpgShaderConstantViewportParameter> ViewportParameter : register(b1, space0);
+
+// Material parameter
+ConstantBuffer<RpgShaderConstantMaterialParameter> MaterialParameter : register(b2, space0);
+
+// Object parameter
+ConstantBuffer<RpgShaderConstantObjectParameter> ObjectParameter : register(b3, space0);
+
+
+
+
+// ================================================================================================================================= //
+// FUNCTIONS
+// ================================================================================================================================= //
+#define RPG_SQR(x) (x) * (x)
+
+
+inline float4 Rpg_GetMaterialParameterTextureColor(int descriptorIndex, SamplerState samplerState, float2 texCoord)
+{
+    return DynamicIndexingTexture2Ds[NonUniformResourceIndex(descriptorIndex)].Sample(samplerState, texCoord);
+}
+
+
+inline float4 Rpg_GetMaterialParameterVectorValue(int vectorIndex)
+{
+    return MaterialVectorScalars.Load(MaterialParameter.VectorScalarValueIndex).Vectors[vectorIndex];
+}
+
+
+inline float Rpg_GetMaterialParameterScalarValue(int scalarIndex)
+{
+    return MaterialVectorScalars.Load(MaterialParameter.VectorScalarValueIndex).Scalars[scalarIndex];
+}

@@ -1,0 +1,5 @@
+#include "RpgGameState.h"
+
+
+RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogGameState, VERBOSITY_DEBUG)
+

@@ -1,0 +1,202 @@
+#include "RpgRenderResource.h"
+#include "RpgRenderPipeline.h"
+
+
+
+RpgWorldResource::RpgWorldResource() noexcept
+{
+	
+}
+
+
+void RpgWorldResource::Reset() noexcept
+{
+	WorldData.DeltaTime = 0.0f;
+	WorldData.CameraCount = 0;
+	WorldData.DirectionalLightCount = 0;
+	WorldData.PointLightCount = 0;
+	WorldData.SpotLightCount = 0;
+	WorldData.AmbientColorStrength = RpgVector4(1.0f, 1.0f, 1.0f, 0.02f).Xmm;
+	TransformDatas.Clear();
+
+#ifndef RPG_BUILD_SHIPPING
+	DebugLineVertexSizeBytes = 0;
+	DebugLineIndexSizeBytes = 0;
+	DebugLine.Clear();
+	DebugLineNoDepth.Clear();
+#endif // !RPG_BUILD_SHIPPING
+
+}
+
+
+void RpgWorldResource::UpdateResources() noexcept
+{
+	RpgD3D12::ResizeBuffer(WorldConstantBuffer, sizeof(RpgShaderConstantWorldData), false);
+	RPG_D3D12_SetDebugNameAllocation(WorldConstantBuffer, "RES_WorldConstantBuffer");
+
+	if (!TransformDatas.IsEmpty())
+	{
+		RpgD3D12::ResizeBuffer(TransformStructBuffer, TransformDatas.GetMemorySizeBytes_Allocated(), false);
+		RPG_D3D12_SetDebugNameAllocation(TransformStructBuffer, "RES_TransformStructBuffer");
+	}
+
+#ifndef RPG_BUILD_SHIPPING
+	DebugLineVertexSizeBytes = 0;
+	DebugLineIndexSizeBytes = 0;
+
+	if (!DebugLine.IsEmpty())
+	{
+		DebugLineVertexSizeBytes += DebugLine.GetVertexSizeBytes();
+		DebugLineIndexSizeBytes += DebugLine.GetIndexSizeBytes();
+	}
+
+	if (!DebugLineNoDepth.IsEmpty())
+	{
+		DebugLineVertexSizeBytes += DebugLineNoDepth.GetVertexSizeBytes();
+		DebugLineIndexSizeBytes += DebugLineNoDepth.GetIndexSizeBytes();
+	}
+
+	if (DebugLineVertexSizeBytes > 0)
+	{
+		RpgD3D12::ResizeBuffer(DebugLineVertexBuffer, DebugLineVertexSizeBytes, false);
+		RPG_D3D12_SetDebugNameAllocation(DebugLineVertexBuffer, "RES_DebugLineVertexBuffer");
+
+		RpgD3D12::ResizeBuffer(DebugLineIndexBuffer, DebugLineIndexSizeBytes, false);
+		RPG_D3D12_SetDebugNameAllocation(DebugLineIndexBuffer, "RES_DebugLineIndexBuffer");
+	}
+#endif // !RPG_BUILD_SHIPPING
+
+}
+
+
+void RpgWorldResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept
+{
+	const size_t worldDataSizeBytes = sizeof(RpgShaderConstantWorldData);
+	const size_t transformDataSizeBytes = TransformDatas.GetMemorySizeBytes_Allocated();
+
+
+#ifndef RPG_BUILD_SHIPPING
+	const size_t stagingSizeBytes = worldDataSizeBytes + transformDataSizeBytes + DebugLineVertexSizeBytes + DebugLineIndexSizeBytes;
+
+#else
+	const size_t stagingSizeBytes = worldDataSizeBytes + transformDataSizeBytes;
+
+#endif // !RPG_BUILD_SHIPPING
+
+
+	RpgD3D12::ResizeBuffer(StagingBuffer, stagingSizeBytes, true);
+	RPG_D3D12_SetDebugNameAllocation(StagingBuffer, "STG_WorldResource");
+
+	ID3D12Resource* stagingResource = StagingBuffer->GetResource();
+	uint8_t* stagingMap = RpgD3D12::MapBuffer<uint8_t>(StagingBuffer.Get());
+	size_t stagingOffset = 0;
+
+
+	// Local function helper to copy data to staging buffer and command copy buffer
+	auto LocalFunc_CopyStaging_CopyBuffer = [&](const void* data, size_t sizeBytes, ID3D12Resource* dstResource, size_t dstOffset)
+	{
+		RpgPlatformMemory::MemCopy(stagingMap + stagingOffset, data, sizeBytes);
+		cmdList->CopyBufferRegion(dstResource, dstOffset, stagingResource, stagingOffset, sizeBytes);
+		stagingOffset += sizeBytes;
+	};
+
+
+	LocalFunc_CopyStaging_CopyBuffer(&WorldData, worldDataSizeBytes, WorldConstantBuffer->GetResource(), 0);
+
+	if (transformDataSizeBytes > 0)
+	{
+		LocalFunc_CopyStaging_CopyBuffer(TransformDatas.GetData(), transformDataSizeBytes, TransformStructBuffer->GetResource(), 0);
+	}
+
+
+#ifndef RPG_BUILD_SHIPPING
+	size_t debugDstVertexOffset = 0;
+	size_t debugDstIndexOffset = 0;
+
+	if (!DebugLine.IsEmpty())
+	{
+		const size_t vertexSizeBytes = DebugLine.GetVertexSizeBytes();
+		LocalFunc_CopyStaging_CopyBuffer(DebugLine.GetVertexData(), vertexSizeBytes, DebugLineVertexBuffer->GetResource(), debugDstVertexOffset);
+		debugDstVertexOffset += vertexSizeBytes;
+
+		const size_t indexSizeBytes = DebugLine.GetIndexSizeBytes();
+		LocalFunc_CopyStaging_CopyBuffer(DebugLine.GetIndexData(), indexSizeBytes, DebugLineIndexBuffer->GetResource(), debugDstIndexOffset);
+		debugDstIndexOffset += indexSizeBytes;
+	}
+
+	if (!DebugLineNoDepth.IsEmpty())
+	{
+		const size_t vertexSizeBytes = DebugLineNoDepth.GetVertexSizeBytes();
+		LocalFunc_CopyStaging_CopyBuffer(DebugLineNoDepth.GetVertexData(), vertexSizeBytes, DebugLineVertexBuffer->GetResource(), debugDstVertexOffset);
+		debugDstVertexOffset += vertexSizeBytes;
+
+		const size_t indexSizeBytes = DebugLineNoDepth.GetIndexSizeBytes();
+		LocalFunc_CopyStaging_CopyBuffer(DebugLineNoDepth.GetIndexData(), indexSizeBytes, DebugLineIndexBuffer->GetResource(), debugDstIndexOffset);
+		debugDstIndexOffset += indexSizeBytes;
+	}
+#endif // !RPG_BUILD_SHIPPING
+
+
+	RPG_PLATFORM_Check(stagingSizeBytes == stagingOffset);
+	RpgD3D12::UnmapBuffer(StagingBuffer.Get());
+}
+
+
+void RpgWorldResource::CommandBindShaderResources(ID3D12GraphicsCommandList* cmdList) const noexcept
+{
+	cmdList->SetGraphicsRootConstantBufferView(RpgRenderPipeline::GRPI_WORLD_DATA, WorldConstantBuffer->GetResource()->GetGPUVirtualAddress());
+
+	if (TransformStructBuffer)
+	{
+		cmdList->SetGraphicsRootShaderResourceView(RpgRenderPipeline::GRPI_TRANSFORM_DATA, TransformStructBuffer->GetResource()->GetGPUVirtualAddress());
+	}
+}
+
+
+
+#ifndef RPG_BUILD_SHIPPING
+
+void RpgWorldResource::Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource, RpgMaterialResource::FMaterialID materialId, RpgMaterialResource::FMaterialID noDepthMaterialId, FCameraID cameraId) const noexcept
+{
+	if (DebugLine.IsEmpty() && DebugLineNoDepth.IsEmpty())
+	{
+		return;
+	}
+
+	// Bind vertex buffer
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	vertexBufferView.BufferLocation = DebugLineVertexBuffer->GetResource()->GetGPUVirtualAddress();
+	vertexBufferView.StrideInBytes = sizeof(RpgVertex::FPrimitive);
+	vertexBufferView.SizeInBytes = static_cast<UINT>(DebugLineVertexSizeBytes);
+	cmdList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	// Bind index buffer
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+	indexBufferView.BufferLocation = DebugLineIndexBuffer->GetResource()->GetGPUVirtualAddress();
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	indexBufferView.SizeInBytes = static_cast<UINT>(DebugLineIndexSizeBytes);
+	cmdList->IASetIndexBuffer(&indexBufferView);
+
+	// Set topology linelist
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	// Bind root constant object param
+	RpgShaderConstantObjectParameter param;
+	param.CameraIndex = cameraId;
+	param.TransformIndex = RPG_INDEX_INVALID;
+	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / sizeof(uint32_t), &param, 0);
+
+	if (!DebugLine.IsEmpty())
+	{
+		materialResource->CommandBindMaterial(cmdList, materialId);
+		cmdList->DrawIndexedInstanced(DebugLine.GetIndexCount(), 1, 0, 0, 0);
+	}
+
+	if (!DebugLineNoDepth.IsEmpty())
+	{
+		materialResource->CommandBindMaterial(cmdList, noDepthMaterialId);
+		cmdList->DrawIndexedInstanced(DebugLineNoDepth.GetIndexCount(), 1, DebugLine.GetIndexCount(), DebugLine.GetVertexCount(), 0);
+	}
+}
+
+#endif // !RPG_BUILD_SHIPPING

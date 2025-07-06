@@ -1,0 +1,30 @@
+#pragma once
+
+#include "core/world/RpgWorld.h"
+#include "RpgAnimationTypes.h"
+
+
+
+class RpgAnimationWorldSubsystem : public RpgWorldSubsystem
+{
+private:
+	static constexpr int TASK_COUNT = 4;
+	RpgAsyncTask_TickPose* TickPoseTasks[TASK_COUNT];
+	bool bTickAnimationPose;
+
+public:
+	float GlobalPlayRate;
+	bool bDebugDrawSkeletonBones;
+
+
+public:
+	RpgAnimationWorldSubsystem() noexcept;
+	~RpgAnimationWorldSubsystem() noexcept;
+
+protected:
+	virtual void StartPlay() noexcept override;
+	virtual void StopPlay() noexcept override;
+	virtual void TickUpdate(float deltaTime) noexcept override;
+	virtual void Render(int frameIndex, RpgRenderer* renderer) noexcept override;
+
+};

@@ -1,0 +1,37 @@
+#pragma once
+
+#include "core/RpgThreadPool.h"
+#include "core/dsa/RpgArray.h"
+#include "../RpgRenderTypes.h"
+
+
+
+class RpgAsyncTask_Copy : public RpgThreadTask
+{
+private:
+	ComPtr<ID3D12CommandAllocator> CmdAllocCopy;
+	ComPtr<ID3D12GraphicsCommandList> CmdListCopy;
+
+public:
+	int FrameIndex;
+	ID3D12Fence* FenceSignal;
+	uint64_t FenceSignalValue;
+	RpgRenderer2D* Renderer2d;
+	RpgMaterialResource* MaterialResource;
+	RpgMeshResource* MeshResource;
+	RpgMeshSkinnedResource* MeshSkinnedResource;
+	RpgArrayInline<RpgWorldResource*, 8> WorldResources;
+
+
+public:
+	RpgAsyncTask_Copy() noexcept;
+	virtual void Reset() noexcept override;
+	virtual void Execute() noexcept override;
+
+
+	virtual const char* GetTaskName() const noexcept override
+	{
+		return "RpgAsyncTask_Copy";
+	}
+
+};

@@ -30,7 +30,7 @@ protected:
 	virtual void CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept = 0;
 
 public:
-	[[nodiscard]] inline ID3D12CommandList* GetCommandList() const noexcept
+	inline ID3D12CommandList* GetCommandList() const noexcept
 	{
 		return CmdListDirect.Get();
 	}

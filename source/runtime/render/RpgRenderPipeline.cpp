@@ -22,8 +22,8 @@ namespace RpgRenderPipeline
 
     static void ValidateRootParameters(const D3D12_ROOT_PARAMETER1* rootParamData, int rootParamCount) noexcept
     {
-        RPG_PLATFORM_Assert(rootParamData);
-        RPG_PLATFORM_Assert(rootParamCount > 0);
+        RPG_Assert(rootParamData);
+        RPG_Assert(rootParamCount > 0);
 
         uint32_t dwordCount = 0;
 
@@ -45,7 +45,7 @@ namespace RpgRenderPipeline
             }
         }
 
-        RPG_PLATFORM_Assert(dwordCount <= 64);
+        RPG_Assert(dwordCount <= 64);
     }
 
 
@@ -308,7 +308,7 @@ void RpgRenderPipeline::Initialize() noexcept
         RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&ComputeSkinningPSO)));
         RPG_D3D12_SetDebugName(ComputeSkinningPSO, "PSO_ComputeSkinning");
 
-        RPG_PLATFORM_LogDebug(RpgLogD3D12, "Compiled compute PSO for (Skinning)");
+        RPG_LogDebug(RpgLogD3D12, "Compiled compute PSO for (Skinning)");
     }
 
     bInitialized = true;
@@ -354,18 +354,18 @@ ID3D12RootSignature* RpgRenderPipeline::GetRootSignatureCompute() noexcept
 
 void RpgRenderPipeline::AddMaterials(RpgSharedMaterial* materialArray, int materialCount) noexcept
 {
-    RPG_PLATFORM_Assert(materialArray);
-    RPG_PLATFORM_Assert(materialCount > 0 && materialCount <= RPG_MAX_COUNT);
+    RPG_Assert(materialArray);
+    RPG_Assert(materialCount > 0 && materialCount <= RPG_MAX_COUNT);
 
     for (int i = 0; i < materialCount; ++i)
     {
         RpgSharedMaterial& mat = materialArray[i];
-        RPG_PLATFORM_Assert(!mat->IsInstance());
+        RPG_Assert(!mat->IsInstance());
         const int foundAtIndex = Materials.FindIndexByValue(materialArray[i]);
 
         if (foundAtIndex != RPG_INDEX_INVALID)
         {
-            RPG_PLATFORM_LogWarn(RpgLogD3D12, "Ignore add material. Material [%s] has been added!", *mat->GetName());
+            RPG_LogWarn(RpgLogD3D12, "Ignore add material. Material [%s] has been added!", *mat->GetName());
             continue;
         }
 
@@ -437,7 +437,7 @@ ID3D12PipelineState* RpgRenderPipeline::GetMaterialPSO(const RpgSharedMaterial& 
 {
     const RpgSharedMaterial& checkMaterial = material->IsInstance() ? material->GetParentMaterial() : material;
     const int index = Materials.FindIndexByValue(checkMaterial);
-    RPG_PLATFORM_Assert(index != RPG_INDEX_INVALID);
+    RPG_Assert(index != RPG_INDEX_INVALID);
 
     return MaterialPipelineStates[index].Get();
 }

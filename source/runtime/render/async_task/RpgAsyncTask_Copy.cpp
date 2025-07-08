@@ -39,7 +39,7 @@ void RpgAsyncTask_Copy::Reset() noexcept
 
 void RpgAsyncTask_Copy::Execute() noexcept
 {
-	RPG_PLATFORM_Assert(FenceSignal);
+	RPG_Assert(FenceSignal);
 
 	ID3D12GraphicsCommandList* cmdList = CmdListCopy.Get();
 	RPG_D3D12_COMMAND_Begin(CmdAllocCopy, cmdList);

@@ -7,7 +7,7 @@ extern "C" __declspec(dllexport) const UINT D3D12SDKVersion = 616;
 extern "C" __declspec(dllexport) const char* D3D12SDKPath = ".\\D3D12\\";
 
 
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogD3D12, VERBOSITY_DEBUG)
+RPG_LOG_DEFINE_CATEGORY(RpgLogD3D12, VERBOSITY_DEBUG)
 
 
 
@@ -81,7 +81,7 @@ void RpgD3D12::Initialize() noexcept
 		return;
 	}
 
-    RPG_PLATFORM_Log(RpgLogD3D12, "Initialize D3D12");
+    RPG_Log(RpgLogD3D12, "Initialize D3D12");
 
     UINT dxgiFactoryFlags = 0;
 	bValidationLayer = RpgCommandLine::HasCommand("d3d12validation");
@@ -146,7 +146,7 @@ void RpgD3D12::Initialize() noexcept
             char adapterDescription[64];
             wcstombs(adapterDescription, desc.Description, 64);
 
-            RPG_PLATFORM_Log(RpgLogD3D12, "Found GPU with D3D12 support (Name: %s, VRAM: %u MiB, DriverVersion: xxx.xx)", 
+            RPG_Log(RpgLogD3D12, "Found GPU with D3D12 support (Name: %s, VRAM: %u MiB, DriverVersion: xxx.xx)", 
                 adapterDescription, 
                 desc.DedicatedVideoMemory / RPG_MEMORY_SIZE_MiB(1)
             );
@@ -300,7 +300,7 @@ void RpgD3D12::Shutdown() noexcept
 		return;
 	}
 
-    RPG_PLATFORM_Log(RpgLogD3D12, "Shutdown D3D12");
+    RPG_Log(RpgLogD3D12, "Shutdown D3D12");
 
     for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
     {
@@ -383,7 +383,7 @@ ID3D12CommandQueue* RpgD3D12::GetCommandQueueCopy() noexcept
 
 ComPtr<D3D12MA::Allocation> RpgD3D12::CreateBuffer(size_t sizeBytes, bool bCpuAccess) noexcept
 {
-    RPG_PLATFORM_Assert(sizeBytes > 0);
+    RPG_Assert(sizeBytes > 0);
 
     D3D12_RESOURCE_DESC bufferDesc{};
     bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -429,7 +429,7 @@ bool RpgD3D12::ResizeBuffer(ComPtr<D3D12MA::Allocation>& out_Buffer, size_t newS
 
 ComPtr<D3D12MA::Allocation> RpgD3D12::CreateTexture2D(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height, uint8_t mipLevel) noexcept
 {
-    RPG_PLATFORM_Assert(width > 0 && height > 0 && mipLevel > 0);
+    RPG_Assert(width > 0 && height > 0 && mipLevel > 0);
 
     const D3D12_RESOURCE_DESC textureDesc = CreateResourceDesc_Texture(format, width, height, mipLevel);
     
@@ -445,7 +445,7 @@ ComPtr<D3D12MA::Allocation> RpgD3D12::CreateTexture2D(DXGI_FORMAT format, D3D12_
 
 ComPtr<D3D12MA::Allocation> RpgD3D12::CreateRenderTarget(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height, RpgColorLinear clearColor) noexcept
 {
-    RPG_PLATFORM_Assert(width > 0 && height > 0);
+    RPG_Assert(width > 0 && height > 0);
 
     D3D12_RESOURCE_DESC renderTargetDesc{};
     renderTargetDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -476,7 +476,7 @@ ComPtr<D3D12MA::Allocation> RpgD3D12::CreateRenderTarget(DXGI_FORMAT format, D3D
 
 ComPtr<D3D12MA::Allocation> RpgD3D12::CreateDepthStencil(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height, float clearDepth, uint8_t clearStencil) noexcept
 {
-    RPG_PLATFORM_Assert(width > 0 && height > 0);
+    RPG_Assert(width > 0 && height > 0);
 
     D3D12_RESOURCE_DESC depthStencilDesc{};
     depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;

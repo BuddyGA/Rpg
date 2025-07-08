@@ -1,13 +1,13 @@
 #include "RpgWorld.h"
 
 
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogWorld, VERBOSITY_DEBUG)
+RPG_LOG_DEFINE_CATEGORY(RpgLogWorld, VERBOSITY_DEBUG)
 
 
 
 RpgWorld::RpgWorld(const RpgName& name) noexcept
 {
-    RPG_PLATFORM_LogDebug(RpgLogWorld, "Create world (%s)", *name);
+    RPG_LogDebug(RpgLogWorld, "Create world (%s)", *name);
 
     Name = name;
     bHasStartedPlay = false;
@@ -17,7 +17,7 @@ RpgWorld::RpgWorld(const RpgName& name) noexcept
 
 RpgWorld::~RpgWorld() noexcept
 {
-    RPG_PLATFORM_LogDebug(RpgLogWorld, "Destroy world (%s)", *Name);
+    RPG_LogDebug(RpgLogWorld, "Destroy world (%s)", *Name);
 
     for (int i = 0; i < ComponentStorages.GetCount(); ++i)
     {
@@ -30,7 +30,7 @@ RpgWorld::~RpgWorld() noexcept
 
     for (int i = 0; i < Subsystems.GetCount(); ++i)
     {
-        RPG_PLATFORM_LogDebug(RpgLogWorld, "Destroy subsystem (%s)", *Subsystems[i]->Name);
+        RPG_LogDebug(RpgLogWorld, "Destroy subsystem (%s)", *Subsystems[i]->Name);
         delete Subsystems[i];
     }
 }
@@ -40,13 +40,6 @@ void RpgWorld::BeginFrame(int frameIndex) noexcept
 {
     FrameIndex = frameIndex;
     FFrameData& frame = FrameDatas[FrameIndex];
-
-    for (int i = 0; i < frame.PendingDestroyScripts.GetCount(); ++i)
-    {
-        RPG_PLATFORM_Assert(frame.PendingDestroyScripts[i]);
-        delete frame.PendingDestroyScripts[i];
-    }
-    frame.PendingDestroyScripts.Clear();
 
     for (int i = 0; i < frame.PendingDestroyObjects.GetCount(); ++i)
     {
@@ -92,12 +85,12 @@ void RpgWorld::DispatchStartPlay() noexcept
     for (int i = 0; i < GameObjectScripts.GetCount(); ++i)
     {
         RpgGameObjectScript* script = GameObjectScripts[i];
-        RPG_PLATFORM_Check(script);
+        RPG_Check(script);
 
-        if (!script->bHasStartedPlay)
+        if (!script->bStartedPlay)
         {
             script->StartPlay();
-            script->bHasStartedPlay = true;
+            script->bStartedPlay = true;
         }
     }
 
@@ -120,12 +113,12 @@ void RpgWorld::DispatchStopPlay() noexcept
     for (int i = 0; i < GameObjectScripts.GetCount(); ++i)
     {
         RpgGameObjectScript* script = GameObjectScripts[i];
-        RPG_PLATFORM_Check(script);
+        RPG_Check(script);
 
-        if (script->bHasStartedPlay)
+        if (script->bStartedPlay)
         {
             script->StopPlay();
-            script->bHasStartedPlay = false;
+            script->bStartedPlay = false;
         }
     }
 
@@ -143,7 +136,7 @@ void RpgWorld::DispatchTickUpdate(float deltaTime) noexcept
     for (int i = 0; i < GameObjectScripts.GetCount(); ++i)
     {
         RpgGameObjectScript* script = GameObjectScripts[i];
-        RPG_PLATFORM_Check(script);
+        RPG_Check(script);
 
         script->TickUpdate(deltaTime);
     }
@@ -172,14 +165,14 @@ RpgGameObjectID RpgWorld::GameObject_Create(const RpgName& name, const RpgTransf
 {
     RPG_IsMainThread();
 
-    RPG_PLATFORM_Assert(!name.IsEmpty());
+    RPG_Assert(!name.IsEmpty());
 
-    RPG_PLATFORM_LogDebug(RpgLogWorld, "Create game object (%s)", *name);
+    RPG_LogDebug(RpgLogWorld, "Create game object (%s)", *name);
 
     const int nameId = GameObjectNames.Add();
     const int infoId = GameObjectInfos.Add();
     const int transformId = GameObjectTransforms.Add();
-    RPG_PLATFORM_Check(nameId == infoId && infoId == transformId);
+    RPG_Check(nameId == infoId && infoId == transformId);
 
     GameObjectNames[nameId] = name;
     
@@ -188,7 +181,7 @@ RpgGameObjectID RpgWorld::GameObject_Create(const RpgName& name, const RpgTransf
 
     ++info.Gen;
     info.Flags = FLAG_Allocated | FLAG_TransformUpdated;
-    RPG_PLATFORM_Check(info.Gen < UINT16_MAX);
+    RPG_Check(info.Gen < UINT16_MAX);
 
     RpgPlatformMemory::MemSet(info.ScriptIndices, RPG_INDEX_INVALID, sizeof(int16_t) * RPG_GAMEOBJECT_MAX_SCRIPT);
 
@@ -210,7 +203,7 @@ void RpgWorld::GameObject_Destroy(RpgGameObjectID& gameObject) noexcept
         FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
         info.Flags |= FLAG_PendingDestroy;
 
-        // cleanup scripts
+        // remove scripts
         for (int i = 0; i < RPG_GAMEOBJECT_MAX_SCRIPT; ++i)
         {
             const int scriptIndex = info.ScriptIndices[i];
@@ -223,7 +216,7 @@ void RpgWorld::GameObject_Destroy(RpgGameObjectID& gameObject) noexcept
 
         FrameDatas[FrameIndex].PendingDestroyObjects.AddValue(gameObject.Index);
 
-        RPG_PLATFORM_LogDebug(RpgLogWorld, "Mark game object (%s) as pending destroy", *GameObjectNames[gameObject.Index]);
+        RPG_LogDebug(RpgLogWorld, "Mark game object (%s) as pending destroy", *GameObjectNames[gameObject.Index]);
     }
 
     gameObject = RpgGameObjectID();

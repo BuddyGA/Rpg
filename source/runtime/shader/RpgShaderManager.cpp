@@ -4,9 +4,9 @@
 #include "core/RpgConfig.h"
 
 
-#define RPG_SHADER_Check(hr)	RPG_PLATFORM_Check((hr) == S_OK)
+#define RPG_SHADER_Check(hr)	RPG_Check((hr) == S_OK)
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_STATIC(RpgLogShader, VERBOSITY_DEBUG)
+RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogShader, VERBOSITY_DEBUG)
 
 
 
@@ -74,8 +74,8 @@ public:
 
 	virtual void Execute() noexcept override
 	{
-		RPG_PLATFORM_LogDebug(RpgLogShader, "[ThreadId-%u] Execute compile shader task\n\tName: %s\n\tFile: %s\n", SDL_GetCurrentThreadID(), *Name, *FilePath);
-		RPG_PLATFORM_Assert(Type >= RpgShader::TYPE_VERTEX && Type < RpgShader::TYPE_MAX_COUNT);
+		RPG_LogDebug(RpgLogShader, "[ThreadId-%u] Execute compile shader task\n\tName: %s\n\tFile: %s\n", SDL_GetCurrentThreadID(), *Name, *FilePath);
+		RPG_Assert(Type >= RpgShader::TYPE_VERTEX && Type < RpgShader::TYPE_MAX_COUNT);
 		
 		RpgArrayInline<FDefine, 8> defines;
 		defines.Resize(CompileMacros.GetCount());
@@ -139,7 +139,7 @@ public:
 				DWORD minor = LOWORD(ffi->dwFileVersionMS);
 				DWORD build = HIWORD(ffi->dwFileVersionLS);
 				DWORD revision = LOWORD(ffi->dwFileVersionLS);
-				RPG_PLATFORM_Check(major >= 1 && minor >= 8);
+				RPG_Check(major >= 1 && minor >= 8);
 			}
 		}
 
@@ -183,12 +183,12 @@ public:
 
 		if (dxcErrorBlob && dxcErrorBlob->GetBufferSize())
 		{
-			RPG_PLATFORM_LogError(RpgLogShader, "[ThreadId-%u] Compile shader FAILED!\n\tName: %s\n\tFile: %s\n\tMessage: %s\n", SDL_GetCurrentThreadID(), *Name, *FilePath, (const char*)dxcErrorBlob->GetBufferPointer());
+			RPG_LogError(RpgLogShader, "[ThreadId-%u] Compile shader FAILED!\n\tName: %s\n\tFile: %s\n\tMessage: %s\n", SDL_GetCurrentThreadID(), *Name, *FilePath, (const char*)dxcErrorBlob->GetBufferPointer());
 			CodeBlob.Reset();
 		}
 		else
 		{
-			RPG_PLATFORM_LogDebug(RpgLogShader, "[ThreadId-%u] Compile shader SUCCESS!\n\tName: %s\n\tFile: %s\n", SDL_GetCurrentThreadID(), *Name, *FilePath);
+			RPG_LogDebug(RpgLogShader, "[ThreadId-%u] Compile shader SUCCESS!\n\tName: %s\n\tFile: %s\n", SDL_GetCurrentThreadID(), *Name, *FilePath);
 			RPG_SHADER_Check(dxcResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&CodeBlob), nullptr));
 		}
 	}
@@ -244,7 +244,7 @@ void RpgShaderManager::Initialize() noexcept
 		return;
 	}
 
-	RPG_PLATFORM_Log(RpgLogShader, "Initialize shader manager");
+	RPG_Log(RpgLogShader, "Initialize shader manager");
 
 #ifndef RPG_BUILD_SHIPPING
 	const RpgString hlslDirPath = RpgFileSystem::GetSourceDirPath() + "runtime/shader/hlsl/";
@@ -282,7 +282,7 @@ void RpgShaderManager::Shutdown() noexcept
 		return;
 	}
 
-	RPG_PLATFORM_Log(RpgLogShader, "Shutdown shader manager");
+	RPG_Log(RpgLogShader, "Shutdown shader manager");
 
 	bInitialized = false;
 }
@@ -292,7 +292,7 @@ void RpgShaderManager::AddShader(const RpgName& in_Name, const RpgString& in_Hls
 {
 	if (ShaderNames.FindIndexByValue(in_Name) != RPG_INDEX_INVALID)
 	{
-		RPG_PLATFORM_LogWarn(RpgLogShader, "Ignore add shader. Shader with name [%s] already exists!", *in_Name);
+		RPG_LogWarn(RpgLogShader, "Ignore add shader. Shader with name [%s] already exists!", *in_Name);
 		return;
 	}
 

@@ -33,8 +33,8 @@ void RpgAsyncTask_Compute::Reset() noexcept
 
 void RpgAsyncTask_Compute::Execute() noexcept
 {
-	RPG_PLATFORM_Assert(MeshResource);
-	RPG_PLATFORM_Assert(MeshSkinnedResource);
+	RPG_Assert(MeshResource);
+	RPG_Assert(MeshSkinnedResource);
 
 	ID3D12GraphicsCommandList* cmdList = CmdListCompute.Get();
 	RPG_D3D12_COMMAND_Begin(CmdAllocCompute, CmdListCompute);
@@ -75,7 +75,7 @@ void RpgAsyncTask_Compute::Execute() noexcept
 		for (int i = 0; i < objectParams.GetCount(); ++i)
 		{
 			const RpgShaderConstantSkinnedObjectParameter param = objectParams[i];
-			RPG_PLATFORM_Check(param.SkeletonIndex != RPG_INDEX_INVALID);
+			RPG_Check(param.SkeletonIndex != RPG_INDEX_INVALID);
 
 			cmdList->SetComputeRoot32BitConstants(RpgRenderPipeline::CRPI_SKINNED_OBJECT_PARAM, sizeof(RpgShaderConstantSkinnedObjectParameter) / sizeof(UINT), &param, 0);
 			cmdList->Dispatch((param.VertexCount + 63) / 64, 1, 1);

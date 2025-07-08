@@ -187,22 +187,22 @@ public:
 	}
 
 public:
-	[[nodiscard]] inline int GetWidth() const noexcept
+	inline int GetWidth() const noexcept
 	{
 		return Right - Left;
 	}
 
-	[[nodiscard]] inline int GetHeight() const noexcept
+	inline int GetHeight() const noexcept
 	{
 		return Bottom - Top;
 	}
 
-	[[nodiscard]] inline bool TestIntersectPoint(const RpgPointInt& p) const noexcept
+	inline bool TestIntersectPoint(const RpgPointInt& p) const noexcept
 	{
 		return (p.X >= Left && p.X <= Right && p.Y >= Top && p.Y <= Bottom);
 	}
 
-	[[nodiscard]] inline bool TestIntersectRect(const RpgRectInt& r) const noexcept
+	inline bool TestIntersectRect(const RpgRectInt& r) const noexcept
 	{
 		return !(r.Right < Left || r.Left > Right || r.Top > Bottom || r.Bottom < Top);
 	}
@@ -240,12 +240,12 @@ public:
 	}
 
 public:
-	[[nodiscard]] inline float GetWidth() const noexcept
+	inline float GetWidth() const noexcept
 	{
 		return Right - Left;
 	}
 
-	[[nodiscard]] inline float GetHeight() const noexcept
+	inline float GetHeight() const noexcept
 	{
 		return Bottom - Top;
 	}
@@ -342,7 +342,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline EBorder TestIntersectBorder(const RpgPointInt& p) const noexcept
+	inline EBorder TestIntersectBorder(const RpgPointInt& p) const noexcept
 	{
 		for (int i = 1; i < MAX_COUNT; ++i)
 		{

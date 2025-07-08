@@ -2,7 +2,7 @@
 #include "thirdparty/clay/clay.h"
 
 
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogGUI, VERBOSITY_DEBUG)
+RPG_LOG_DEFINE_CATEGORY(RpgLogGUI, VERBOSITY_DEBUG)
 
 #define RPG_GUI_FromClayColor(c)		RpgColorRGBA(static_cast<uint8_t>(c.r * 255), static_cast<uint8_t>(c.g * 255), static_cast<uint8_t>(c.b * 255), static_cast<uint8_t>(c.a * 255))
 #define RPG_GUI_ToClayColor(c)			{ static_cast<float>(c.R) / 255.0f, static_cast<float>(c.G) / 255.0f, static_cast<float>(c.B) / 255.0f, static_cast<float>(c.A) / 255.0f }
@@ -12,7 +12,7 @@ RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogGUI, VERBOSITY_DEBUG)
 
 static void Rpg_ClayErrorHandler(Clay_ErrorData error) noexcept
 {
-	RPG_PLATFORM_LogError(RpgLogGUI, "ClayError: %s", error.errorText.chars);
+	RPG_LogError(RpgLogGUI, "ClayError: %s", error.errorText.chars);
 }
 
 

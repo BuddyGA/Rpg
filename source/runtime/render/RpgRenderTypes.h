@@ -44,14 +44,50 @@ enum class RpgRenderProjectionMode : uint8_t
 
 
 
-enum class RpgRenderLightType : uint8_t
+namespace RpgRenderLight
 {
-	NONE = 0,
-	POINT_LIGHT,
-	SPOT_LIGHT,
-	DIRECTIONAL_LIGHT
-};
+	enum EType : uint8_t
+	{
+		TYPE_NONE = 0,
+		TYPE_POINT_LIGHT,
+		TYPE_SPOT_LIGHT,
+		TYPE_DIRECTIONAL_LIGHT
+	};
 
+
+	enum EShadowResolutionQuality : uint8_t
+	{
+		SHADOW_RESOLUTION_QUALITY_LOW = 0,
+		SHADOW_RESOLUTION_QUALITY_MEDIUM,
+		SHADOW_RESOLUTION_QUALITY_HIGH,
+		SHADOW_RESOLUTION_QUALITY_MAX_COUNT
+	};
+
+
+	constexpr uint16_t POINT_SHADOW_RESOLUTIONS[SHADOW_RESOLUTION_QUALITY_MAX_COUNT] =
+	{
+		256,	// LOW
+		512,	// MEDIUM
+		1024	// HIGH
+	};
+
+
+	constexpr uint16_t SPOT_SHADOW_RESOLUTIONS[SHADOW_RESOLUTION_QUALITY_MAX_COUNT] =
+	{
+		256,	// LOW
+		512,	// MEDIUM
+		1024	// HIGH
+	};
+
+
+	constexpr uint16_t DIRECTIONAL_SHADOW_RESOLUTIONS[SHADOW_RESOLUTION_QUALITY_MAX_COUNT] =
+	{
+		512,	// LOW
+		1024,	// MEDIUM
+		2048	// HIGH
+	};
+
+};
 
 
 

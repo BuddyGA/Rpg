@@ -1,4 +1,4 @@
-#include "RpgGameApp.h"
+#include "RpgEngine.h"
 #include "asset/RpgAssetImporter.h"
 #include "core/world/RpgWorld.h"
 #include "render/world/RpgRenderComponent.h"
@@ -65,7 +65,7 @@ static void TestLevel_OBJ(RpgWorld* world, const RpgFilePath& sourceFilePath, fl
 
 		if (model->HasSkin())
 		{
-			RPG_PLATFORM_Check(importedSkeleton);
+			RPG_Check(importedSkeleton);
 			RpgAnimationComponent* animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
 			animComp->SetSkeleton(importedSkeleton);
 			animComp->Clip = importedAnimations[0];
@@ -139,13 +139,13 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 			spawnPos.Z += OFFSET;
 			modelIndex = (modelIndex + 1) % 2;
 		}
-
+		
 		spawnPos.X += OFFSET;
 	}
 }
 
 
-void RpgGameApp::CreateTestLevel() noexcept
+void RpgEngine::CreateTestLevel() noexcept
 {
 	//TestLevel_PrimitiveShapes(MainWorld);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sponza_phong/sponza.obj", 1.0f);

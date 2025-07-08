@@ -7,17 +7,16 @@
 class RpgSceneViewport : public RpgRenderViewport
 {
 private:
-	RpgMatrixTransform CameraViewMatrix;
-	RpgMatrixProjection CameraProjectionMatrix;
-	RpgQuaternion CameraRotation;
-	RpgVector3 CameraPosition;
-	RpgBoundingFrustum CameraFrustum;
-	float CameraFovDegree;
-	float CameraNearClipZ;
-	float CameraFarClipZ;
+	RpgMatrixTransform ViewMatrix;
+	RpgMatrixProjection ProjectionMatrix;
+	RpgQuaternion ViewRotation;
+	RpgVector3 ViewPosition;
+	RpgBoundingFrustum ViewFrustum;
+	float FovDegree;
+	float NearClipZ;
+	float FarClipZ;
 	bool bOrthographicProjection;
 	bool bDirtyProjection;
-	RpgArray<RpgGameObjectID> CapturedGameObjects;
 
 
 	struct FFrameData
@@ -49,24 +48,24 @@ public:
 	virtual void SetupRenderPasses(int frameIndex, RpgAsyncTask_RenderPassArray& out_RenderPasses, const RpgMaterialResource* materialResource, const RpgMeshResource* meshResource, const RpgMeshSkinnedResource* meshSkinnedResource, const RpgWorldResource* worldResource) noexcept override;
 
 
-	inline void SetCameraRotationAndPosition(const RpgQuaternion& in_Rotation, const RpgVector3& in_Position) noexcept
+	inline void SetViewRotationAndPosition(const RpgQuaternion& in_Rotation, const RpgVector3& in_Position) noexcept
 	{
-		CameraRotation = in_Rotation;
-		CameraPosition = in_Position;
+		ViewRotation = in_Rotation;
+		ViewPosition = in_Position;
 	}
 
-	inline void GetCameraRotationAndPosition(RpgQuaternion& out_Rotation, RpgVector3& out_Position) const noexcept
+	inline void GetViewRotationAndPosition(RpgQuaternion& out_Rotation, RpgVector3& out_Position) const noexcept
 	{
-		out_Rotation = CameraRotation;
-		out_Position = CameraPosition;
+		out_Rotation = ViewRotation;
+		out_Position = ViewPosition;
 	}
 
 
 	inline void SetProjectionPerspective(float in_FovDegree, float in_NearClipZ, float in_FarClipZ) noexcept
 	{
-		CameraFovDegree = in_FovDegree;
-		CameraNearClipZ = in_NearClipZ;
-		CameraFarClipZ = in_FarClipZ;
+		FovDegree = in_FovDegree;
+		NearClipZ = in_NearClipZ;
+		FarClipZ = in_FarClipZ;
 		bOrthographicProjection = false;
 		bDirtyProjection = true;
 	}
@@ -74,26 +73,21 @@ public:
 
 	inline void SetProjectionOrthographic(float in_NearClipZ, float in_FarClipZ) noexcept
 	{
-		CameraNearClipZ = in_NearClipZ;
-		CameraFarClipZ = in_FarClipZ;
+		NearClipZ = in_NearClipZ;
+		FarClipZ = in_FarClipZ;
 		bOrthographicProjection = true;
 		bDirtyProjection = true;
 	}
 
 
-	[[nodiscard]] inline const RpgSharedTexture2D& GetRenderTargetTexture(int frameIndex) const noexcept
+	inline const RpgSharedTexture2D& GetRenderTargetTexture(int frameIndex) const noexcept
 	{
 		return FrameDatas[frameIndex].RenderTargetTexture;
 	}
 
-	[[nodiscard]] inline const RpgSharedTexture2D& GetDepthStencilTexture(int frameIndex) const noexcept
+	inline const RpgSharedTexture2D& GetDepthStencilTexture(int frameIndex) const noexcept
 	{
 		return FrameDatas[frameIndex].DepthStencilTexture;
-	}
-
-	[[nodiscard]] inline const RpgArray<RpgGameObjectID>& GetCapturedGameObjects() const noexcept
-	{
-		return CapturedGameObjects;
 	}
 
 

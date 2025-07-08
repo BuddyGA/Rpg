@@ -3,20 +3,20 @@
 #include "thirdparty/stb/stb_truetype.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_STATIC(RpgLogFont, VERBOSITY_DEBUG)
+RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogFont, VERBOSITY_DEBUG)
 
 
 RpgFont::RpgFont(const RpgName& in_Name, const RpgString& ttfFilePath, int in_SizePx, int in_UnicodeStart, int in_UnicodeCount) noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogFont, "Create font (%s)", *in_Name);
+	RPG_LogDebug(RpgLogFont, "Create font (%s)", *in_Name);
 
 	Name = in_Name;
 
 	SDL_IOStream* fileCtx = SDL_IOFromFile(*ttfFilePath, "r");
-	RPG_PLATFORM_Check(fileCtx);
+	RPG_Check(fileCtx);
 
 	int64_t fileSizeBytes = SDL_GetIOSize(fileCtx);
-	RPG_PLATFORM_Check(fileSizeBytes > 0);
+	RPG_Check(fileSizeBytes > 0);
 
 	RpgArray<uint8_t> fileData(static_cast<int>(fileSizeBytes));
 	SDL_ReadIO(fileCtx, fileData.GetData(), fileSizeBytes);
@@ -25,29 +25,29 @@ RpgFont::RpgFont(const RpgName& in_Name, const RpgString& ttfFilePath, int in_Si
 
 	stbtt_fontinfo stbFontInfo{};
 	const int stbError = stbtt_InitFont(&stbFontInfo, fileData.GetData(), 0);
-	RPG_PLATFORM_Check(stbError != 0);
+	RPG_Check(stbError != 0);
 
 	// Init font datas
 	RpgPointInt textureDimension(256);
 	RpgArray<uint8_t> texturePixels(textureDimension.X * textureDimension.Y);
 
-	Unicode.CodeStart = in_UnicodeStart;
-	Unicode.CodeCount = in_UnicodeCount;
-	Unicode.PackedChars = RpgPlatformMemory::MemMalloc(sizeof(stbtt_packedchar) * Unicode.CodeCount);
+	UnicodeRange.CodeStart = in_UnicodeStart;
+	UnicodeRange.CodeCount = in_UnicodeCount;
+	UnicodeRange.PackedChars = RpgPlatformMemory::MemMalloc(sizeof(stbtt_packedchar) * UnicodeRange.CodeCount);
 
 	const float scaleFactor = stbtt_ScaleForPixelHeight(&stbFontInfo, static_cast<float>(in_SizePx));
 
 	stbtt_pack_context stbPackContext{};
 	{
 		int res = stbtt_PackBegin(&stbPackContext, texturePixels.GetData(), textureDimension.X, textureDimension.Y, 0, 1, nullptr);
-		RPG_PLATFORM_Check(res == 1);
+		RPG_Check(res == 1);
 
 		// TODO: Resize texture dimension if packing failed (res == 0)
 
 		stbtt_PackSetOversampling(&stbPackContext, 2, 2);
 
-		res = stbtt_PackFontRange(&stbPackContext, fileData.GetData(), 0, static_cast<float>(in_SizePx), Unicode.CodeStart, Unicode.CodeCount, static_cast<stbtt_packedchar*>(Unicode.PackedChars));
-		RPG_PLATFORM_Check(res == 1);
+		res = stbtt_PackFontRange(&stbPackContext, fileData.GetData(), 0, static_cast<float>(in_SizePx), UnicodeRange.CodeStart, UnicodeRange.CodeCount, static_cast<stbtt_packedchar*>(UnicodeRange.PackedChars));
+		RPG_Check(res == 1);
 
 		stbtt_PackEnd(&stbPackContext);
 	}
@@ -72,9 +72,9 @@ RpgFont::RpgFont(const RpgName& in_Name, const RpgString& ttfFilePath, int in_Si
 
 RpgFont::~RpgFont() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogFont, "Destroy font (%s)", *Name);
+	RPG_LogDebug(RpgLogFont, "Destroy font (%s)", *Name);
 
-	RpgPlatformMemory::MemFree(Unicode.PackedChars);
+	RpgPlatformMemory::MemFree(UnicodeRange.PackedChars);
 }
 
 
@@ -85,7 +85,7 @@ RpgPointInt RpgFont::CalculateTextDimension(const char* text, int length) const 
 		return RpgPointInt();
 	}
 
-	const stbtt_packedchar* packedChars = static_cast<stbtt_packedchar*>(Unicode.PackedChars);
+	const stbtt_packedchar* packedChars = static_cast<stbtt_packedchar*>(UnicodeRange.PackedChars);
 
 	RpgPointInt dim(0, Metric.Ascent - Metric.Descent);
 	int x = dim.X;
@@ -94,7 +94,7 @@ RpgPointInt RpgFont::CalculateTextDimension(const char* text, int length) const 
 	for (int i = 0; i < length; ++i)
 	{
 		char c = text[i];
-		RPG_PLATFORM_Assert(c);
+		RPG_Assert(c);
 
 		if (c == '\n')
 		{
@@ -111,8 +111,8 @@ RpgPointInt RpgFont::CalculateTextDimension(const char* text, int length) const 
 			continue;
 		}
 
-		const int w = static_cast<int>(packedChars[c - Unicode.CodeStart].xadvance);
-		RPG_PLATFORM_Assert(w > 0);
+		const int w = static_cast<int>(packedChars[c - UnicodeRange.CodeStart].xadvance);
+		RPG_Assert(w > 0);
 		x += w;
 	}
 
@@ -140,7 +140,7 @@ int RpgFont::GenerateTextVertex(const char* text, int length, int x, int y, RpgC
 		return 0;
 	}
 
-	const stbtt_packedchar* packedChars = static_cast<stbtt_packedchar*>(Unicode.PackedChars);
+	const stbtt_packedchar* packedChars = static_cast<stbtt_packedchar*>(UnicodeRange.PackedChars);
 	const RpgPointInt texDim = Texture->GetDimension();
 
 	float px = static_cast<float>(x);
@@ -153,7 +153,7 @@ int RpgFont::GenerateTextVertex(const char* text, int length, int x, int y, RpgC
 	for (int i = 0; i < length; ++i)
 	{
 		char c = text[i];
-		RPG_PLATFORM_Assert(c);
+		RPG_Assert(c);
 
 		if (c == '\n')
 		{
@@ -169,9 +169,9 @@ int RpgFont::GenerateTextVertex(const char* text, int length, int x, int y, RpgC
 		}
 
 		stbtt_aligned_quad quad;
-		stbtt_GetPackedQuad(packedChars, texDim.X, texDim.Y, c - Unicode.CodeStart, &px, &py, &quad, 1);
-		RPG_PLATFORM_Assert(quad.x1 - quad.x0 >= 0.0f);
-		RPG_PLATFORM_Assert(quad.y1 - quad.y0 >= 0.0f);
+		stbtt_GetPackedQuad(packedChars, texDim.X, texDim.Y, c - UnicodeRange.CodeStart, &px, &py, &quad, 1);
+		RPG_Assert(quad.x1 - quad.x0 >= 0.0f);
+		RPG_Assert(quad.y1 - quad.y0 >= 0.0f);
 
 		const RpgVertex::FMesh2D vertexes[4] =
 		{
@@ -228,7 +228,7 @@ RpgSharedFont RpgFont::s_CreateShared(const RpgName& name, const RpgString& ttfF
 
 void RpgFont::s_CreateDefaults() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogFont, "Create default fonts...");
+	RPG_LogDebug(RpgLogFont, "Create default fonts...");
 
 	const RpgString fontAssetDirPath = RpgFileSystem::GetAssetRawDirPath() + "font/";
 

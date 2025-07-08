@@ -17,10 +17,10 @@ using namespace Microsoft::WRL;
 #include "thirdparty/D3D12MA/D3D12MemAlloc.h"
 
 
-#define RPG_D3D12_Validate(hr)		RPG_PLATFORM_Validate((hr) == S_OK)
+#define RPG_D3D12_Validate(hr)		RPG_Validate((hr) == S_OK)
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogD3D12)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogD3D12)
 
 
 #ifndef RPG_BUILD_SHIPPING
@@ -100,7 +100,7 @@ namespace RpgD3D12
 		}
 
 
-		[[nodiscard]] inline ID3D12DescriptorHeap* GetHeap() const noexcept
+		inline ID3D12DescriptorHeap* GetHeap() const noexcept
 		{
 			return Heap.Get();
 		}
@@ -111,7 +111,7 @@ namespace RpgD3D12
 			FResourceDescriptor descriptor{};
 
 			descriptor.Index = SDL_AddAtomicInt(&DescriptorIndex, 1);
-			RPG_PLATFORM_CheckV(descriptor.Index < static_cast<int>(Desc.NumDescriptors), "Exceeds maximum descriptor capacity!");
+			RPG_CheckV(descriptor.Index < static_cast<int>(Desc.NumDescriptors), "Exceeds maximum descriptor capacity!");
 
 			descriptor.CpuHandle.ptr = Heap->GetCPUDescriptorHandleForHeapStart().ptr + static_cast<SIZE_T>(descriptor.Index * IncrementSize);
 
@@ -132,12 +132,12 @@ namespace RpgD3D12
 
 	extern void BeginFrame(int frameIndex) noexcept;
 
-	[[nodiscard]] extern IDXGIFactory6* GetFactory() noexcept;
-	[[nodiscard]] extern IDXGIAdapter1* GetAdapter() noexcept;
-	[[nodiscard]] extern ID3D12Device4* GetDevice() noexcept;
-	[[nodiscard]] extern ID3D12CommandQueue* GetCommandQueueDirect() noexcept;
-	[[nodiscard]] extern ID3D12CommandQueue* GetCommandQueueCompute() noexcept;
-	[[nodiscard]] extern ID3D12CommandQueue* GetCommandQueueCopy() noexcept;
+	extern IDXGIFactory6* GetFactory() noexcept;
+	extern IDXGIAdapter1* GetAdapter() noexcept;
+	extern ID3D12Device4* GetDevice() noexcept;
+	extern ID3D12CommandQueue* GetCommandQueueDirect() noexcept;
+	extern ID3D12CommandQueue* GetCommandQueueCompute() noexcept;
+	extern ID3D12CommandQueue* GetCommandQueueCopy() noexcept;
 
 	[[nodiscard]] extern ComPtr<D3D12MA::Allocation> CreateBuffer(size_t sizeBytes, bool bCpuAccess) noexcept;
 	extern bool ResizeBuffer(ComPtr<D3D12MA::Allocation>& out_Buffer, size_t newSizeBytes, bool bCpuAccess) noexcept;
@@ -149,7 +149,7 @@ namespace RpgD3D12
 	template<typename TData = void>
 	inline TData* MapBuffer(D3D12MA::Allocation* buffer) noexcept
 	{
-		RPG_PLATFORM_Check(buffer);
+		RPG_Check(buffer);
 		void* map = nullptr;
 		RPG_D3D12_Validate(buffer->GetResource()->Map(0, nullptr, &map));
 
@@ -168,7 +168,7 @@ namespace RpgD3D12
 	[[nodiscard]] extern ID3D12DescriptorHeap* GetDescriptorHeap_TDI() noexcept;
 
 
-	[[nodiscard]] static inline D3D12_RESOURCE_DESC CreateResourceDesc_Texture(DXGI_FORMAT format, uint16_t width, uint16_t height, uint8_t mipLevel) noexcept
+	static inline D3D12_RESOURCE_DESC CreateResourceDesc_Texture(DXGI_FORMAT format, uint16_t width, uint16_t height, uint8_t mipLevel) noexcept
 	{
 		D3D12_RESOURCE_DESC textureDesc{};
 		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -187,7 +187,7 @@ namespace RpgD3D12
 	}
 
 
-	[[nodiscard]] static inline D3D12_RESOURCE_BARRIER CreateResourceBarrier_Transition(ID3D12Resource* resource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter) noexcept
+	static inline D3D12_RESOURCE_BARRIER CreateResourceBarrier_Transition(ID3D12Resource* resource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter) noexcept
 	{
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -219,7 +219,7 @@ namespace RpgD3D12Command
 {
 	inline void SetViewport(ID3D12GraphicsCommandList* cmdList, int x, int y, int w, int h, float minDepth, float maxDepth) noexcept
 	{
-		RPG_PLATFORM_Assert(cmdList);
+		RPG_Assert(cmdList);
 
 		D3D12_VIEWPORT viewport{};
 		viewport.TopLeftX = static_cast<FLOAT>(x);
@@ -235,7 +235,7 @@ namespace RpgD3D12Command
 
 	inline void SetScissor(ID3D12GraphicsCommandList* cmdList, int left, int top, int right, int bottom) noexcept
 	{
-		RPG_PLATFORM_Assert(cmdList);
+		RPG_Assert(cmdList);
 
 		D3D12_RECT scissor{};
 		scissor.left = static_cast<LONG>(left);
@@ -249,8 +249,8 @@ namespace RpgD3D12Command
 
 	inline void TransitionAllSubresources(ID3D12GraphicsCommandList* cmdList, ID3D12Resource* resource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter) noexcept
 	{
-		RPG_PLATFORM_Assert(cmdList);
-		RPG_PLATFORM_Assert(resource);
+		RPG_Assert(cmdList);
+		RPG_Assert(resource);
 
 		if (stateBefore == stateAfter)
 		{

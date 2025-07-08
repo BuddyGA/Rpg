@@ -67,7 +67,7 @@ public:
 		UploadTextureIndices.Clear(true);
 	}
 
-	[[nodiscard]] inline FMaterialID AddMaterial(const RpgSharedMaterial& material) noexcept
+	inline FMaterialID AddMaterial(const RpgSharedMaterial& material) noexcept
 	{
 		FMaterialID id = Materials.FindIndexByValue(material);
 
@@ -140,7 +140,7 @@ public:
 
 private:
 	template<typename TVertex>
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource) const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource) const noexcept
 	{
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = vertexBufferResource->GetGPUVirtualAddress();
@@ -151,22 +151,22 @@ private:
 	}
 
 public:
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshPosition>(VertexPositionBuffer->GetResource());
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_NormalTangent() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_NormalTangent() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshNormalTangent>(VertexNormalTangentBuffer->GetResource());
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_TexCoord() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_TexCoord() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshTexCoord>(VertexTexCoordBuffer->GetResource());
 	}
 
-	[[nodiscard]] inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const noexcept
+	inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const noexcept
 	{
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = IndexBuffer->GetResource()->GetGPUVirtualAddress();
@@ -262,7 +262,7 @@ private:
 public:
 	RpgMeshSkinnedResource() noexcept;
 	
-	[[nodiscard]] FMeshID AddMesh(const RpgSharedMesh& mesh, int& out_IndexCount, int& out_IndexStart, int& out_IndexVertexOffset) noexcept;
+	FMeshID AddMesh(const RpgSharedMesh& mesh, int& out_IndexCount, int& out_IndexStart, int& out_IndexVertexOffset) noexcept;
 	FSkeletonID AddObjectBoneSkinningTransforms(FMeshID meshId, const RpgArray<RpgMatrixTransform>& boneSkinningTransforms) noexcept;
 
 	void UpdateResources() noexcept;
@@ -280,17 +280,17 @@ public:
 		SkinnedIndexCount = 0;
 	}
 
-	[[nodiscard]] inline int GetVertexCount() const noexcept
+	inline int GetVertexCount() const noexcept
 	{
 		return VertexCount;
 	}
 
-	[[nodiscard]] inline int GetIndexCount() const noexcept
+	inline int GetIndexCount() const noexcept
 	{
 		return IndexCount;
 	}
 
-	[[nodiscard]] inline const RpgArray<RpgShaderConstantSkinnedObjectParameter>& GetObjectParameters() const noexcept
+	inline const RpgArray<RpgShaderConstantSkinnedObjectParameter>& GetObjectParameters() const noexcept
 	{
 		return ObjectParameters;
 	}
@@ -298,7 +298,7 @@ public:
 
 private:
 	template<typename TVertex>
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource, int vertexCount) const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource, int vertexCount) const noexcept
 	{
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = vertexBufferResource->GetGPUVirtualAddress();
@@ -309,27 +309,27 @@ private:
 	}
 
 public:
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshPosition>(VertexPositionBuffer->GetResource(), VertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_NormalTangent() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_NormalTangent() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshNormalTangent>(VertexNormalTangentBuffer->GetResource(), VertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_TexCoord() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_TexCoord() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshTexCoord>(VertexTexCoordBuffer->GetResource(), VertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Skin() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Skin() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshSkin>(VertexSkinBuffer->GetResource(), VertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const noexcept
+	inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const noexcept
 	{
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = IndexBuffer->GetResource()->GetGPUVirtualAddress();
@@ -339,22 +339,22 @@ public:
 		return view;
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_SkinnedPosition() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_SkinnedPosition() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshPosition>(SkinnedVertexPositionBuffer->GetResource(), SkinnedVertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_SkinnedNormalTangent() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_SkinnedNormalTangent() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshNormalTangent>(SkinnedVertexNormalTangentBuffer->GetResource(), SkinnedVertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_SkinnedTexCoord() const noexcept
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_SkinnedTexCoord() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshTexCoord>(SkinnedVertexTexCoordBuffer->GetResource(), SkinnedVertexCount);
 	}
 
-	[[nodiscard]] inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView_Skinned() const noexcept
+	inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView_Skinned() const noexcept
 	{
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = SkinnedIndexBuffer->GetResource()->GetGPUVirtualAddress();
@@ -364,32 +364,32 @@ public:
 		return view;
 	}
 
-	[[nodiscard]] inline ID3D12Resource* GetResourceVertexPosition() const noexcept
+	inline ID3D12Resource* GetResourceVertexPosition() const noexcept
 	{
 		return VertexPositionBuffer->GetResource();
 	}
 
-	[[nodiscard]] inline ID3D12Resource* GetResourceVertexNormalTangent() const noexcept
+	inline ID3D12Resource* GetResourceVertexNormalTangent() const noexcept
 	{
 		return VertexNormalTangentBuffer->GetResource();
 	}
 
-	[[nodiscard]] inline ID3D12Resource* GetResourceVertexSkin() const noexcept
+	inline ID3D12Resource* GetResourceVertexSkin() const noexcept
 	{
 		return VertexSkinBuffer->GetResource();
 	}
 
-	[[nodiscard]] inline ID3D12Resource* GetResourceSkeletonBoneSkinning() const noexcept
+	inline ID3D12Resource* GetResourceSkeletonBoneSkinning() const noexcept
 	{
 		return SkeletonBoneSkinningBuffer->GetResource();
 	}
 
-	[[nodiscard]] inline ID3D12Resource* GetResourceSkinnedVertexPosition() const noexcept
+	inline ID3D12Resource* GetResourceSkinnedVertexPosition() const noexcept
 	{
 		return SkinnedVertexPositionBuffer->GetResource();
 	}
 
-	[[nodiscard]] inline ID3D12Resource* GetResourceSkinnedVertexNormalTangent() const noexcept
+	inline ID3D12Resource* GetResourceSkinnedVertexNormalTangent() const noexcept
 	{
 		return SkinnedVertexNormalTangentBuffer->GetResource();
 	}
@@ -408,6 +408,19 @@ public:
 	typedef int FTransformID;
 
 private:
+	struct FTagLightID
+	{
+		int TagId{ 0 };
+		int LightId{ 0 };
+
+		inline bool operator==(int rhs) const noexcept
+		{
+			return TagId == rhs;
+		}
+	};
+
+	RpgArrayInline<FTagLightID, RPG_RENDER_MAX_LIGHT> CachedTagLights;
+
 	RpgShaderConstantWorldData WorldData;
 	ComPtr<D3D12MA::Allocation> WorldConstantBuffer;
 
@@ -415,6 +428,9 @@ private:
 	ComPtr<D3D12MA::Allocation> TransformStructBuffer;
 
 	ComPtr<D3D12MA::Allocation> StagingBuffer;
+
+public:
+	RpgRenderLight::EShadowResolutionQuality ShadowResolutionQuality;
 
 
 public:
@@ -437,10 +453,10 @@ public:
 	}
 
 
-	[[nodiscard]] inline FCameraID AddCamera(const RpgMatrixTransform& viewMatrix, const RpgMatrixProjection& projMatrix, const RpgVector3& worldPosition, float nearClipZ, float farClipZ) noexcept
+	inline FCameraID AddCamera(const RpgMatrixTransform& viewMatrix, const RpgMatrixProjection& projMatrix, const RpgVector3& worldPosition, float nearClipZ, float farClipZ) noexcept
 	{
 		const FCameraID id = WorldData.CameraCount++;
-		RPG_PLATFORM_Check(WorldData.CameraCount <= RPG_RENDER_MAX_CAMERA);
+		RPG_Check(WorldData.CameraCount <= RPG_RENDER_MAX_CAMERA);
 
 		RpgShaderConstantCamera& camera = WorldData.Cameras[id];
 		camera.ViewMatrix = viewMatrix.Xmm;
@@ -453,13 +469,44 @@ public:
 	}
 
 
-	[[nodiscard]] inline FTransformID AddTransform(const RpgMatrixTransform& worldTransformMatrix) noexcept
+	inline FTransformID AddTransform(const RpgMatrixTransform& worldTransformMatrix) noexcept
 	{
 		const FTransformID id = TransformDatas.GetCount();
 		TransformDatas.AddValue(worldTransformMatrix.Xmm);
 
 		return id;
 	}
+
+
+	// Add point light
+	// @param uniqueTagId - Unique tag identifier. Normally the value is game object id but could be anything as long as it is to prevent adding the same light object multiple times
+	// @param worldPosition - World position
+	// @param colorIntensity - Light color (RGB), and light intensity (A)
+	// @param attRadius - Attenuation radius factor
+	// @param attFallOffExp - Attenuation falloff exponential factor
+	// @param bCastShadow - Set to true if this light casts shadow
+	inline FLightID AddLight_Point(int uniqueTagId, RpgVector3 worldPosition, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp, bool bCastShadow) noexcept
+	{
+		const int tagIndex = CachedTagLights.FindIndexByCompare(uniqueTagId);
+		if (tagIndex != RPG_INDEX_INVALID)
+		{
+			return CachedTagLights[tagIndex].LightId;
+		}
+
+		const FLightID id = RPG_RENDER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
+		CachedTagLights.AddValue(FTagLightID(uniqueTagId, id));
+
+		RpgShaderConstantLight& data = WorldData.Lights[id];
+		data.Position = worldPosition.Xmm;
+		data.ColorIntensity = DirectX::XMVectorSet(colorIntensity.R, colorIntensity.G, colorIntensity.B, colorIntensity.A);
+		data.AttenuationRadius = attRadius;
+		data.AttenuationFallOffExp = attFallOffExp;
+
+		return id;
+	}
+
+
+	
 
 
 #ifndef RPG_BUILD_SHIPPING

@@ -47,12 +47,12 @@ public:
 		bPendingChangeVsync = bEnabled;
 	}
 
-	[[nodiscard]] inline bool GetVsync() const noexcept
+	inline bool GetVsync() const noexcept
 	{
 		return bVsync;
 	}
 
-	[[nodiscard]] RpgPointInt GetSwapChainDimension() const noexcept
+	inline RpgPointInt GetSwapChainDimension() const noexcept
 	{
 		DXGI_SWAP_CHAIN_DESC1 desc{};
 		SwapChain->GetDesc1(&desc);
@@ -118,12 +118,12 @@ private:
 	void WaitFrameFinished(int frameIndex) noexcept;
 
 
-	[[nodiscard]] inline FWorldContext& GetWorldContext(int frameIndex, const RpgWorld* world) noexcept
+	inline FWorldContext& GetWorldContext(int frameIndex, const RpgWorld* world) noexcept
 	{
 		FFrameData& frame = FrameDatas[frameIndex];
 
 		const int index = frame.WorldContexts.FindIndexByCompare(world);
-		RPG_PLATFORM_Check(index != RPG_INDEX_INVALID);
+		RPG_Check(index != RPG_INDEX_INVALID);
 
 		return frame.WorldContexts[index];
 	}
@@ -143,7 +143,7 @@ public:
 	void EndRender(int frameIndex) noexcept;
 
 
-	[[nodiscard]] inline RpgRenderer2D& GetRenderer2D() noexcept
+	inline RpgRenderer2D& GetRenderer2D() noexcept
 	{
 		return Renderer2d;
 	}
@@ -151,7 +151,7 @@ public:
 
 #ifndef RPG_BUILD_SHIPPING
 public:
-	[[nodiscard]] RpgVertexPrimitiveBatchLine* Debug_GetPrimitiveBatchLine(int frameIndex, const RpgWorld* world, bool bNoDepth) noexcept;
+	RpgVertexPrimitiveBatchLine* Debug_GetPrimitiveBatchLine(int frameIndex, const RpgWorld* world, bool bNoDepth) noexcept;
 #endif // !RPG_BUILD_SHIPPING
 
 };

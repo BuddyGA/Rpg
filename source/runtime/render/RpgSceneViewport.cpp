@@ -9,9 +9,9 @@
 RpgSceneViewport::RpgSceneViewport() noexcept
 	: FrameDatas()
 {
-	CameraFovDegree = 90.0f;
-	CameraNearClipZ = 10.0f;
-	CameraFarClipZ = 10000.0f;
+	FovDegree = 90.0f;
+	NearClipZ = 10.0f;
+	FarClipZ = 10000.0f;
 	bOrthographicProjection = false;
 	bDirtyProjection = true;
 	RenderTargetDimension = RpgPointInt(1600, 900);
@@ -78,34 +78,32 @@ void RpgSceneViewport::PreRender(int frameIndex, RpgMaterialResource* materialRe
 
 	// Update camera view projection
 	{
-		const RpgMatrixTransform worldMatrixTransform(CameraPosition, CameraRotation);
+		const RpgMatrixTransform worldMatrixTransform(ViewPosition, ViewRotation);
 
-		CameraViewMatrix = worldMatrixTransform.GetInverse();
+		ViewMatrix = worldMatrixTransform.GetInverse();
 
-		CameraProjectionMatrix = bOrthographicProjection ?
-			RpgMatrixProjection::CreateOrthographic(0.0f, static_cast<float>(RenderTargetDimension.X), 0.0f, static_cast<float>(RenderTargetDimension.Y), CameraNearClipZ, CameraFarClipZ) :
-			RpgMatrixProjection::CreatePerspective(static_cast<float>(RenderTargetDimension.X) / static_cast<float>(RenderTargetDimension.Y), CameraFovDegree, CameraNearClipZ, CameraFarClipZ);
+		ProjectionMatrix = bOrthographicProjection ?
+			RpgMatrixProjection::CreateOrthographic(0.0f, static_cast<float>(RenderTargetDimension.X), 0.0f, static_cast<float>(RenderTargetDimension.Y), NearClipZ, FarClipZ) :
+			RpgMatrixProjection::CreatePerspective(static_cast<float>(RenderTargetDimension.X) / static_cast<float>(RenderTargetDimension.Y), FovDegree, NearClipZ, FarClipZ);
 
-		CameraFrustum.CreateFromMatrix(worldMatrixTransform, CameraProjectionMatrix);
+		ViewFrustum.CreateFromMatrix(worldMatrixTransform, ProjectionMatrix);
 	}
 
 
 	// Build draw calls
-	const RpgWorldResource::FCameraID cameraId = worldResource->AddCamera(CameraViewMatrix, CameraProjectionMatrix, CameraPosition, CameraNearClipZ, CameraFarClipZ);
+	const RpgWorldResource::FCameraID cameraId = worldResource->AddCamera(ViewMatrix, ProjectionMatrix, ViewPosition, NearClipZ, FarClipZ);
 
-	CapturedGameObjects.Clear();
+	// capture meshes
 	RpgArray<RpgMatrixTransform> tempBoneSkinningTransforms;
-
 
 	for (auto it = world->Component_CreateConstIterator<RpgRenderComponent_Mesh>(); it; ++it)
 	{
 		const RpgRenderComponent_Mesh& comp = it.GetValue();
-		if (!comp.bIsVisible || (bFrustumCulling && !CameraFrustum.TestIntersectBoundingAABB(comp.Bound)))
+		if (!comp.bIsVisible || (bFrustumCulling && !ViewFrustum.TestIntersectBoundingAABB(comp.Bound)))
 		{
 			continue;
 		}
 
-		CapturedGameObjects.AddValue(comp.GameObject);
 		const RpgSharedModel& model = comp.Model;
 
 		// TODO: Determine LOD level based on distance from the camera
@@ -132,7 +130,7 @@ void RpgSceneViewport::PreRender(int frameIndex, RpgMaterialResource* materialRe
 				if (animComp)
 				{
 					const RpgAnimationSkeleton* skeleton = animComp->GetSkeleton().Get();
-					RPG_PLATFORM_Check(skeleton);
+					RPG_Check(skeleton);
 
 					const int boneCount = skeleton->GetBoneCount();
 					tempBoneSkinningTransforms.Resize(boneCount);
@@ -168,6 +166,20 @@ void RpgSceneViewport::PreRender(int frameIndex, RpgMaterialResource* materialRe
 				}
 			}
 		}
+	}
+
+
+	// capture lights
+	for (auto it = world->Component_CreateConstIterator<RpgRenderComponent_Light>(); it; ++it)
+	{
+		const RpgRenderComponent_Light& comp = it.GetValue();
+		if (comp.Type == RpgRenderLight::TYPE_NONE || !comp.bIsVisible)
+		{
+			continue;
+		}
+
+		const RpgTransform transform = world->GameObject_GetWorldTransform(comp.GameObject);
+		worldResource->AddLight_Point(comp.GameObject.GetIndex(), transform.Position, comp.ColorIntensity, comp.AttenuationRadius, comp.AttenuationFallOffExp, comp.bCastShadow);
 	}
 
 

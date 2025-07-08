@@ -116,7 +116,7 @@ void RpgMeshResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept
 
 
 		// Sanity check 
-		RPG_PLATFORM_Check(stagingOffset == stagingSizeBytes);
+		RPG_Check(stagingOffset == stagingSizeBytes);
 	}
 	RpgD3D12::UnmapBuffer(StagingBuffer.Get());
 }

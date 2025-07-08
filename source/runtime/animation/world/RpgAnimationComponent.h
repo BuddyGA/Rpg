@@ -10,7 +10,7 @@
 // ======================================================================================================================= //
 class RpgAnimationComponent
 {
-	RPG_COMPONENT_TYPE("Animation")
+	RPG_COMPONENT_TYPE("RpgComponent - Animation")
 
 public:
 	RpgSharedAnimationClip Clip;

@@ -5,7 +5,7 @@
 #include "animation/RpgAnimationTypes.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogAssetImporter)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogAssetImporter)
 
 
 
@@ -57,7 +57,7 @@ public:
 	void ImportModel(RpgArray<RpgSharedModel>& out_Models, RpgSharedAnimationSkeleton& out_Skeleton, RpgArray<RpgSharedAnimationClip>& out_Animations, const RpgAssetImportSetting_Model& setting) noexcept;
 
 
-	[[nodiscard]] inline RpgAssetImportType GetCurrentImportType() noexcept
+	inline RpgAssetImportType GetCurrentImportType() noexcept
 	{
 		return ImportingType;
 	}

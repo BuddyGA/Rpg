@@ -3,7 +3,7 @@
 #include "RpgAlgorithm.h"
 
 
-#define RPG_ARRAY_ValidateIndex(i)		RPG_PLATFORM_ValidateV(i >= 0 && i < Count, "RpgArray: Index (%i) out of bound!", i)
+#define RPG_ARRAY_ValidateIndex(i)		RPG_ValidateV(i >= 0 && i < Count, "RpgArray: Index (%i) out of bound!", i)
 
 
 
@@ -215,7 +215,7 @@ private:
 	}
 
 public:
-	[[nodiscard]] inline T* GetData(int index = 0) noexcept
+	inline T* GetData(int index = 0) noexcept
 	{
 		if (Count == 0 && index == 0)
 		{
@@ -226,7 +226,7 @@ public:
 		return (Data + index);
 	}
 
-	[[nodiscard]] inline const T* GetData(int index = 0) const noexcept
+	inline const T* GetData(int index = 0) const noexcept
 	{
 		if (Count == 0 && index == 0)
 		{
@@ -238,81 +238,81 @@ public:
 	}
 
 
-	[[nodiscard]] inline T& GetAt(int index) noexcept
+	inline T& GetAt(int index) noexcept
 	{
 		RPG_ARRAY_ValidateIndex(index);
 		return Data[index];
 	}
 
-	[[nodiscard]] inline const T& GetAt(int index) const noexcept
+	inline const T& GetAt(int index) const noexcept
 	{
 		RPG_ARRAY_ValidateIndex(index);
 		return Data[index];
 	}
 
-	[[nodiscard]] inline T& GetAtFirst() noexcept
+	inline T& GetAtFirst() noexcept
 	{
 		return GetAt(0);
 	}
 
-	[[nodiscard]] inline const T& GetAtFirst() const noexcept
+	inline const T& GetAtFirst() const noexcept
 	{
 		return GetAt(0);
 	}
 
-	[[nodiscard]] inline T& GetAtLast() noexcept
+	inline T& GetAtLast() noexcept
 	{
 		return GetAt(Count - 1);
 	}
 
-	[[nodiscard]] inline const T& GetAtLast() const noexcept
+	inline const T& GetAtLast() const noexcept
 	{
 		return GetAt(Count - 1);
 	}
 
-	[[nodiscard]] inline int GetCapacity() const noexcept
+	inline int GetCapacity() const noexcept
 	{
 		return Capacity;
 	}
 
-	[[nodiscard]] inline int GetCount() const noexcept
+	inline int GetCount() const noexcept
 	{
 		return Count;
 	}
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return Count == 0;
 	}
 
-	[[nodiscard]] inline size_t GetMemorySizeBytes_Reserved() const noexcept
+	inline size_t GetMemorySizeBytes_Reserved() const noexcept
 	{
 		return sizeof(T) * Capacity;
 	}
 
-	[[nodiscard]] inline size_t GetMemorySizeBytes_Allocated() const noexcept
+	inline size_t GetMemorySizeBytes_Allocated() const noexcept
 	{
 		return sizeof(T) * Count;
 	}
 
-	[[nodiscard]] inline int FindIndexByValue(const T& value) const noexcept
+	inline int FindIndexByValue(const T& value) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByValue(Data, Count, value) : RPG_INDEX_INVALID;
 	}
 
-	[[nodiscard]] inline int FindIndexByValueFromLast(const T& value) const noexcept
+	inline int FindIndexByValueFromLast(const T& value) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByValueFromLast(Data, Count, value) : RPG_INDEX_INVALID;
 	}
 
 	template<typename TCompare>
-	[[nodiscard]] inline int FindIndexByCompare(const TCompare& compare) const noexcept
+	inline int FindIndexByCompare(const TCompare& compare) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByCompare(Data, Count, compare) : RPG_INDEX_INVALID;
 	}
 
 	template<typename TPredicate>
-	[[nodiscard]] inline int FindIndexByPredicate(TPredicate predicate) const noexcept
+	inline int FindIndexByPredicate(TPredicate predicate) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByPredicate(Data, Count, predicate) : RPG_INDEX_INVALID;
 	}
@@ -326,10 +326,10 @@ public:
 		}
 
 		const int alignedCapacity = RpgType::Align(in_Capacity, CAPACITY_ALIGNMENT);
-		RPG_PLATFORM_Check(alignedCapacity >= in_Capacity);
+		RPG_Check(alignedCapacity >= in_Capacity);
 
 		T* NewData = reinterpret_cast<T*>(RpgPlatformMemory::MemRealloc(Data, sizeof(T) * alignedCapacity));
-		RPG_PLATFORM_Check(NewData);
+		RPG_Check(NewData);
 
 		Data = NewData;
 		Capacity = alignedCapacity;
@@ -344,7 +344,7 @@ public:
 		}
 
 		Reserve(in_Count);
-		RPG_PLATFORM_Check(Capacity >= Count);
+		RPG_Check(Capacity >= Count);
 
 		if (Count < in_Count)
 		{
@@ -419,6 +419,12 @@ public:
 	{
 		Resize(Count + 1);
 		Data[Count - 1] = in_Value;
+	}
+
+	inline void AddValue(T&& in_MoveValue) noexcept
+	{
+		Resize(Count + 1);
+		Data[Count - 1] = std::move(in_MoveValue);
 	}
 
 
@@ -612,22 +618,22 @@ public:
 	}
 
 
-	[[nodiscard]] inline T* begin() noexcept
+	inline T* begin() noexcept
 	{
 		return Data;
 	}
 
-	[[nodiscard]] inline const T* begin() const noexcept
+	inline const T* begin() const noexcept
 	{
 		return Data;
 	}
 
-	[[nodiscard]] inline T* end() noexcept
+	inline T* end() noexcept
 	{
 		return Data + Count;
 	}
 
-	[[nodiscard]] inline const T* end() const noexcept
+	inline const T* end() const noexcept
 	{
 		return Data + Count;
 	}
@@ -704,7 +710,7 @@ public:
 
 
 public:
-	[[nodiscard]] inline T* GetData(int index = 0) noexcept
+	inline T* GetData(int index = 0) noexcept
 	{
 		if (Count == 0 && index == 0)
 		{
@@ -715,7 +721,7 @@ public:
 		return (Data + index);
 	}
 
-	[[nodiscard]] inline const T* GetData(int index = 0) const noexcept
+	inline const T* GetData(int index = 0) const noexcept
 	{
 		if (Count == 0 && index == 0)
 		{
@@ -726,49 +732,49 @@ public:
 		return (Data + index);
 	}
 
-	[[nodiscard]] constexpr inline int GetCapacity() const noexcept
+	constexpr inline int GetCapacity() const noexcept
 	{
 		return CAPACITY;
 	}
 
-	[[nodiscard]] inline int GetCount() const noexcept
+	inline int GetCount() const noexcept
 	{
 		return Count;
 	}
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return Count == 0;
 	}
 
-	[[nodiscard]] constexpr inline size_t GetMemorySizeBytes_Reserved() const noexcept
+	constexpr inline size_t GetMemorySizeBytes_Reserved() const noexcept
 	{
 		return sizeof(T) * CAPACITY;
 	}
 
-	[[nodiscard]] inline size_t GetMemorySizeBytes_Allocated() const noexcept
+	inline size_t GetMemorySizeBytes_Allocated() const noexcept
 	{
 		return sizeof(T) * Count;
 	}
 
-	[[nodiscard]] inline int FindIndexByValue(const T& value) const noexcept
+	inline int FindIndexByValue(const T& value) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByValue(Data, Count, value) : RPG_INDEX_INVALID;
 	}
 
-	[[nodiscard]] inline int FindIndexByValueFromLast(const T& value) const noexcept
+	inline int FindIndexByValueFromLast(const T& value) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByValueFromLast(Data, Count, value) : RPG_INDEX_INVALID;
 	}
 
 	template<typename TCompare>
-	[[nodiscard]] inline int FindIndexByCompare(const TCompare& compare) const noexcept
+	inline int FindIndexByCompare(const TCompare& compare) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByCompare(Data, Count, compare) : RPG_INDEX_INVALID;
 	}
 
 	template<typename TPredicate>
-	[[nodiscard]] inline int FindIndexByPredicate(TPredicate predicate) const noexcept
+	inline int FindIndexByPredicate(TPredicate predicate) const noexcept
 	{
 		return Count > 0 ? RpgAlgorithm::LinearSearch_FindIndexByPredicate(Data, Count, predicate) : RPG_INDEX_INVALID;
 	}
@@ -776,14 +782,14 @@ public:
 
 	inline void Resize(int in_Count) noexcept
 	{
-		RPG_PLATFORM_ValidateV(in_Count <= CAPACITY, "RpgArrayInline: Exceeds maximum capacity!");
+		RPG_ValidateV(in_Count <= CAPACITY, "RpgArrayInline: Exceeds maximum capacity!");
 		Count = in_Count;
 	}
 
 
 	inline T& Add() noexcept
 	{
-		RPG_PLATFORM_ValidateV(Count < CAPACITY, "RpgArrayInline: Exceeds maximum capacity!");
+		RPG_ValidateV(Count < CAPACITY, "RpgArrayInline: Exceeds maximum capacity!");
 		++Count;
 		return Data[Count - 1];
 	}

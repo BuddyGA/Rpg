@@ -2,7 +2,7 @@
 #include "core/RpgMath.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_STATIC(RpgLogTexture2D, VERBOSITY_DEBUG)
+RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogTexture2D, VERBOSITY_DEBUG)
 
 
 
@@ -34,22 +34,22 @@ RpgTexture2D::RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, 
 	, Flags(FLAG_None)
 	, GpuState(D3D12_RESOURCE_STATE_COMMON)
 {
-	RPG_PLATFORM_LogDebug(RpgLogTexture2D, "Create texture (%s)", *name);
+	RPG_LogDebug(RpgLogTexture2D, "Create texture (%s)", *name);
 
-	RPG_PLATFORM_Check(!name.IsEmpty());
+	RPG_Check(!name.IsEmpty());
 	Name = name;
 
 	if (flags & FLAG_IsRenderTarget)
 	{
-		RPG_PLATFORM_Check(format >= RpgTextureFormat::TEX_RT_RGBA && format <= RpgTextureFormat::TEX_RT_BGRA);
+		RPG_Check(format >= RpgTextureFormat::TEX_RT_RGBA && format <= RpgTextureFormat::TEX_RT_BGRA);
 	}
 	else if (flags & FLAG_IsDepthStencil)
 	{
-		RPG_PLATFORM_Check(format >= RpgTextureFormat::TEX_DS_16 && format <= RpgTextureFormat::TEX_DS_32);
+		RPG_Check(format >= RpgTextureFormat::TEX_DS_16 && format <= RpgTextureFormat::TEX_DS_32);
 	}
 	else
 	{
-		RPG_PLATFORM_Check(format >= RpgTextureFormat::TEX_2D_R && format <= RpgTextureFormat::TEX_2D_BC7U);
+		RPG_Check(format >= RpgTextureFormat::TEX_2D_R && format <= RpgTextureFormat::TEX_2D_BC7U);
 	}
 
 	Format = format;
@@ -60,7 +60,7 @@ RpgTexture2D::RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, 
 	//RPG_PLATFORM_Check(height >= RPG_TEXTURE_MIN_DIM && height <= RPG_TEXTURE_MAX_DIM);
 	Height = height;
 
-	RPG_PLATFORM_Check(mipCount > 0 && mipCount <= RPG_TEXTURE_MAX_MIP);
+	RPG_Check(mipCount > 0 && mipCount <= RPG_TEXTURE_MAX_MIP);
 	MipCount = mipCount;
 
 	TotalSizeBytes = 0;
@@ -77,7 +77,7 @@ RpgTexture2D::RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, 
 
 RpgTexture2D::~RpgTexture2D() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogTexture2D, "Destroy texture (%s)", *Name);
+	RPG_LogDebug(RpgLogTexture2D, "Destroy texture (%s)", *Name);
 
 	if (PixelStagingBuffer && PixelData)
 	{
@@ -94,7 +94,7 @@ RpgTexture2D::~RpgTexture2D() noexcept
 
 void RpgTexture2D::InitializeMips() noexcept
 {
-	RPG_PLATFORM_Check(MipCount > 0 && MipCount <= RPG_TEXTURE_MAX_MIP);
+	RPG_Check(MipCount > 0 && MipCount <= RPG_TEXTURE_MAX_MIP);
 
 	const D3D12_RESOURCE_DESC textureDesc = RpgD3D12::CreateResourceDesc_Texture(RPG_TEXTURE_FORMAT_TO_DXGI_FORMAT[static_cast<uint8_t>(Format)], Width, Height, MipCount);
 
@@ -102,7 +102,7 @@ void RpgTexture2D::InitializeMips() noexcept
 	uint32_t numRows[RPG_TEXTURE_MAX_MIP];
 	uint64_t rowBytes[RPG_TEXTURE_MAX_MIP];
 	RpgD3D12::GetDevice()->GetCopyableFootprints(&textureDesc, 0, MipCount, 0, subresources, numRows, rowBytes, &TotalSizeBytes);
-	RPG_PLATFORM_Check(TotalSizeBytes <= RPG_MAX_COUNT);
+	RPG_Check(TotalSizeBytes <= RPG_MAX_COUNT);
 	//PixelData.Resize(static_cast<int>(totalSizeBytes));
 
 	if (PixelData && PixelStagingBuffer)
@@ -142,7 +142,7 @@ void RpgTexture2D::GPU_UpdateResource() noexcept
 
 	if (!bShouldCreateNew && (bIsRenderTarget || bIsDepthStencil))
 	{
-		RPG_PLATFORM_Assert(GpuAlloc);
+		RPG_Assert(GpuAlloc);
 
 		const D3D12_RESOURCE_DESC desc = GpuAlloc->GetResource()->GetDesc();
 		bShouldCreateNew = (Width != desc.Width || Height != desc.Height);
@@ -225,7 +225,7 @@ RpgSharedTexture2D RpgTexture2D::s_CreateSharedDepthStencil(const RpgName& name,
 
 void RpgTexture2D::s_CreateDefaults() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogTexture2D, "Create default textures...");
+	RPG_LogDebug(RpgLogTexture2D, "Create default textures...");
 
 	// texture2d-white
 	{

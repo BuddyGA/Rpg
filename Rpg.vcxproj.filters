@@ -21,7 +21,7 @@
     <Natvis Include="Rpg.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\RpgMain.cpp">
+    <ClCompile Include="source\runtime\RpgMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\core\RpgCommandLine.cpp">
@@ -75,7 +75,7 @@
     <ClCompile Include="source\runtime\shader\RpgShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgGameApp.cpp">
+    <ClCompile Include="source\runtime\engine\RpgEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgRenderer.cpp">
@@ -108,7 +108,7 @@
     <ClCompile Include="source\runtime\render\RpgRenderResource_Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgGameApp_TestLevel.cpp">
+    <ClCompile Include="source\runtime\engine\RpgEngine_TestLevel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass.cpp">
@@ -138,7 +138,7 @@
     <ClCompile Include="source\runtime\render\RpgRenderer2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\editor\editor_build.cpp">
+    <ClCompile Include="source\editor\__editor__build.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\asset\RpgAssetImporter.cpp">
@@ -195,10 +195,7 @@
     <ClCompile Include="source\runtime\render\RpgRenderResource_MeshSkinned.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\world\RpgRenderComponent_Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\runtime\game\script\RpgScriptCamera.cpp">
+    <ClCompile Include="source\runtime\engine\script\RpgScriptDebugCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\input\RpgInputManager.cpp">
@@ -227,7 +224,7 @@
     <ClInclude Include="source\runtime\core\RpgPlatform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\core\RpgSharedPtr.h">
+    <ClInclude Include="source\runtime\core\RpgPointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\core\RpgStateMachine.h">
@@ -284,7 +281,7 @@
     <ClInclude Include="source\runtime\shader\RpgShaderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\game\RpgGameApp.h">
+    <ClInclude Include="source\runtime\engine\RpgEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\RpgRenderer.h">
@@ -296,7 +293,7 @@
     <ClInclude Include="source\runtime\render\RpgShadowViewport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\editor\public\RpgEditorAssetImporter.h">
+    <ClInclude Include="source\editor\RpgEditorAssetImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Copy.h">
@@ -329,19 +326,19 @@
     <ClInclude Include="source\runtime\gui\RpgGuiTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\editor\public\RpgEditor.h">
+    <ClInclude Include="source\editor\RpgEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\editor\public\RpgEditorTypes.h">
+    <ClInclude Include="source\editor\RpgEditorTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\editor\public\RpgEditorGizmo.h">
+    <ClInclude Include="source\editor\RpgEditorGizmo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\editor\public\RpgEditorWorldOutliner.h">
+    <ClInclude Include="source\editor\RpgEditorWorldOutliner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\editor\public\RpgEditorObjectInspector.h">
+    <ClInclude Include="source\editor\RpgEditorObjectInspector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\RpgRenderer2D.h">
@@ -410,7 +407,7 @@
     <ClInclude Include="source\runtime\asset\async_task\RpgAssimpTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\game\script\RpgScriptCamera.h">
+    <ClInclude Include="source\runtime\engine\script\RpgScriptDebugCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\input\RpgInputTypes.h">
@@ -419,10 +416,10 @@
     <ClInclude Include="source\runtime\input\RpgInputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\game\world\RpgAttributeComponent.h">
+    <ClInclude Include="source\game\world\RpgAttributeComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\game\world\RpgAttributeWorldSubsystem.h">
+    <ClInclude Include="source\game\world\RpgAttributeWorldSubsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h">

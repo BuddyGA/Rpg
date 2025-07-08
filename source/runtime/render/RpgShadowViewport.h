@@ -26,7 +26,7 @@ public:
 	virtual void SetupRenderPasses(int frameIndex, RpgAsyncTask_RenderPassArray& out_RenderPasses, const RpgMaterialResource* materialResource, const RpgMeshResource* meshResource, const RpgMeshSkinnedResource* meshSkinnedResource, const RpgWorldResource* worldResource) noexcept override;
 
 
-	[[nodiscard]] inline const RpgSharedTexture2D& GetDepthStencilTexture(int frameIndex) const noexcept
+	inline const RpgSharedTexture2D& GetDepthTexture(int frameIndex) const noexcept
 	{
 		return FrameDatas[frameIndex].DepthTexture;
 	}

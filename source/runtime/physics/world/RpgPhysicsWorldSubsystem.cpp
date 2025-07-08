@@ -41,7 +41,7 @@ namespace RpgCollisionGJK
 			}
 		}
 
-		RPG_PLATFORM_Check(cornerIndex != -1);
+		RPG_Check(cornerIndex != -1);
 		const RpgVector3 farthestPoint = corners.Points[cornerIndex];
 
 		ccdVec3Set(vec, farthestPoint.X, farthestPoint.Y, farthestPoint.Z);
@@ -152,7 +152,7 @@ bool RpgPhysicsWorldSubsystem::TestOverlapSphereBox(RpgBoundingSphere sphere, Rp
 		ccd_vec3_t contactPoint;
 
 		const int ret = ccdGJKPenetration(&sphere, &box, &ccd, &depth, &separationDirection, &contactPoint);
-		RPG_PLATFORM_Check(ret != -2);
+		RPG_Check(ret != -2);
 
 		if (ret == 0)
 		{

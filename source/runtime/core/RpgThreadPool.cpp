@@ -98,7 +98,7 @@ namespace RpgThreadPool
 			//RPG_PLATFORM_LogDebug(RpgLogSystem, "%s back to wait", threadName);
 		}
 
-		RPG_PLATFORM_Log(RpgLogSystem, "%s exit", threadName);
+		RPG_Log(RpgLogSystem, "%s exit", threadName);
 
 		return 0;
 	}
@@ -118,9 +118,9 @@ void RpgThreadPool::Initialize(int numOtherDedicatedThreads) noexcept
 
 	// Exclude dedicated threads and main thread
 	const int numThreadWorkers = cpuCount - numOtherDedicatedThreads - 1;
-	RPG_PLATFORM_Validate(numThreadWorkers > 1);
+	RPG_Validate(numThreadWorkers > 1);
 
-	RPG_PLATFORM_Log(RpgLogSystem, "Initialize threadpool with %i worker threads", numThreadWorkers);
+	RPG_Log(RpgLogSystem, "Initialize threadpool with %i worker threads", numThreadWorkers);
 
 	SignalSemaphore = SDL_CreateSemaphore(0);
 	TaskQueue.Initialize();
@@ -146,7 +146,7 @@ void RpgThreadPool::Shutdown() noexcept
 		return;
 	}
 
-	RPG_PLATFORM_Log(RpgLogSystem, "Shutdown threadpool");
+	RPG_Log(RpgLogSystem, "Shutdown threadpool");
 
 	for (int t = 0; t < ThreadWorkers.GetCount(); ++t)
 	{
@@ -177,12 +177,12 @@ void RpgThreadPool::Shutdown() noexcept
 
 void RpgThreadPool::SubmitTasks(RpgThreadTask** tasks, int taskCount) noexcept
 {
-	RPG_PLATFORM_Assert(tasks && taskCount > 0);
+	RPG_Assert(tasks && taskCount > 0);
 
 	for (int i = 0; i < taskCount; ++i)
 	{
 		RpgThreadTask* task = tasks[i];
-		RPG_PLATFORM_CheckV(task->IsIdle(), "Task submitted must be on idle state!");
+		RPG_CheckV(task->IsIdle(), "Task submitted must be on idle state!");
 		task->SetRunning();
 	}
 

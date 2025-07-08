@@ -3,6 +3,9 @@
 #include "core/RpgString.h"
 
 
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogInput)
+
+
 
 namespace RpgInputKey
 {

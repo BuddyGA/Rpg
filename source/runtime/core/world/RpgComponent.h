@@ -48,11 +48,11 @@ public:
 	
 	~RpgComponentStorage() noexcept
 	{
-		RPG_PLATFORM_LogDebug(RpgLogTemp, "Destroy component storage (%s)", TComponent::TYPE_NAME);
+		RPG_LogDebug(RpgLogTemp, "Destroy component storage (%s)", TComponent::TYPE_NAME);
 	}
 
 
-	[[nodiscard]] inline bool IsValid(int id) const noexcept 
+	inline bool IsValid(int id) const noexcept 
 	{
 		return Components.IsValid(id);
 	}
@@ -67,22 +67,22 @@ public:
 		Components.RemoveAt(id);
 	}
 
-	[[nodiscard]] inline TComponent& Get(int id) noexcept
+	inline TComponent& Get(int id) noexcept
 	{
 		return Components.GetAt(id);
 	}
 
-	[[nodiscard]] inline const TComponent& Get(int id) const noexcept
+	inline const TComponent& Get(int id) const noexcept
 	{
 		return Components.GetAt(id);
 	}
 
-	[[nodiscard]] inline RpgFreeList<TComponent>& GetComponents() noexcept
+	inline RpgFreeList<TComponent>& GetComponents() noexcept
 	{
 		return Components;
 	}
 
-	[[nodiscard]] inline const RpgFreeList<TComponent>& GetComponents() const noexcept
+	inline const RpgFreeList<TComponent>& GetComponents() const noexcept
 	{
 		return Components;
 	}

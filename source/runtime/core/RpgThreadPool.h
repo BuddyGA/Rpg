@@ -23,7 +23,7 @@ public:
 
 	virtual void Reset() noexcept
 	{
-		RPG_PLATFORM_AssertV(SDL_GetAtomicInt(&State) != 1, "Cannot reset while it's still running!");
+		RPG_AssertV(SDL_GetAtomicInt(&State) != 1, "Cannot reset while it's still running!");
 		SDL_SetAtomicInt(&State, 0);
 	}
 
@@ -49,24 +49,24 @@ public:
 	inline void Wait() noexcept
 	{
 		while (SDL_GetAtomicInt(&State) == 1);
-		RPG_PLATFORM_Assert(SDL_GetAtomicInt(&State) == 2);
+		RPG_Assert(SDL_GetAtomicInt(&State) == 2);
 	}
 
 
 	// Check if task is in idle state
-	[[nodiscard]] inline bool IsIdle() const noexcept
+	inline bool IsIdle() const noexcept
 	{
 		return SDL_GetAtomicInt(&State) == 0;
 	}
 
 	// Check if task is in running state (submitted or probably being executed by worker thread)
-	[[nodiscard]] inline bool IsRunning() const noexcept
+	inline bool IsRunning() const noexcept
 	{
 		return SDL_GetAtomicInt(&State) == 1;
 	}
 
 	// Check if task is done (worker thread has finished execute this task)
-	[[nodiscard]] inline bool IsDone() const noexcept
+	inline bool IsDone() const noexcept
 	{
 		return SDL_GetAtomicInt(&State) == 2;
 	}
@@ -116,7 +116,7 @@ namespace RpgThreadPool
 	inline void DestroyTask(TTask*& task) noexcept
 	{
 		static_assert(std::is_base_of<RpgThreadTask, TTask>::value, "DestroyTask() type of <TTask> must be derived from type <RpgThreadTask>!");
-		RPG_PLATFORM_Assert(task && (task->IsIdle() || task->IsDone()));
+		RPG_Assert(task && (task->IsIdle() || task->IsDone()));
 		delete task;
 	}
 

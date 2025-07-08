@@ -126,7 +126,7 @@ public:
 
 		if (length > 0)
 		{
-			RPG_PLATFORM_Check(length < RPG_STRING_FORMAT_BUFFER_COUNT);
+			RPG_Check(length < RPG_STRING_FORMAT_BUFFER_COUNT);
 
 			char temp[RPG_STRING_FORMAT_BUFFER_COUNT];
 			RpgPlatformMemory::MemZero(temp, RPG_STRING_FORMAT_BUFFER_COUNT);
@@ -166,12 +166,12 @@ public:
 	}
 
 
-	[[nodiscard]] inline const uint8_t* GetByteData() const noexcept
+	inline const uint8_t* GetByteData() const noexcept
 	{
 		return Bytes.GetData();
 	}
 
-	[[nodiscard]] inline size_t GetByteSize() const noexcept
+	inline size_t GetByteSize() const noexcept
 	{
 		return Bytes.GetCount();
 	}
@@ -214,12 +214,12 @@ public:
 	}
 
 
-	[[nodiscard]] inline const uint8_t* GetByteData() const noexcept
+	inline const uint8_t* GetByteData() const noexcept
 	{
 		return Bytes.GetData();
 	}
 
-	[[nodiscard]] inline size_t GetByteSize() const noexcept
+	inline size_t GetByteSize() const noexcept
 	{
 		return Bytes.GetCount();
 	}

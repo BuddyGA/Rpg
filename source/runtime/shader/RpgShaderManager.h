@@ -37,7 +37,7 @@ namespace RpgShaderManager
 	extern void AddShader(const RpgName& in_Name, const RpgString& in_HlslFilePath, RpgShader::EType in_Type, RpgShader::FCompileMacros optIn_CompileMacros = RpgShader::FCompileMacros()) noexcept;
 	extern void CompileShaders(bool bWaitAll) noexcept;
 
-	[[nodiscard]] extern bool DoesShaderExists(const RpgName& name) noexcept;
-	[[nodiscard]] extern IDxcBlob* GetShaderCodeBlob(const RpgName& name) noexcept;
+	extern bool DoesShaderExists(const RpgName& name) noexcept;
+	extern IDxcBlob* GetShaderCodeBlob(const RpgName& name) noexcept;
 
 };

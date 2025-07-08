@@ -15,7 +15,7 @@ namespace RpgAlgorithm
 	}
 
 
-	[[nodiscard]] constexpr inline bool IsPowerOfTwo(uint32_t value) noexcept
+	constexpr inline bool IsPowerOfTwo(uint32_t value) noexcept
 	{
 		return (value > 0) && !(value & (value - 1));
 	}
@@ -24,11 +24,11 @@ namespace RpgAlgorithm
 	template<typename T>
 	inline void Array_CopyElements(int copyCount, T* dstDataArray, int dstDataCount, int dstCopyIndex, const T* srcDataArray, int srcDataCount, int srcCopyIndex) noexcept
 	{
-		RPG_PLATFORM_Check(copyCount > 0);
-		RPG_PLATFORM_Check(dstDataArray && dstDataCount > 0 && dstDataCount <= RPG_MAX_COUNT);
-		RPG_PLATFORM_CheckV(dstCopyIndex >= 0 && (dstCopyIndex + copyCount) <= dstDataCount, "RpgAlgorithm: Array copy elements dst range out of bound!");
-		RPG_PLATFORM_Check(srcDataArray && srcDataCount > 0 && srcDataCount <= RPG_MAX_COUNT);
-		RPG_PLATFORM_CheckV(srcCopyIndex >= 0 && (srcCopyIndex + copyCount) <= srcDataCount, "RpgAlgorithm: Array copy elements src range out of bound!");
+		RPG_Check(copyCount > 0);
+		RPG_Check(dstDataArray && dstDataCount > 0 && dstDataCount <= RPG_MAX_COUNT);
+		RPG_CheckV(dstCopyIndex >= 0 && (dstCopyIndex + copyCount) <= dstDataCount, "RpgAlgorithm: Array copy elements dst range out of bound!");
+		RPG_Check(srcDataArray && srcDataCount > 0 && srcDataCount <= RPG_MAX_COUNT);
+		RPG_CheckV(srcCopyIndex >= 0 && (srcCopyIndex + copyCount) <= srcDataCount, "RpgAlgorithm: Array copy elements src range out of bound!");
 
 		if constexpr (std::is_trivially_copyable<T>::value)
 		{
@@ -47,10 +47,10 @@ namespace RpgAlgorithm
 	template<typename T>
 	inline void Array_ShiftElements(int shiftCount, T* dataArray, int dataCount, int dstShiftIndex, int srcShiftIndex) noexcept
 	{
-		RPG_PLATFORM_Check(shiftCount > 0);
-		RPG_PLATFORM_Check(dataArray && dataCount > 0 && dataCount <= RPG_MAX_COUNT);
-		RPG_PLATFORM_CheckV(dstShiftIndex >= 0 && (dstShiftIndex + shiftCount) <= dataCount, "RpgAlgorithm: Array shift elements dst range out of bound!");
-		RPG_PLATFORM_CheckV(srcShiftIndex >= 0 && (srcShiftIndex + shiftCount) <= dataCount, "RpgAlgorithm: Array shift elements src range out of bound!");
+		RPG_Check(shiftCount > 0);
+		RPG_Check(dataArray && dataCount > 0 && dataCount <= RPG_MAX_COUNT);
+		RPG_CheckV(dstShiftIndex >= 0 && (dstShiftIndex + shiftCount) <= dataCount, "RpgAlgorithm: Array shift elements dst range out of bound!");
+		RPG_CheckV(srcShiftIndex >= 0 && (srcShiftIndex + shiftCount) <= dataCount, "RpgAlgorithm: Array shift elements src range out of bound!");
 
 		RpgPlatformMemory::MemMove(dataArray + dstShiftIndex, dataArray + srcShiftIndex, sizeof(T) * shiftCount);
 	}
@@ -59,12 +59,12 @@ namespace RpgAlgorithm
 	template<typename T>
 	inline void Array_RemoveElements(T* dataArray, int dataCount, int index, int count, bool bKeepOrder) noexcept
 	{
-		RPG_PLATFORM_Check(dataArray && dataCount > 0 && dataCount <= RPG_MAX_COUNT);
-		RPG_PLATFORM_Check(count > 0);
+		RPG_Check(dataArray && dataCount > 0 && dataCount <= RPG_MAX_COUNT);
+		RPG_Check(count > 0);
 
 		const int lastIndex = dataCount - 1;
 		const int removeIndex = (index == RPG_INDEX_LAST) ? lastIndex : index;
-		RPG_PLATFORM_CheckV(removeIndex >= 0 && (removeIndex + count) <= dataCount, "RpgAlgorithm: Array remove elements range out of bound!");
+		RPG_CheckV(removeIndex >= 0 && (removeIndex + count) <= dataCount, "RpgAlgorithm: Array remove elements range out of bound!");
 
 		if (removeIndex == lastIndex && count == 1)
 		{
@@ -77,9 +77,17 @@ namespace RpgAlgorithm
 		}
 		else
 		{
-			RPG_PLATFORM_Check(count == 1);
-			RPG_PLATFORM_Check(!bKeepOrder);
-			dataArray[removeIndex] = dataArray[lastIndex];
+			RPG_Check(count == 1);
+			RPG_Check(!bKeepOrder);
+
+			if constexpr (std::is_move_assignable<T>::value)
+			{
+				dataArray[removeIndex] = std::move(dataArray[lastIndex]);
+			}
+			else
+			{
+				dataArray[removeIndex] = dataArray[lastIndex];
+			}
 		}
 	}
 
@@ -87,9 +95,9 @@ namespace RpgAlgorithm
 	template<typename T>
 	inline void Array_InsertElements(T* dstDataArray, int dstDataCount, int dstIndex, const T* srcDataArray, int srcDataCount) noexcept
 	{
-		RPG_PLATFORM_Check(dstDataArray && dstDataCount > 0 && dstDataCount <= RPG_MAX_COUNT);
-		RPG_PLATFORM_Check(srcDataArray && srcDataCount > 0 && srcDataCount <= RPG_MAX_COUNT);
-		RPG_PLATFORM_CheckV(dstIndex >= 0 && (dstIndex + srcDataCount) <= dstDataCount, "RpgAlgorithm: Array insert elements range out of bound!");
+		RPG_Check(dstDataArray && dstDataCount > 0 && dstDataCount <= RPG_MAX_COUNT);
+		RPG_Check(srcDataArray && srcDataCount > 0 && srcDataCount <= RPG_MAX_COUNT);
+		RPG_CheckV(dstIndex >= 0 && (dstIndex + srcDataCount) <= dstDataCount, "RpgAlgorithm: Array insert elements range out of bound!");
 
 		const int lastIndex = dstDataCount - 1;
 

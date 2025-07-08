@@ -35,7 +35,7 @@ public:
 	inline int AddLod() noexcept
 	{
 		const int lodIndex = LodCount;
-		RPG_PLATFORM_Check(lodIndex >= 0 && lodIndex < RPG_MODEL_MAX_LOD);
+		RPG_Check(lodIndex >= 0 && lodIndex < RPG_MODEL_MAX_LOD);
 		++LodCount;
 
 		return lodIndex;
@@ -44,57 +44,57 @@ public:
 
 	inline void SetMaterial(int meshIndex, const RpgSharedMaterial& material) noexcept
 	{
-		RPG_PLATFORM_Check(meshIndex >= 0 && meshIndex < MeshCount);
+		RPG_Check(meshIndex >= 0 && meshIndex < MeshCount);
 		Materials[meshIndex] = material;
 	}
 
 
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
 
-	[[nodiscard]] inline int GetLodCount() const noexcept
+	inline int GetLodCount() const noexcept
 	{
 		return LodCount;
 	}
 
-	[[nodiscard]] inline int GetMeshCount() const noexcept
+	inline int GetMeshCount() const noexcept
 	{
 		return MeshCount;
 	}
 
-	[[nodiscard]] inline bool HasSkin() const noexcept
+	inline bool HasSkin() const noexcept
 	{
 		return Meshes[0][0]->HasSkin();
 	}
 
-	[[nodiscard]] inline RpgBoundingAABB GetBound() const noexcept
+	inline RpgBoundingAABB GetBound() const noexcept
 	{
 		return Bound;
 	}
 
 
-	[[nodiscard]] inline RpgSharedMesh& GetMeshLod(int meshIndex, int lodIndex) noexcept
+	inline RpgSharedMesh& GetMeshLod(int meshIndex, int lodIndex) noexcept
 	{
-		RPG_PLATFORM_Check(meshIndex >= 0 && meshIndex < MeshCount);
-		RPG_PLATFORM_Check(lodIndex >= 0 && lodIndex < LodCount);
+		RPG_Check(meshIndex >= 0 && meshIndex < MeshCount);
+		RPG_Check(lodIndex >= 0 && lodIndex < LodCount);
 
 		return Meshes[meshIndex][lodIndex];
 	}
 
-	[[nodiscard]] inline const RpgSharedMesh& GetMeshLod(int meshIndex, int lodIndex) const noexcept
+	inline const RpgSharedMesh& GetMeshLod(int meshIndex, int lodIndex) const noexcept
 	{
-		RPG_PLATFORM_Check(meshIndex >= 0 && meshIndex < MeshCount);
-		RPG_PLATFORM_Check(lodIndex >= 0 && lodIndex < LodCount);
+		RPG_Check(meshIndex >= 0 && meshIndex < MeshCount);
+		RPG_Check(lodIndex >= 0 && lodIndex < LodCount);
 
 		return Meshes[meshIndex][lodIndex];
 	}
 
 
-	[[nodiscard]] inline const RpgSharedMaterial& GetMaterial(int meshIndex) const noexcept
+	inline const RpgSharedMaterial& GetMaterial(int meshIndex) const noexcept
 	{
-		RPG_PLATFORM_Check(meshIndex >= 0 && meshIndex < MeshCount);
+		RPG_Check(meshIndex >= 0 && meshIndex < MeshCount);
 
 		return Materials[meshIndex];
 	}

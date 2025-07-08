@@ -7,6 +7,9 @@
 #include "async_task/RpgAsyncTask_RenderPass.h"
 
 
+RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogRenderer, VERBOSITY_DEBUG)
+
+
 
 RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 	: FrameDatas()
@@ -49,6 +52,8 @@ RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 
 RpgRenderer::~RpgRenderer() noexcept
 {
+	RPG_LogDebug(RpgLogRenderer, "Destruct renderer");
+
 	SwapchainWaitAllPresents();
 	SwapchainReleaseResources(false);
 
@@ -139,13 +144,13 @@ void RpgRenderer::SwapchainResize() noexcept
 
 	if (static_cast<UINT>(windowDimension.X) != desc.Width || static_cast<UINT>(windowDimension.Y) != desc.Height)
 	{
-		RPG_PLATFORM_LogDebug(RpgLogD3D12, "Resizing swapchain... Adjusting to window size (Swapchain: %i, %i) (Window: %i, %i)!", desc.Width, desc.Height, windowDimension.X, windowDimension.Y);
+		RPG_LogDebug(RpgLogD3D12, "Resizing swapchain... Adjusting to window size (Swapchain: %i, %i) (Window: %i, %i)!", desc.Width, desc.Height, windowDimension.X, windowDimension.Y);
 		bShouldResize = true;
 	}
 
 	if (bVsync != bPendingChangeVsync)
 	{
-		RPG_PLATFORM_LogDebug(RpgLogD3D12, "Resizing swapchain... Vsync changed!");
+		RPG_LogDebug(RpgLogD3D12, "Resizing swapchain... Vsync changed!");
 		bShouldResize = true;
 	}
 
@@ -159,7 +164,7 @@ void RpgRenderer::SwapchainResize() noexcept
 
 	if (SwapChain == nullptr)
 	{
-		RPG_PLATFORM_LogDebug(RpgLogD3D12, "Create swapchain");
+		RPG_LogDebug(RpgLogD3D12, "Create swapchain");
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDesc{};
 		swapchainDesc.Flags = flags;
@@ -185,7 +190,7 @@ void RpgRenderer::SwapchainResize() noexcept
 		SwapchainWaitAllPresents();
 		SwapchainReleaseResources(true);
 
-		RPG_PLATFORM_LogDebug(RpgLogD3D12, "Resize swapchain %i, %i", windowDimension.X, windowDimension.Y);
+		RPG_LogDebug(RpgLogD3D12, "Resize swapchain %i, %i", windowDimension.X, windowDimension.Y);
 		RPG_D3D12_Validate(SwapChain->ResizeBuffers(RPG_FRAME_BUFFERING, static_cast<UINT>(windowDimension.X), static_cast<UINT>(windowDimension.Y), BackbufferFormat, flags));
 	}
 
@@ -195,7 +200,7 @@ void RpgRenderer::SwapchainResize() noexcept
 		RPG_D3D12_SetDebugName(BackbufferResources[f], "_%i_RES_SwapBackbuffer", f);
 	}
 
-	RPG_PLATFORM_LogDebug(RpgLogD3D12, "Swapchain resized successfully");
+	RPG_LogDebug(RpgLogD3D12, "Swapchain resized successfully");
 
 	BackbufferIndex = SwapChain->GetCurrentBackBufferIndex();
 }
@@ -219,7 +224,7 @@ void RpgRenderer::WaitFrameFinished(int frameIndex) noexcept
 
 void RpgRenderer::RegisterWorld(const RpgWorld* world) noexcept
 {
-	RPG_PLATFORM_Assert(world);
+	RPG_Assert(world);
 
 	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
@@ -237,7 +242,7 @@ void RpgRenderer::RegisterWorld(const RpgWorld* world) noexcept
 
 void RpgRenderer::UnregisterWorld(const RpgWorld* world) noexcept
 {
-	RPG_PLATFORM_Assert(world);
+	RPG_Assert(world);
 
 	RPG_NotImplementedYet();
 }
@@ -454,15 +459,15 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 
 		if (hr == DXGI_ERROR_DEVICE_REMOVED)
 		{
-			RPG_PLATFORM_LogError(RpgLogD3D12, "Present failed: DXGI_ERROR_DEVICE_REMOVED!");
+			RPG_LogError(RpgLogD3D12, "Present failed: DXGI_ERROR_DEVICE_REMOVED!");
 		}
 		else if (hr == DXGI_ERROR_DEVICE_RESET)
 		{
-			RPG_PLATFORM_LogError(RpgLogD3D12, "Present failed: DXGI_ERROR_DEVICE_RESET!");
+			RPG_LogError(RpgLogD3D12, "Present failed: DXGI_ERROR_DEVICE_RESET!");
 		}
 		else if (hr != S_OK)
 		{
-			RPG_PLATFORM_LogWarn(RpgLogD3D12, "Present failed!");
+			RPG_LogWarn(RpgLogD3D12, "Present failed!");
 		}
 
 		BackbufferIndex = SwapChain->GetCurrentBackBufferIndex();
@@ -489,7 +494,7 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 RpgVertexPrimitiveBatchLine* RpgRenderer::Debug_GetPrimitiveBatchLine(int frameIndex, const RpgWorld* world, bool bNoDepth) noexcept
 {
 	RpgWorldResource* resource = GetWorldContext(frameIndex, world).Resource;
-	RPG_PLATFORM_Assert(resource);
+	RPG_Assert(resource);
 
 	return bNoDepth ? &resource->DebugLineNoDepth : &resource->DebugLine;
 }

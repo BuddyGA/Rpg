@@ -9,7 +9,7 @@
 #include "asset/RpgAssetImporter.h"
 #include "shader/RpgShaderManager.h"
 #include "render/RpgRenderPipeline.h"
-#include "game/RpgGameApp.h"
+#include "engine/RpgEngine.h"
 
 
 
@@ -81,8 +81,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 	// Initialize game
-	g_GameApp = new RpgGameApp("RpgGame_v0.0_alpha");
-	g_GameApp->Initialize();
+	g_Engine = new RpgEngine("RpgGame_v0.0_alpha");
+	g_Engine->Initialize();
 
 
 // ------------------------------------------------------------------------------------------------- //
@@ -111,27 +111,27 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 				case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 				{
-					g_GameApp->WindowSizeChanged(e.window);
+					g_Engine->WindowSizeChanged(e.window);
 					break;
 				}
 
 				case SDL_EVENT_MOUSE_MOTION:
 				{
-					g_GameApp->MouseMove(e.motion);
+					g_Engine->MouseMove(e.motion);
 					break;
 				}
 
 				case SDL_EVENT_MOUSE_BUTTON_DOWN:
 				case SDL_EVENT_MOUSE_BUTTON_UP:
 				{
-					g_GameApp->MouseButton(e.button);
+					g_Engine->MouseButton(e.button);
 					break;
 				}
 
 				case SDL_EVENT_KEY_DOWN:
 				case SDL_EVENT_KEY_UP:
 				{
-					g_GameApp->KeyboardButton(e.key);
+					g_Engine->KeyboardButton(e.key);
 					break;
 				}
 
@@ -152,11 +152,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		RpgD3D12::BeginFrame(frameIndex);
 
 		Timer.Tick();
-		g_GameApp->FrameTick(frameIndex, Timer.GetDeltaTimeSeconds());
+		g_Engine->FrameTick(frameIndex, Timer.GetDeltaTimeSeconds());
 
-		const int fpsLimit = g_GameApp->FpsLimit;
+		const int fpsLimit = g_Engine->FpsLimit;
 
-		if (g_GameApp->IsWindowMinimized())
+		if (g_Engine->IsWindowMinimized())
 		{
 			SDL_Delay(60);
 		}
@@ -175,13 +175,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		++FrameCounter;
 	}
 
-	RPG_PLATFORM_Log(RpgLogSystem, "Exit game");
+	RPG_Log(RpgLogSystem, "Exit game");
 
 
 // ------------------------------------------------------------------------------------------------- //
 // 	Shutdown
 // ------------------------------------------------------------------------------------------------- //
-	delete g_GameApp;
+	delete g_Engine;
 
 	RpgMaterial::s_DestroyDefaults();
 	RpgFont::s_DestroyDefaults();

@@ -120,7 +120,7 @@ public:
 
 
 public:
-	[[nodiscard]] inline bool IsValid() const noexcept
+	inline bool IsValid() const noexcept
 	{
 		return Ref && Ref->Object;
 	}
@@ -148,17 +148,17 @@ public:
 	}
 
 
-	[[nodiscard]] inline T* Get() noexcept
+	inline T* Get() noexcept
 	{
 		return Ref ? Ref->Object : nullptr;
 	}
 
-	[[nodiscard]] inline const T* Get() const noexcept
+	inline const T* Get() const noexcept
 	{
 		return Ref ? Ref->Object : nullptr;
 	}
 
-	[[nodiscard]] inline int GetRefCount() const noexcept
+	inline int GetRefCount() const noexcept
 	{
 		return Ref ? SDL_GetAtomicInt(&Ref->SharedCount) : 0;
 	}
@@ -281,7 +281,7 @@ public:
 			// If return == 1, we were the last user
 			if (SDL_AddAtomicInt(&Ref->WeakCount, -1) == 1 && SDL_GetAtomicInt(&Ref->SharedCount) == 0)
 			{
-				RPG_PLATFORM_Check(Ref->Object == nullptr);
+				RPG_Check(Ref->Object == nullptr);
 				delete Ref;
 			}
 		}
@@ -311,7 +311,7 @@ public:
 		while (!SDL_CompareAndSwapAtomicInt(&Ref->SharedCount, oldValue, oldValue + 1));
 
 		shared.Ref = Ref;
-		RPG_PLATFORM_Check(shared.Ref && shared.Ref->Object);
+		RPG_Check(shared.Ref && shared.Ref->Object);
 
 		return shared;
 	}
@@ -320,6 +320,134 @@ public:
 	inline bool operator==(const RpgSharedPtr<T>& rhs) const noexcept
 	{
 		return Ref == rhs.Ref;
+	}
+
+};
+
+
+template<typename T>
+using TUniqueDeleteFunction = void(*)(T*);
+
+template<typename T>
+inline void Rpg_UniquePtrDefaultDelete(T* ref) noexcept
+{
+	if (ref)
+	{
+		delete ref;
+	}
+}
+
+
+template<typename T, TUniqueDeleteFunction<T> DeleteFunction = Rpg_UniquePtrDefaultDelete<T>>
+class RpgUniquePtr
+{
+	RPG_NOCOPY(RpgUniquePtr)
+
+private:
+	T* Ref;
+
+
+public:
+	RpgUniquePtr(T* in_Ref = nullptr) noexcept
+		: Ref(in_Ref)
+	{
+	}
+
+	RpgUniquePtr(RpgUniquePtr&& other) noexcept
+		: Ref(other.Ref)
+	{
+		other.Ref = nullptr;
+	}
+
+	~RpgUniquePtr() noexcept
+	{
+		Release();
+	}
+
+
+public:
+	inline RpgUniquePtr& operator=(RpgUniquePtr&& rhs) noexcept
+	{
+		if (this != &rhs)
+		{
+			Release();
+			Ref = rhs.Ref;
+			rhs.Ref = nullptr;
+		}
+
+		return *this;
+	}
+
+	inline RpgUniquePtr& operator=(T* rhs) noexcept
+	{
+		if (Ref != rhs)
+		{
+			Release();
+			Ref = rhs;
+		}
+
+		return *this;
+	}
+
+	inline T* operator->() noexcept
+	{
+		return Ref;
+	}
+
+	inline const T* operator->() const noexcept
+	{
+		return Ref;
+	}
+
+	inline bool operator==(const T* rhs) const noexcept
+	{
+		return Ref == rhs;
+	}
+
+	inline operator bool() const noexcept
+	{
+		return Ref != nullptr;
+	}
+
+public:
+	inline bool IsValid() const noexcept
+	{
+		return Ref != nullptr;
+	}
+
+	inline void Release() noexcept
+	{
+		DeleteFunction(Ref);
+		Ref = nullptr;
+	}
+
+	inline T* Get() noexcept
+	{
+		return Ref;
+	}
+
+	inline const T* Get() const noexcept
+	{
+		return Ref;
+	}
+
+};
+
+
+
+namespace RpgPointer
+{
+	template<typename T, typename...TConstructorArgs>
+	[[nodiscard]] inline RpgUniquePtr<T> MakeUnique(TConstructorArgs&&... args) noexcept
+	{
+		return RpgUniquePtr<T>(new T(std::forward<TConstructorArgs>(args)...));
+	}
+
+
+	template<typename T, typename...TConstructorArgs>
+	[[nodiscard]] inline RpgSharedPtr<T> MakeShared(TConstructorArgs&&... args) noexcept
+	{
+		return RpgSharedPtr<T>(new T(std::forward<TConstructorArgs>(args)...));
 	}
 
 };

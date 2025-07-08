@@ -4,7 +4,7 @@
 
 RpgModel::RpgModel(const RpgName& name) noexcept
 {
-	RPG_PLATFORM_Log(RpgLogTemp, "Create model (%s)", *name);
+	RPG_Log(RpgLogTemp, "Create model (%s)", *name);
 
 	Name = name;
 	MeshCount = 0;
@@ -20,7 +20,7 @@ RpgModel::~RpgModel() noexcept
 
 int RpgModel::AddMeshEmpty() noexcept
 {
-	RPG_PLATFORM_Check(MeshCount < RPG_MODEL_MAX_MESH);
+	RPG_Check(MeshCount < RPG_MODEL_MAX_MESH);
 
 	const int meshIndex = MeshCount++;
 
@@ -35,7 +35,7 @@ int RpgModel::AddMeshEmpty() noexcept
 
 int RpgModel::AddMesh(const RpgSharedMesh& mesh) noexcept
 {
-	RPG_PLATFORM_Check(MeshCount < RPG_MODEL_MAX_MESH);
+	RPG_Check(MeshCount < RPG_MODEL_MAX_MESH);
 
 	const int meshIndex = MeshCount++;
 	

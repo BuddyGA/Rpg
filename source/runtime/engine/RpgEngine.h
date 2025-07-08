@@ -1,47 +1,53 @@
 #pragma once
 
 #include "core/RpgString.h"
-#include "core/world/RpgGameObject.h"
+#include "core/RpgPointer.h"
+#include "core/world/RpgWorld.h"
+#include "input/RpgInputManager.h"
+#include "render/RpgRenderer.h"
+#include "render/RpgSceneViewport.h"
+#include "gui/RpgGuiContext.h"
+#include "script/RpgScriptDebugCamera.h"
 
 
-class RpgInputManager;
-class RpgWorld;
-class RpgRenderer;
-class RpgSceneViewport;
-class RpgGuiContext;
 
+extern class RpgEngine* g_Engine;
 
-
-class RpgGameApp 
+class RpgEngine 
 {
-	RPG_NOCOPYMOVE(RpgGameApp)
+	RPG_NOCOPYMOVE(RpgEngine)
 
 private:
 	// Main window
 	SDL_Window* Window;
 	HWND NativeWindowHandle;
 
-	// Input
-	RpgInputManager* InputManager;
+	// Input manager
+	RpgInputManager InputManager;
 
-	// Main world
+	// Created worlds. Main world always at index 0
+	RpgArray<RpgUniquePtr<RpgWorld>> Worlds;
 	RpgWorld* MainWorld;
 
 	// Main renderer
-	RpgRenderer* Renderer;
-	
+	RpgUniquePtr<RpgRenderer> Renderer;
+
 	// Main scene viewport
-	RpgSceneViewport* Viewport;
-
+	RpgSceneViewport SceneViewport;
+	
 	// GUI context
-	RpgGuiContext* GuiContext;
+	RpgGuiContext GuiContext;
 
-	RpgGameObjectID MainCamera;
+	// Main camera object inside main world
+	RpgGameObjectID MainCameraObject;
+
+	// Script camera
+	RpgScriptDebugCamera ScriptDebugCamera;
 
 
 public:
-	RpgGameApp(const char* windowTitle) noexcept;
-	~RpgGameApp() noexcept;
+	RpgEngine(const char* windowTitle) noexcept;
+	~RpgEngine() noexcept;
 
 	void Initialize() noexcept;
 
@@ -52,8 +58,13 @@ public:
 
 	void FrameTick(int frameIndex, float deltaTime) noexcept;
 
+	[[nodiscard]] RpgWorld* CreateWorld(const RpgName& name) noexcept;
+	void DestroyWorld(RpgWorld*& world) noexcept;
 
-	[[nodiscard]] inline bool IsWindowMinimized() const noexcept
+	void SetMainCamera(RpgGameObjectID cameraObject) noexcept;
+
+
+	inline bool IsWindowMinimized() const noexcept
 	{
 		return SDL_GetWindowFlags(Window) & SDL_WINDOW_MINIMIZED;
 	}
@@ -90,9 +101,24 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgInputManager* GetInputManager() const noexcept
+	inline RpgInputManager& GetInputManager() noexcept
 	{
 		return InputManager;
+	}
+
+	inline const RpgInputManager& GetInputManager() const noexcept
+	{
+		return InputManager;
+	}
+
+	inline RpgWorld* GetMainWorld() noexcept
+	{
+		return MainWorld;
+	}
+
+	inline const RpgWorld* GetMainWorld() const noexcept
+	{
+		return MainWorld;
 	}
 
 
@@ -111,7 +137,3 @@ private:
 	void CreateTestLevel() noexcept;
 
 };
-
-
-
-extern RpgGameApp* g_GameApp;

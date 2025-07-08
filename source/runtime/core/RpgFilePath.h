@@ -106,29 +106,29 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgFilePath operator+(const RpgString& rhs) const noexcept
+	inline RpgFilePath operator+(const RpgString& rhs) const noexcept
 	{
 		return RpgFilePath(FullPath + rhs);
 	}
 
-	[[nodiscard]] inline RpgFilePath operator+(const char* rhs) const noexcept
+	inline RpgFilePath operator+(const char* rhs) const noexcept
 	{
 		return RpgFilePath(FullPath + rhs);
 	}
 
 
-	[[nodiscard]] inline const char* operator*() const noexcept
+	inline const char* operator*() const noexcept
 	{
 		return *FullPath;
 	}
 
 
-	[[nodiscard]] inline bool operator==(const RpgFilePath& rhs) const noexcept
+	inline bool operator==(const RpgFilePath& rhs) const noexcept
 	{
 		return FullPath.Equals(rhs.FullPath, true);
 	}
 
-	[[nodiscard]] inline bool operator!=(const RpgFilePath& rhs) const noexcept
+	inline bool operator!=(const RpgFilePath& rhs) const noexcept
 	{
 		return !FullPath.Equals(rhs.FullPath, true);
 	}
@@ -136,15 +136,15 @@ public:
 
 private:
 	void InitializeInternal();
-	[[nodiscard]] bool IsPathValid() const noexcept;
+	bool IsPathValid() const noexcept;
 
 
 public:
-	[[nodiscard]] RpgFilePath GetParentDirectoryPath() const noexcept;
-	[[nodiscard]] RpgString GetDirectoryPath() const noexcept;
-	[[nodiscard]] RpgName GetDirectoryName() const noexcept;
-	[[nodiscard]] RpgName GetFileName() const noexcept;
-	[[nodiscard]] RpgName GetFileExtension() const noexcept;
+	RpgFilePath GetParentDirectoryPath() const noexcept;
+	RpgString GetDirectoryPath() const noexcept;
+	RpgName GetDirectoryName() const noexcept;
+	RpgName GetFileName() const noexcept;
+	RpgName GetFileExtension() const noexcept;
 
 
 	inline void Clear(bool bFreeMemory = false) noexcept
@@ -154,22 +154,22 @@ public:
 	}
 
 
-	[[nodiscard]] inline bool IsDirectoryPath() const noexcept
+	inline bool IsDirectoryPath() const noexcept
 	{
 		return !DirectoryPath.IsEmpty() && !DirectoryName.IsEmpty() && FileName.IsEmpty() && FileExt.IsEmpty();
 	}
 
-	[[nodiscard]] inline bool IsFilePath() const noexcept
+	inline bool IsFilePath() const noexcept
 	{
 		return !FileName.IsEmpty();
 	}
 
-	[[nodiscard]] inline bool HasFileExtension() const noexcept
+	inline bool HasFileExtension() const noexcept
 	{
 		return !FileExt.IsEmpty();
 	}
 
-	[[nodiscard]] inline const RpgString& ToString() const noexcept
+	inline const RpgString& ToString() const noexcept
 	{
 		return FullPath;
 	}
@@ -182,12 +182,12 @@ namespace RpgFileSystem
 {
 	extern void Initialize() noexcept;
 
-	[[nodiscard]] extern const RpgString& GetExecutableDirPath() noexcept;
-	[[nodiscard]] extern const RpgString& GetUserAppDataLocalDirPath() noexcept;
-	[[nodiscard]] extern const RpgString& GetUserTempDirPath() noexcept;
-	[[nodiscard]] extern const RpgString& GetProjectDirPath() noexcept;
-	[[nodiscard]] extern const RpgString& GetSourceDirPath() noexcept;
-	[[nodiscard]] extern const RpgString& GetAssetDirPath() noexcept;
-	[[nodiscard]] extern const RpgString& GetAssetRawDirPath() noexcept;
+	extern const RpgString& GetExecutableDirPath() noexcept;
+	extern const RpgString& GetUserAppDataLocalDirPath() noexcept;
+	extern const RpgString& GetUserTempDirPath() noexcept;
+	extern const RpgString& GetProjectDirPath() noexcept;
+	extern const RpgString& GetSourceDirPath() noexcept;
+	extern const RpgString& GetAssetDirPath() noexcept;
+	extern const RpgString& GetAssetRawDirPath() noexcept;
 
 };

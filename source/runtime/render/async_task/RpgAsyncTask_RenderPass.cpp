@@ -30,10 +30,10 @@ void RpgAsyncTask_RenderPass::Reset() noexcept
 
 void RpgAsyncTask_RenderPass::Execute() noexcept
 {
-	RPG_PLATFORM_Assert(MaterialResource);
-	RPG_PLATFORM_Assert(MeshResource);
-	RPG_PLATFORM_Assert(MeshSkinnedResource);
-	RPG_PLATFORM_Assert(WorldResource);
+	RPG_Assert(MaterialResource);
+	RPG_Assert(MeshResource);
+	RPG_Assert(MeshSkinnedResource);
+	RPG_Assert(WorldResource);
 
 	RPG_D3D12_COMMAND_Begin(CmdAllocDirect, CmdListDirect);
 	CommandDraw(CmdListDirect.Get());

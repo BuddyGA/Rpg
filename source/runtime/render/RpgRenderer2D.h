@@ -121,7 +121,7 @@ public:
 	void End(int frameIndex) noexcept;
 
 
-	[[nodiscard]] inline RpgPointInt GetViewportDimension() const noexcept
+	inline RpgPointInt GetViewportDimension() const noexcept
 	{
 		return ViewportDimension;
 	}

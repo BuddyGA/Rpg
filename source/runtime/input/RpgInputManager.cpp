@@ -1,6 +1,9 @@
 #include "RpgInputManager.h"
 
 
+RPG_LOG_DEFINE_CATEGORY(RpgLogInput, VERBOSITY_DEBUG)
+
+
 
 namespace RpgInput
 {

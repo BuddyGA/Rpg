@@ -38,14 +38,14 @@ void RpgAsyncTask_TickPose::Execute() noexcept
 		// Skeleton must valid
 		if (!comp->Skeleton)
 		{
-			RPG_PLATFORM_LogWarn(RpgLogAnimation, "Fail to update animation for game object (%s). Invalid skeleton!", *World->GameObject_GetName(comp->GameObject));
+			RPG_LogWarn(RpgLogAnimation, "Fail to update animation for game object (%s). Invalid skeleton!", *World->GameObject_GetName(comp->GameObject));
 			continue;
 		}
 
 		// AnimClip must valid
 		if (!comp->Clip)
 		{
-			RPG_PLATFORM_LogWarn(RpgLogAnimation, "Fail to update animation for game object (%s). Invalid animation clip!", *World->GameObject_GetName(comp->GameObject));
+			RPG_LogWarn(RpgLogAnimation, "Fail to update animation for game object (%s). Invalid animation clip!", *World->GameObject_GetName(comp->GameObject));
 			continue;
 		}
 
@@ -73,7 +73,7 @@ void RpgAsyncTask_TickPose::Execute() noexcept
 	#ifndef RPG_BUILD_SHIPPING
 		if (!animClip->CheckSkeletonCompatibility(skeleton))
 		{
-			RPG_PLATFORM_LogWarn(RpgLogAnimation, "Animation clip (%s) is not compatible with skeleton (%s)", *animClip->GetName(), *skeleton->GetName());
+			RPG_LogWarn(RpgLogAnimation, "Animation clip (%s) is not compatible with skeleton (%s)", *animClip->GetName(), *skeleton->GetName());
 			continue;
 		}
 	#endif // !RPG_BUILD_SHIPPING
@@ -134,7 +134,7 @@ void RpgAsyncTask_TickPose::Execute() noexcept
 			if (bMarkDirty)
 			{
 				const int boneIndex = skeleton->GetBoneIndex(track.BoneName);
-				RPG_PLATFORM_Check(boneIndex != RPG_SKELETON_BONE_INDEX_INVALID);
+				RPG_Check(boneIndex != RPG_SKELETON_BONE_INDEX_INVALID);
 				comp->FinalPose.SetBoneLocalTransform(boneIndex, RpgMatrixTransform(interpolatedPosition, interpolatedRotation));
 			}
 		}

@@ -111,37 +111,37 @@ public:
 		Indices.Clear(bFreeMemory);
 	}
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return Vertices.IsEmpty();
 	}
 
-	[[nodiscard]] inline int GetVertexCount() const noexcept
+	inline int GetVertexCount() const noexcept
 	{
 		return Vertices.GetCount();
 	}
 
-	[[nodiscard]] inline const RpgVertex::FPrimitive* GetVertexData() const noexcept
+	inline const RpgVertex::FPrimitive* GetVertexData() const noexcept
 	{
 		return Vertices.GetData();
 	}
 
-	[[nodiscard]] inline size_t GetVertexSizeBytes() const noexcept
+	inline size_t GetVertexSizeBytes() const noexcept
 	{
 		return Vertices.GetMemorySizeBytes_Allocated();
 	}
 
-	[[nodiscard]] inline int GetIndexCount() const noexcept
+	inline int GetIndexCount() const noexcept
 	{
 		return Indices.GetCount();
 	}
 
-	[[nodiscard]] inline const RpgVertex::FIndex* GetIndexData() const noexcept
+	inline const RpgVertex::FIndex* GetIndexData() const noexcept
 	{
 		return Indices.GetData();
 	}
 
-	[[nodiscard]] inline size_t GetIndexSizeBytes() const noexcept
+	inline size_t GetIndexSizeBytes() const noexcept
 	{
 		return Indices.GetMemorySizeBytes_Allocated();
 	}
@@ -170,32 +170,32 @@ public:
 		Indices.Clear(bFreeMemory);
 	}
 
-	[[nodiscard]] inline int GetVertexCount() const noexcept
+	inline int GetVertexCount() const noexcept
 	{
 		return Vertices.GetCount();
 	}
 
-	[[nodiscard]] inline const RpgVertex::FPrimitive* GetVertexData() const noexcept
+	inline const RpgVertex::FPrimitive* GetVertexData() const noexcept
 	{
 		return Vertices.GetData();
 	}
 
-	[[nodiscard]] inline size_t GetVertexSizeBytes() const noexcept
+	inline size_t GetVertexSizeBytes() const noexcept
 	{
 		return Vertices.GetMemorySizeBytes_Allocated();
 	}
 
-	[[nodiscard]] inline int GetIndexCount() const noexcept
+	inline int GetIndexCount() const noexcept
 	{
 		return Indices.GetCount();
 	}
 
-	[[nodiscard]] inline const RpgVertex::FIndex* GetIndexData() const noexcept
+	inline const RpgVertex::FIndex* GetIndexData() const noexcept
 	{
 		return Indices.GetData();
 	}
 
-	[[nodiscard]] inline size_t GetIndexSizeBytes() const noexcept
+	inline size_t GetIndexSizeBytes() const noexcept
 	{
 		return Indices.GetMemorySizeBytes_Allocated();
 	}

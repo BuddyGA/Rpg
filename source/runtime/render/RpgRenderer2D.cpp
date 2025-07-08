@@ -18,8 +18,8 @@ RpgRenderer2D::~RpgRenderer2D() noexcept
 
 int RpgRenderer2D::GetOrAddMaterialInstanceId(const RpgSharedMaterial& material, const RpgSharedTexture2D& texture, bool bIsText) noexcept
 {
-	RPG_PLATFORM_Assert(material);
-	RPG_PLATFORM_Assert(texture);
+	RPG_Assert(material);
+	RPG_Assert(texture);
 
 	RpgWeakPtr<RpgMaterial> materialToCheck = material->IsInstance() ? material->GetParentMaterial() : material;
 	RpgWeakPtr<RpgTexture2D> textureToCheck = texture ? texture : DefaultTexture;
@@ -89,7 +89,7 @@ void RpgRenderer2D::Begin(int frameIndex, RpgPointInt viewportDimension) noexcep
 void RpgRenderer2D::End(int frameIndex) noexcept
 {
 	PopClipRect();
-	RPG_PLATFORM_Check(CurrentClipIndex == RPG_INDEX_INVALID);
+	RPG_Check(CurrentClipIndex == RPG_INDEX_INVALID);
 }
 
 
@@ -149,7 +149,7 @@ void RpgRenderer2D::AddText(const char* text, int length, int x, int y, RpgColor
 
 	const RpgFont* useFont = font ? font.Get() : DefaultFont.Get();
 	const RpgPointInt textDim = useFont->CalculateTextDimension(text, length);
-	RPG_PLATFORM_Assert(textDim.X > 0 && textDim.Y > 0);
+	RPG_Assert(textDim.X > 0 && textDim.Y > 0);
 	const RpgRectInt textBound(x, y, x + textDim.X, y + textDim.Y);
 
 	FClip& clip = Clips.GetAtLast();
@@ -189,7 +189,7 @@ void RpgRenderer2D::PreRender(int frameIndex, RpgMaterialResource* materialResou
 		}
 
 		FDrawBatch& batchDraw = batchDraws[batchDrawIndex];
-		RPG_PLATFORM_Assert(batchDraw.ShaderMaterialId == shaderMaterialId);
+		RPG_Assert(batchDraw.ShaderMaterialId == shaderMaterialId);
 
 		const uint32_t vertexOffset = frame.BatchMeshVertexData.GetCount();
 		if (vertexOffset > 0)
@@ -223,7 +223,7 @@ void RpgRenderer2D::PreRender(int frameIndex, RpgMaterialResource* materialResou
 		}
 
 		FDrawBatchClip& batchClip = batchClipDrawMeshes[batchClipIndex];
-		RPG_PLATFORM_Assert(batchClip.Rect == clip.Rect);
+		RPG_Assert(batchClip.Rect == clip.Rect);
 
 		for (int s = 0; s < clip.Shapes.GetCount(); ++s)
 		{

@@ -4,7 +4,7 @@
 
 RpgAnimationSkeleton::RpgAnimationSkeleton(const RpgName& name) noexcept
 {
-	RPG_PLATFORM_Log(RpgLogTemp, "Create skeleton (%s)", *name);
+	RPG_Log(RpgLogTemp, "Create skeleton (%s)", *name);
 
 	Name = name;
 	BoneNames.Reserve(16);

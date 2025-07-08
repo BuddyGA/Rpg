@@ -36,7 +36,7 @@ protected:
 	virtual void OnTickUpdateState(RpgStateMachine& stateMachine, float deltaTime) {}
 
 public:
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
@@ -95,7 +95,7 @@ public:
 			}
 		}
 
-		RPG_PLATFORM_Assert(newState && newState != CurrentState);
+		RPG_Assert(newState && newState != CurrentState);
 
 		if (CurrentState)
 		{
@@ -103,12 +103,12 @@ public:
 		}
 
 		CurrentState = newState;
-		RPG_PLATFORM_Assert(CurrentState);
+		RPG_Assert(CurrentState);
 		CurrentState->OnEnterState(*this);
 	}
 
 	template<typename TState = RpgState>
-	[[nodiscard]] inline TState* GetCurrentState() noexcept
+	inline TState* GetCurrentState() noexcept
 	{
 		return dynamic_cast<TState*>(CurrentState);
 	}
@@ -121,7 +121,7 @@ public:
 			return;
 		}
 
-		RPG_PLATFORM_Assert(CurrentState);
+		RPG_Assert(CurrentState);
 
 		if (CurrentState->bTickUpdate)
 		{

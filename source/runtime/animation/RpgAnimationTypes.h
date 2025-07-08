@@ -3,10 +3,10 @@
 #include "core/RpgConfig.h"
 #include "core/RpgMath.h"
 #include "core/RpgString.h"
-#include "core/RpgSharedPtr.h"
+#include "core/RpgPointer.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogAnimation)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogAnimation)
 
 
 class RpgAnimationSkeleton;
@@ -105,23 +105,23 @@ public:
 	}
 
 
-	[[nodiscard]] inline const RpgMatrixTransform& GetBoneLocalTransform(int boneIndex) const noexcept
+	inline const RpgMatrixTransform& GetBoneLocalTransform(int boneIndex) const noexcept
 	{
 		return BoneLocalTransforms[boneIndex];
 	}
 
-	[[nodiscard]] inline const RpgArray<RpgMatrixTransform>& GetBoneLocalTransforms() const noexcept
+	inline const RpgArray<RpgMatrixTransform>& GetBoneLocalTransforms() const noexcept
 	{
 		return BoneLocalTransforms;
 	}
 
 
-	[[nodiscard]] inline const RpgMatrixTransform& GetBonePoseTransform(int boneIndex) const noexcept
+	inline const RpgMatrixTransform& GetBonePoseTransform(int boneIndex) const noexcept
 	{
 		return BonePoseTransforms[boneIndex];
 	}
 
-	[[nodiscard]] inline const RpgArray<RpgMatrixTransform>& GetBonePoseTransforms() const noexcept
+	inline const RpgArray<RpgMatrixTransform>& GetBonePoseTransforms() const noexcept
 	{
 		return BonePoseTransforms;
 	}
@@ -163,9 +163,9 @@ public:
 	{
 		const int index = BoneNames.GetCount();
 
-		RPG_PLATFORM_Check(index >= 0 && index < RPG_SKELETON_MAX_BONE);
-		RPG_PLATFORM_Check(parentIndex == RPG_SKELETON_BONE_INDEX_INVALID || (parentIndex >= 0 && parentIndex < RPG_SKELETON_MAX_BONE));
-		RPG_PLATFORM_Check(index != parentIndex);
+		RPG_Check(index >= 0 && index < RPG_SKELETON_MAX_BONE);
+		RPG_Check(parentIndex == RPG_SKELETON_BONE_INDEX_INVALID || (parentIndex >= 0 && parentIndex < RPG_SKELETON_MAX_BONE));
+		RPG_Check(index != parentIndex);
 
 		BoneNames.AddValue(name);
 		BoneParentIndices.AddValue(parentIndex);
@@ -183,47 +183,47 @@ public:
 
 
 
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
 
-	[[nodiscard]] inline int GetBoneCount() const noexcept
+	inline int GetBoneCount() const noexcept
 	{
 		return BoneNames.GetCount();
 	}
 
-	[[nodiscard]] inline int GetBoneIndex(const RpgName& name) const noexcept
+	inline int GetBoneIndex(const RpgName& name) const noexcept
 	{
 		const int index = BoneNames.FindIndexByValue(name);
 		return (index == RPG_INDEX_INVALID) ? RPG_SKELETON_BONE_INDEX_INVALID : index;
 	}
 
-	[[nodiscard]] inline const RpgName& GetBoneName(int boneIndex) const noexcept
+	inline const RpgName& GetBoneName(int boneIndex) const noexcept
 	{
-		RPG_PLATFORM_CheckV(boneIndex >= 0 && boneIndex < BoneNames.GetCount(), "Invalid bone index (%i)", boneIndex);
+		RPG_CheckV(boneIndex >= 0 && boneIndex < BoneNames.GetCount(), "Invalid bone index (%i)", boneIndex);
 		return BoneNames[boneIndex];
 	}
 
-	[[nodiscard]] inline int GetBoneParentIndex(int boneIndex) const noexcept
+	inline int GetBoneParentIndex(int boneIndex) const noexcept
 	{
-		RPG_PLATFORM_CheckV(boneIndex >= 0 && boneIndex < BoneNames.GetCount(), "Invalid bone index (%i)", boneIndex);
+		RPG_CheckV(boneIndex >= 0 && boneIndex < BoneNames.GetCount(), "Invalid bone index (%i)", boneIndex);
 		return BoneParentIndices[boneIndex];
 	}
 
-	[[nodiscard]] inline const RpgArray<int>& GetBoneParentIndices() const noexcept
+	inline const RpgArray<int>& GetBoneParentIndices() const noexcept
 	{
 		return BoneParentIndices;
 	}
 
 
-	[[nodiscard]] inline const RpgMatrixTransform& GetBoneInverseBindPoseTransform(int boneIndex) const noexcept
+	inline const RpgMatrixTransform& GetBoneInverseBindPoseTransform(int boneIndex) const noexcept
 	{
-		RPG_PLATFORM_CheckV(boneIndex >= 0 && boneIndex < BoneNames.GetCount(), "Invalid bone index (%i)", boneIndex);
+		RPG_CheckV(boneIndex >= 0 && boneIndex < BoneNames.GetCount(), "Invalid bone index (%i)", boneIndex);
 		return BoneInverseBindPoseTransforms[boneIndex];
 	}
 
-	[[nodiscard]] inline const RpgAnimationPose& GetBindPose() const noexcept
+	inline const RpgAnimationPose& GetBindPose() const noexcept
 	{
 		return BindPose;
 	}
@@ -293,20 +293,20 @@ public:
 	void AddTrack(const RpgAnimationTrack& in_Track) noexcept;
 
 	// Returns TRUE if for each track/bone in anim clip contains bone name in skeleton
-	[[nodiscard]] bool CheckSkeletonCompatibility(const RpgAnimationSkeleton* skeleton) const noexcept;
+	bool CheckSkeletonCompatibility(const RpgAnimationSkeleton* skeleton) const noexcept;
 
 
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
 
-	[[nodiscard]] inline float GetDurationSeconds() const noexcept
+	inline float GetDurationSeconds() const noexcept
 	{
 		return DurationSeconds;
 	}
 
-	[[nodiscard]] inline const RpgArray<RpgAnimationTrack>& GetTracks() const noexcept
+	inline const RpgArray<RpgAnimationTrack>& GetTracks() const noexcept
 	{
 		return Tracks;
 	}

@@ -114,14 +114,14 @@ public:
 
 	inline T& operator[](int index) noexcept
 	{
-		RPG_PLATFORM_ValidateV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
+		RPG_ValidateV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
 		return DataArray[index];
 	}
 
 
 	inline const T& operator[](int index) const noexcept
 	{
-		RPG_PLATFORM_ValidateV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
+		RPG_ValidateV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
 		return DataArray[index];
 	}
 
@@ -186,7 +186,7 @@ private:
 
 
 public:
-	[[nodiscard]] inline bool IsValid(int index) const noexcept
+	inline bool IsValid(int index) const noexcept
 	{
 		return Capacity > 0 ? ValidIndexArray[index] : false;
 	}
@@ -229,7 +229,7 @@ public:
 			NextFreeIndex = *intPtr;
 		}
 
-		RPG_PLATFORM_Check(index != RPG_INDEX_INVALID);
+		RPG_Check(index != RPG_INDEX_INVALID);
 		ValidIndexArray[index] = true;
 		new (DataArray + index)T(std::forward<TConstructorArgs>(args)...);
 
@@ -241,7 +241,7 @@ public:
 
 	inline void RemoveAt(int index)
 	{
-		RPG_PLATFORM_ValidateV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
+		RPG_ValidateV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
 
 		// Call destructor if not POD
 		if constexpr (!std::is_trivially_copyable<T>::value)
@@ -303,33 +303,33 @@ public:
 	}
 
 
-	[[nodiscard]] inline T& GetAt(int index) noexcept
+	inline T& GetAt(int index) noexcept
 	{
-		RPG_PLATFORM_AssertV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
+		RPG_AssertV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
 		return DataArray[index];
 	}
 
 
-	[[nodiscard]] inline const T& GetAt(int index) const noexcept
+	inline const T& GetAt(int index) const noexcept
 	{
-		RPG_PLATFORM_AssertV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
+		RPG_AssertV(IsValid(index), "RpgFreeList: Element at index %i is not valid!", index);
 		return DataArray[index];
 	}
 
 
-	[[nodiscard]] inline int GetCapacity() const noexcept
+	inline int GetCapacity() const noexcept
 	{
 		return Capacity;
 	}
 
 
-	[[nodiscard]] inline int GetCount() const noexcept
+	inline int GetCount() const noexcept
 	{
 		return Count;
 	}
 
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return Count == 0;
 	}
@@ -453,12 +453,12 @@ public:
 		}
 
 	public:
-		[[nodiscard]] inline int GetIndex() const noexcept
+		inline int GetIndex() const noexcept
 		{
 			return Index;
 		}
 
-		[[nodiscard]] inline const T& GetValue() const noexcept
+		inline const T& GetValue() const noexcept
 		{
 			return FreeList->GetAt(Index);
 		}
@@ -498,7 +498,7 @@ public:
 
 
 public:
-	[[nodiscard]] inline Iterator CreateIterator() noexcept { return Iterator(this); }
-	[[nodiscard]] inline ConstIterator CreateConstIterator() const noexcept { return ConstIterator(this); }
+	inline Iterator CreateIterator() noexcept { return Iterator(this); }
+	inline ConstIterator CreateConstIterator() const noexcept { return ConstIterator(this); }
 
 };

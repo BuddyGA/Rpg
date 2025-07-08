@@ -134,16 +134,16 @@ public:
 
 	inline void SetTextureValue(RpgMaterialParameterTexture::ESlot slot, const RpgSharedTexture2D& in_Value) noexcept
 	{
-		RPG_PLATFORM_Check(slot < RpgMaterialParameterTexture::MAX_COUNT);
+		RPG_Check(slot < RpgMaterialParameterTexture::MAX_COUNT);
 		Textures[slot] = in_Value;
 	}
 
-	[[nodiscard]] inline RpgMaterialParameterTextureArray& GetTextures() noexcept
+	inline RpgMaterialParameterTextureArray& GetTextures() noexcept
 	{
 		return Textures;
 	}
 
-	[[nodiscard]] inline const RpgMaterialParameterTextureArray& GetTextures() const noexcept
+	inline const RpgMaterialParameterTextureArray& GetTextures() const noexcept
 	{
 		return Textures;
 	}
@@ -159,24 +159,24 @@ public:
 	inline void SetVectorValue(const RpgName& paramName, RpgVector4 in_Value) noexcept
 	{
 		const int index = Vectors.FindIndexByCompare(paramName);
-		RPG_PLATFORM_CheckV(index != RPG_INDEX_INVALID, "Vector param %s not found!", *paramName);
+		RPG_CheckV(index != RPG_INDEX_INVALID, "Vector param %s not found!", *paramName);
 		Vectors[index].Value = in_Value;
 	}
 
-	[[nodiscard]] inline RpgVector4 GetVectorValue(const RpgName& paramName) const noexcept
+	inline RpgVector4 GetVectorValue(const RpgName& paramName) const noexcept
 	{
 		const int index = Vectors.FindIndexByCompare(paramName);
-		RPG_PLATFORM_CheckV(index != RPG_INDEX_INVALID, "Vector param %s not found!", *paramName);
+		RPG_CheckV(index != RPG_INDEX_INVALID, "Vector param %s not found!", *paramName);
 
 		return Vectors[index].Value;
 	}
 
-	[[nodiscard]] inline RpgMaterialParameterVectorArray& GetVectors() noexcept
+	inline RpgMaterialParameterVectorArray& GetVectors() noexcept
 	{
 		return Vectors;
 	}
 
-	[[nodiscard]] inline const RpgMaterialParameterVectorArray& GetVectors() const noexcept
+	inline const RpgMaterialParameterVectorArray& GetVectors() const noexcept
 	{
 		return Vectors;
 	}
@@ -192,24 +192,24 @@ public:
 	inline void SetScalarValue(const RpgName& paramName, float in_Value) noexcept
 	{
 		const int index = Scalars.FindIndexByCompare(paramName);
-		RPG_PLATFORM_CheckV(index != RPG_INDEX_INVALID, "Scalar param %s not found!", *paramName);
+		RPG_CheckV(index != RPG_INDEX_INVALID, "Scalar param %s not found!", *paramName);
 		Scalars[index].Value = in_Value;
 	}
 
-	[[nodiscard]] inline float GetScalarValue(const RpgName& paramName) const noexcept
+	inline float GetScalarValue(const RpgName& paramName) const noexcept
 	{
 		const int index = Scalars.FindIndexByCompare(paramName);
-		RPG_PLATFORM_CheckV(index != RPG_INDEX_INVALID, "Scalar param %s not found!", *paramName);
+		RPG_CheckV(index != RPG_INDEX_INVALID, "Scalar param %s not found!", *paramName);
 
 		return Scalars[index].Value;
 	}
 
-	[[nodiscard]] inline RpgMaterialParameterScalarArray& GetScalars() noexcept
+	inline RpgMaterialParameterScalarArray& GetScalars() noexcept
 	{
 		return Scalars;
 	}
 
-	[[nodiscard]] inline const RpgMaterialParameterScalarArray& GetScalars() const noexcept
+	inline const RpgMaterialParameterScalarArray& GetScalars() const noexcept
 	{
 		return Scalars;
 	}
@@ -277,27 +277,27 @@ public:
 	~RpgMaterial() noexcept;
 
 
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
 
-	[[nodiscard]] inline const RpgSharedMaterial& GetParentMaterial() const noexcept
+	inline const RpgSharedMaterial& GetParentMaterial() const noexcept
 	{
 		return ParentMaterial;
 	}
 
-	[[nodiscard]] inline const RpgMaterialRenderState& GetRenderState() const noexcept
+	inline const RpgMaterialRenderState& GetRenderState() const noexcept
 	{
 		return RenderState;
 	}
 
-	[[nodiscard]] inline bool IsInstance() const noexcept
+	inline bool IsInstance() const noexcept
 	{
 		return ParentMaterial.IsValid();
 	}
 
-	[[nodiscard]] inline bool IsTransparency() const noexcept
+	inline bool IsTransparency() const noexcept
 	{
 		return RenderState.BlendMode == RpgMaterialBlendMode::TRANSPARENCY;
 	}
@@ -324,7 +324,7 @@ public:
 		SDL_UnlockRWLock(ParameterScalarLock);
 	}
 
-	[[nodiscard]] inline RpgSharedTexture2D GetParameterTextureValue(RpgMaterialParameterTexture::ESlot slot) const noexcept
+	inline RpgSharedTexture2D GetParameterTextureValue(RpgMaterialParameterTexture::ESlot slot) const noexcept
 	{
 		SDL_LockRWLockForReading(ParameterTextureLock);
 		const RpgSharedTexture2D textureValue = ParameterLayout.GetTextures()[slot];
@@ -333,7 +333,7 @@ public:
 		return textureValue;
 	}
 
-	[[nodiscard]] inline RpgVector4 GetParameterVectorValue(const RpgName& paramName) const noexcept
+	inline RpgVector4 GetParameterVectorValue(const RpgName& paramName) const noexcept
 	{
 		SDL_LockRWLockForReading(ParameterVectorLock);
 		const RpgVector4 vectorValue = ParameterLayout.GetVectorValue(paramName);
@@ -342,7 +342,7 @@ public:
 		return vectorValue;
 	}
 
-	[[nodiscard]] inline float GetParameterScalarValue(const RpgName& paramName) const noexcept
+	inline float GetParameterScalarValue(const RpgName& paramName) const noexcept
 	{
 		SDL_LockRWLockForReading(ParameterScalarLock);
 		const float scalarValue = ParameterLayout.GetScalarValue(paramName);
@@ -352,7 +352,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgMaterialParameterTextureArray& ParameterTexturesReadLock() noexcept
+	inline RpgMaterialParameterTextureArray& ParameterTexturesReadLock() noexcept
 	{
 		SDL_LockRWLockForReading(ParameterTextureLock);
 		return ParameterLayout.GetTextures();
@@ -364,7 +364,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline const RpgMaterialParameterVectorArray& ParameterVectorsReadLock() const noexcept
+	inline const RpgMaterialParameterVectorArray& ParameterVectorsReadLock() const noexcept
 	{
 		SDL_LockRWLockForReading(ParameterVectorLock);
 		return ParameterLayout.GetVectors();
@@ -376,7 +376,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline const RpgMaterialParameterScalarArray& ParameterScalarsReadLock() const noexcept
+	inline const RpgMaterialParameterScalarArray& ParameterScalarsReadLock() const noexcept
 	{
 		SDL_LockRWLockForReading(ParameterScalarLock);
 		return ParameterLayout.GetScalars();
@@ -390,35 +390,35 @@ public:
 
 	inline void MarkPipelinePending() noexcept
 	{
-		RPG_PLATFORM_Assert((Flags & (FLAG_PSO_Compiling | FLAG_PSO_Compiled)) == 0);
+		RPG_Assert((Flags & (FLAG_PSO_Compiling | FLAG_PSO_Compiled)) == 0);
 		Flags |= FLAG_PSO_Pending;
 	}
 
 	inline void MarkPipelineCompiling() noexcept
 	{
-		RPG_PLATFORM_Assert((Flags & FLAG_PSO_Pending) && (Flags & FLAG_PSO_Compiled) == 0);
+		RPG_Assert((Flags & FLAG_PSO_Pending) && (Flags & FLAG_PSO_Compiled) == 0);
 		Flags &= ~FLAG_PSO_Pending;
 		Flags |= FLAG_PSO_Compiling;
 	}
 
 	inline void MarkPipelineCompiled() noexcept
 	{
-		RPG_PLATFORM_Assert((Flags & FLAG_PSO_Compiling) && (Flags & FLAG_PSO_Pending) == 0);
+		RPG_Assert((Flags & FLAG_PSO_Compiling) && (Flags & FLAG_PSO_Pending) == 0);
 		Flags &= ~FLAG_PSO_Compiling;
 		Flags |= FLAG_PSO_Compiled;
 	}
 
-	[[nodiscard]] inline bool IsPipelinePending() const noexcept
+	inline bool IsPipelinePending() const noexcept
 	{
 		return (Flags & FLAG_PSO_Pending);
 	}
 
-	[[nodiscard]] inline bool IsPipelineCompiling() const noexcept
+	inline bool IsPipelineCompiling() const noexcept
 	{
 		return (Flags & FLAG_PSO_Compiling);
 	}
 
-	[[nodiscard]] inline bool IsPipelineCompiled() const noexcept
+	inline bool IsPipelineCompiled() const noexcept
 	{
 		return (Flags & FLAG_PSO_Compiled);
 	}
@@ -430,6 +430,6 @@ public:
 
 	static void s_CreateDefaults() noexcept;
 	static void s_DestroyDefaults() noexcept;
-	[[nodiscard]] static const RpgSharedMaterial& s_GetDefault(RpgMaterialDefault::EType type) noexcept;
+	static const RpgSharedMaterial& s_GetDefault(RpgMaterialDefault::EType type) noexcept;
 
 };

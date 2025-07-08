@@ -6,7 +6,7 @@
 
 
 #define STB_RECT_PACK_IMPLEMENTATION
-#define STBRP_ASSERT	RPG_PLATFORM_Check
+#define STBRP_ASSERT	RPG_Check
 #include "stb_rect_pack.h"
 
 

@@ -7,7 +7,7 @@
 
 class RpgPhysicsComponent_Collision
 {
-	RPG_COMPONENT_TYPE("Collision");
+	RPG_COMPONENT_TYPE("RpgComponent - Collision");
 
 private:
 	// Internal bounding AABB for broadphase

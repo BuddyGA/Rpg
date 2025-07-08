@@ -73,7 +73,10 @@ struct RpgShaderConstantLight
     // [XYZ]: RGB color, [W]: Intensity
     RpgShaderFloat4 ColorIntensity;
 
+    // Attenuation radius factor
     float AttenuationRadius;
+
+    // Attenuation falloff exponential factor
     float AttenuationFallOffExp;
 
     // For spotlight only. Inner cone angle in radian

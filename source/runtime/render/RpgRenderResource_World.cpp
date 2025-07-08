@@ -5,12 +5,14 @@
 
 RpgWorldResource::RpgWorldResource() noexcept
 {
-	
+	ShadowResolutionQuality = RpgRenderLight::SHADOW_RESOLUTION_QUALITY_MEDIUM;
 }
 
 
 void RpgWorldResource::Reset() noexcept
 {
+	CachedTagLights.Clear();
+
 	WorldData.DeltaTime = 0.0f;
 	WorldData.CameraCount = 0;
 	WorldData.DirectionalLightCount = 0;
@@ -137,7 +139,7 @@ void RpgWorldResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept
 #endif // !RPG_BUILD_SHIPPING
 
 
-	RPG_PLATFORM_Check(stagingSizeBytes == stagingOffset);
+	RPG_Check(stagingSizeBytes == stagingOffset);
 	RpgD3D12::UnmapBuffer(StagingBuffer.Get());
 }
 

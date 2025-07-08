@@ -43,8 +43,8 @@ void RpgAsyncTask_RenderPass_Forward::Reset() noexcept
 
 void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
 {
-	RPG_PLATFORM_Assert(RenderTargetTexture);
-	RPG_PLATFORM_Assert(DepthStencilTexture);
+	RPG_Assert(RenderTargetTexture);
+	RPG_Assert(DepthStencilTexture);
 	
 	const RpgPointInt renderTargetDimension = RenderTargetTexture->GetDimension();
 
@@ -84,7 +84,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 	// Draw mesh
 	if (DrawMeshData)
 	{
-		RPG_PLATFORM_Assert(DrawMeshCount > 0);
+		RPG_Assert(DrawMeshCount > 0);
 
 		// Bind vertex buffers
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[3] =
@@ -114,7 +114,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 	// Draw mesh skinned
 	if (DrawSkinnedMeshData)
 	{
-		RPG_PLATFORM_Assert(DrawSkinnedMeshCount > 0);
+		RPG_Assert(DrawSkinnedMeshCount > 0);
 
 		// Bind vertex buffers
 		const D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[3] =
@@ -130,7 +130,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 		cmdList->IASetIndexBuffer(&indexBufferView);
 
 		const RpgArray<RpgShaderConstantSkinnedObjectParameter>& skinnedObjectParams = MeshSkinnedResource->GetObjectParameters();
-		RPG_PLATFORM_Check(skinnedObjectParams.GetCount() == DrawSkinnedMeshCount);
+		RPG_Check(skinnedObjectParams.GetCount() == DrawSkinnedMeshCount);
 
 		// Draw calls
 		for (int d = 0; d < DrawSkinnedMeshCount; ++d)

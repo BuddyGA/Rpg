@@ -59,7 +59,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline uint64_t GetCurrentTickCounter() const noexcept
+	inline uint64_t GetCurrentTickCounter() const noexcept
 	{
 		return PrevTickCounter;
 	}
@@ -67,7 +67,7 @@ public:
 
 	// Get delta time in seconds
 	// @returns Delta time in seconds
-	[[nodiscard]] inline float GetDeltaTimeSeconds() const noexcept
+	inline float GetDeltaTimeSeconds() const noexcept
 	{
 		return DeltaTime / TIME_UNIT;
 	}

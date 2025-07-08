@@ -37,12 +37,12 @@ public:
 		(Object->*Function)(args...);
 	}
 
-	[[nodiscard]] inline T* GetObject() const noexcept
+	inline T* GetObject() const noexcept
 	{
 		return Object;
 	}
 
-	[[nodiscard]] inline FFunction GetFunction() const noexcept
+	inline FFunction GetFunction() const noexcept
 	{
 		return Function;
 	}
@@ -87,7 +87,7 @@ public:
 
 private:
 	template<typename T>
-	[[nodiscard]] int FindObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) const noexcept
+	int FindObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) const noexcept
 	{
 		for (int i = 0; i < ObjectFunctionInvokeList.GetCount(); ++i)
 		{

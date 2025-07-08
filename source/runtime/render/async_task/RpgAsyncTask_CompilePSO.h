@@ -27,9 +27,9 @@ public:
 	}
 
 
-	[[nodiscard]] inline ComPtr<ID3D12PipelineState> GetCompiledPSO() const noexcept
+	[[nodiscard]] inline ComPtr<ID3D12PipelineState> GetCompiledPSO() noexcept
 	{
-		return PSO;
+		return PSO.Detach();
 	}
 
 };

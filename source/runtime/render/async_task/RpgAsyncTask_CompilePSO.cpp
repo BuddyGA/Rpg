@@ -21,7 +21,7 @@ void RpgAsyncTask_CompilePSO::Reset() noexcept
 
 void RpgAsyncTask_CompilePSO::Execute() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute compile PSO task for Material: %s", SDL_GetCurrentThreadID(), *MaterialName);
+	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute compile PSO task for Material: %s", SDL_GetCurrentThreadID(), *MaterialName);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.NodeMask = 0;
@@ -85,7 +85,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 			case RpgMaterialVertexMode::SKELETAL_MESH:
 			{
-				RPG_PLATFORM_CheckV(0, "Not using this anymore!");
+				RPG_CheckV(0, "Not using this anymore!");
 
 				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_SKINNED_NAME;
 
@@ -122,7 +122,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	{
 		// Vertex shader
 		IDxcBlob* vertexShaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(vertexShaderName);
-		RPG_PLATFORM_Assert(vertexShaderCodeBlob);
+		RPG_Assert(vertexShaderCodeBlob);
 		psoDesc.VS.pShaderBytecode = vertexShaderCodeBlob->GetBufferPointer();
 		psoDesc.VS.BytecodeLength = vertexShaderCodeBlob->GetBufferSize();
 
@@ -130,7 +130,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 		if (MaterialRenderState.PixelShaderName.GetLength() > 0)
 		{
 			IDxcBlob* pixelShaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(MaterialRenderState.PixelShaderName);
-			RPG_PLATFORM_Assert(pixelShaderCodeBlob);
+			RPG_Assert(pixelShaderCodeBlob);
 			psoDesc.PS.pShaderBytecode = pixelShaderCodeBlob->GetBufferPointer();
 			psoDesc.PS.BytecodeLength = pixelShaderCodeBlob->GetBufferSize();
 		}
@@ -233,5 +233,5 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)));
 	RPG_D3D12_SetDebugName(PSO, "PSO_%s", *MaterialName);
 
-	RPG_PLATFORM_LogDebug(RpgLogD3D12, "[ThreadId-%u] Compiled PSO for material: %s", SDL_GetCurrentThreadID(), *MaterialName);
+	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Compiled PSO for material: %s", SDL_GetCurrentThreadID(), *MaterialName);
 }

@@ -29,19 +29,19 @@ public:
 	{
 	}
 
-	[[nodiscard]] inline const char* GetData() const noexcept
+	inline const char* GetData() const noexcept
 	{
 		return Data;
 	}
 
 
-	[[nodiscard]] inline int GetLength() const noexcept
+	inline int GetLength() const noexcept
 	{
 		return Length;
 	}
 
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return Length == 0;
 	}
@@ -188,44 +188,44 @@ public:
 		CharArray.Resize(length + 1);
 	}
 
-	[[nodiscard]] inline char* GetData() noexcept
+	inline char* GetData() noexcept
 	{
 		return CharArray.GetData();
 	}
 
-	[[nodiscard]] inline const char* GetData() const noexcept
+	inline const char* GetData() const noexcept
 	{
 		return CharArray.GetData();
 	}
 
-	[[nodiscard]] inline int GetLength() const noexcept
+	inline int GetLength() const noexcept
 	{
 		return CharArray.GetData() ? RpgPlatformMemory::CStringLength(CharArray.GetData()) : 0;
 	}
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return GetLength() == 0;
 	}
 
 
-	[[nodiscard]] inline bool Equals(const RpgString& other, bool bIgnoreCase = false) const noexcept
+	inline bool Equals(const RpgString& other, bool bIgnoreCase = false) const noexcept
 	{
 		return RpgPlatformMemory::CStringCompare(CharArray.GetData(), other.CharArray.GetData(), bIgnoreCase);
 	}
 
-	[[nodiscard]] inline bool Equals(const char* cstr, bool bIgnoreCase = false) const noexcept
+	inline bool Equals(const char* cstr, bool bIgnoreCase = false) const noexcept
 	{
 		return RpgPlatformMemory::CStringCompare(CharArray.GetData(), cstr, bIgnoreCase);
 	}
 
 
-	[[nodiscard]] inline int FindFirstIndexOf(char c) const noexcept
+	inline int FindFirstIndexOf(char c) const noexcept
 	{
 		return CharArray.FindIndexByValue(c);
 	}
 
-	[[nodiscard]] inline int FindLastIndexOf(char c) const noexcept
+	inline int FindLastIndexOf(char c) const noexcept
 	{
 		return CharArray.FindIndexByValueFromLast(c);
 	}
@@ -249,7 +249,7 @@ public:
 		AppendInPlace(other.GetData(), other.GetLength());
 	}
 
-	[[nodiscard]] inline RpgString Append(const char* srcStr, int srcLength = RPG_STRING_MAX_LENGTH) const noexcept
+	inline RpgString Append(const char* srcStr, int srcLength = RPG_STRING_MAX_LENGTH) const noexcept
 	{
 		RpgString temp = *this;
 		temp.AppendInPlace(srcStr, srcLength);
@@ -257,7 +257,7 @@ public:
 		return temp;
 	}
 
-	[[nodiscard]] inline RpgString Append(const RpgString& other) const noexcept
+	inline RpgString Append(const RpgString& other) const noexcept
 	{
 		RpgString temp = *this;
 		temp.AppendInPlace(other);
@@ -296,8 +296,8 @@ public:
 			return RpgString();
 		}
 
-		RPG_PLATFORM_Validate(index >= 0 && index < len);
-		RPG_PLATFORM_Validate(length > 0 && length <= RPG_STRING_MAX_LENGTH);
+		RPG_Validate(index >= 0 && index < len);
+		RPG_Validate(length > 0 && length <= RPG_STRING_MAX_LENGTH);
 
 		const int copyLength = (length == RPG_STRING_MAX_LENGTH) ? len - index : length;
 
@@ -405,22 +405,22 @@ private:
 	}
 
 public:
-	[[nodiscard]] inline char* GetData() noexcept
+	inline char* GetData() noexcept
 	{
 		return CharArray;
 	}
 
-	[[nodiscard]] inline const char* GetData() const noexcept
+	inline const char* GetData() const noexcept
 	{
 		return CharArray;
 	}
 
-	[[nodiscard]] inline int GetLength() const noexcept
+	inline int GetLength() const noexcept
 	{
 		return RpgPlatformMemory::CStringLength(CharArray);
 	}
 
-	[[nodiscard]] inline bool IsEmpty() const noexcept
+	inline bool IsEmpty() const noexcept
 	{
 		return GetLength() == 0;
 	}

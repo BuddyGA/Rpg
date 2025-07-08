@@ -9,6 +9,7 @@ RpgRenderWorldSubsystem::RpgRenderWorldSubsystem() noexcept
 {
 	Name = "RenderWorldSubsystem";
 	bDebugDrawMeshBounds = false;
+	bDebugDrawLightBounds = false;
 }
 
 
@@ -40,16 +41,11 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
 			continue;
 		}
 
-		if (comp.SceneViewport == nullptr)
-		{
-			comp.SceneViewport = new RpgSceneViewport();
-		}
-
-		RpgSceneViewport* sceneViewport = comp.SceneViewport;
+		RpgSceneViewport* sceneViewport = comp.GetViewport();
 		sceneViewport->RenderTargetDimension = comp.RenderTargetDimension;
 		
-		const RpgTransform worldTransform(world->GameObject_GetWorldTransformMatrix(comp.GameObject));
-		sceneViewport->SetCameraRotationAndPosition(worldTransform.Rotation, worldTransform.Position);
+		const RpgTransform worldTransform = world->GameObject_GetWorldTransform(comp.GameObject);
+		sceneViewport->SetViewRotationAndPosition(worldTransform.Rotation, worldTransform.Position);
 
 		if (comp.ProjectionMode == RpgRenderProjectionMode::PERSPECTIVE)
 		{
@@ -67,17 +63,17 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
 
 void RpgRenderWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) noexcept
 {
-	const RpgWorld* world = GetWorld();
+	RpgWorld* world = GetWorld();
 
-	for (auto it = world->Component_CreateConstIterator<RpgRenderComponent_Camera>(); it; ++it)
+	for (auto it = world->Component_CreateIterator<RpgRenderComponent_Camera>(); it; ++it)
 	{
-		const RpgRenderComponent_Camera& comp = it.GetValue();
+		RpgRenderComponent_Camera& comp = it.GetValue();
 		if (!comp.bActivated)
 		{
 			continue;
 		}
 
-		renderer->AddWorldViewport(frameIndex, world, comp.SceneViewport);
+		renderer->AddWorldViewport(frameIndex, world, comp.GetViewport());
 	}
 
 
@@ -96,6 +92,11 @@ void RpgRenderWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) noex
 
 			debugLine->AddAABB(comp.Bound, RpgColorRGBA(255, 255, 255));
 		}
+	}
+
+	if (bDebugDrawLightBounds)
+	{
+
 	}
 #endif // RPG_BUILD_SHIPPING
 

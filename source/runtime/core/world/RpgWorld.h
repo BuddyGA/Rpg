@@ -6,7 +6,7 @@
 #include "RpgComponent.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogWorld)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogWorld)
 
 
 
@@ -119,7 +119,6 @@ private:
 
 	struct FFrameData
 	{
-		RpgArray<RpgGameObjectScript*> PendingDestroyScripts;
 		RpgArray<int> PendingDestroyObjects;
 	};
 
@@ -141,6 +140,11 @@ public:
 	void DispatchRender(int frameIndex, RpgRenderer* renderer) noexcept;
 
 
+	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	{
+		return Name;
+	}
+
 	[[nodiscard]] inline bool HasStartedPlay() const noexcept
 	{
 		return bHasStartedPlay;
@@ -161,7 +165,7 @@ public:
 		{
 			if (TWorldSubsystem* check = dynamic_cast<TWorldSubsystem*>(Subsystems[i]))
 			{
-				RPG_PLATFORM_LogWarn(RpgLogWorld, "World subsystem type (%s) already exists!", *check->GetName());
+				RPG_LogWarn(RpgLogWorld, "World subsystem type (%s) already exists!", *check->GetName());
 				return;
 			}
 		}
@@ -200,7 +204,7 @@ public:
 	inline void Component_Register() noexcept
 	{
 		TComponent::TYPE_ID = ComponentStorages.GetCount();
-		RPG_PLATFORM_CheckV(TComponent::TYPE_ID >= 0 && TComponent::TYPE_ID < RPG_COMPONENT_TYPE_MAX_COUNT, "RpgWorld: Exceeds maximum component type count!");
+		RPG_CheckV(TComponent::TYPE_ID >= 0 && TComponent::TYPE_ID < RPG_COMPONENT_TYPE_MAX_COUNT, "RpgWorld: Exceeds maximum component type count!");
 		ComponentStorages.AddValue(new RpgComponentStorage<TComponent>());
 	}
 
@@ -252,7 +256,7 @@ public:
 
 	inline void GameObject_SetWorldTransform(RpgGameObjectID gameObject, const RpgTransform& worldTransform) noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 
 		FGameObjectTransform& transform = GameObjectTransforms[gameObject.Index];
 		transform.WorldMatrix = worldTransform.ToMatrixTransform();
@@ -262,7 +266,7 @@ public:
 
 	[[nodiscard]] inline RpgTransform GameObject_GetWorldTransform(RpgGameObjectID gameObject) const noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 
 		RpgTransform transform;
 		GameObjectTransforms[gameObject.Index].WorldMatrix.Decompose(transform.Position, transform.Rotation, transform.Scale);
@@ -273,28 +277,34 @@ public:
 
 	[[nodiscard]] inline const RpgName& GameObject_GetName(RpgGameObjectID gameObject) const noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 		return GameObjectNames[gameObject.Index];
 	}
 
 
 	[[nodiscard]] inline const RpgMatrixTransform& GameObject_GetWorldTransformMatrix(RpgGameObjectID gameObject) const noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 		return GameObjectTransforms[gameObject.Index].WorldMatrix;
 	}
 
 
 public:
-
 	template<typename TComponent>
 	inline TComponent* GameObject_AddComponent(RpgGameObjectID gameObject) noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 
 		FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
 		int index = info.ComponentIndices[TComponent::TYPE_ID];
-		RPG_PLATFORM_CheckV(index == RPG_COMPONENT_ID_INVALID, "Game object (%s) already has component of type (%s)", *GameObjectNames[gameObject.Index], TComponent::TYPE_NAME);
+
+		if (index != RPG_COMPONENT_ID_INVALID)
+		{
+			TComponent& check = Component_GetStorage<TComponent>()->Get(index);
+			RPG_Check(check.GameObject == gameObject);
+
+			return &check;
+		}
 
 		auto storage = Component_GetStorage<TComponent>();
 		index = storage->Add();
@@ -310,7 +320,7 @@ public:
 	template<typename TComponent>
 	inline void GameObject_RemoveComponent(RpgGameObjectID gameObject) noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 
 		FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
 		const int index = info.ComponentIndices[TComponent::TYPE_ID];
@@ -318,7 +328,7 @@ public:
 		auto storage = Component_GetStorage<TComponent>();
 		{
 			TComponent& data = storage->Get(index);
-			RPG_PLATFORM_Check(data.GameObject == gameObject);
+			RPG_Check(data.GameObject == gameObject);
 			data.Destroy();
 		}
 		storage->Remove(index);
@@ -330,7 +340,7 @@ public:
 	template<typename TComponent>
 	[[nodiscard]] inline TComponent* GameObject_GetComponent(RpgGameObjectID gameObject) noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 
 		const FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
 		const int index = info.ComponentIndices[TComponent::TYPE_ID];
@@ -341,7 +351,7 @@ public:
 		}
 
 		TComponent& data = Component_GetStorage<TComponent>()->Get(index);
-		RPG_PLATFORM_Check(data.GameObject == gameObject);
+		RPG_Check(data.GameObject == gameObject);
 
 		return &data;
 	}
@@ -349,7 +359,7 @@ public:
 	template<typename TComponent>
 	[[nodiscard]] inline const TComponent* GameObject_GetComponent(RpgGameObjectID gameObject) const noexcept
 	{
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(GameObject_IsValid(gameObject));
 
 		const FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
 		const int index = info.ComponentIndices[TComponent::TYPE_ID];
@@ -360,7 +370,7 @@ public:
 		}
 
 		const TComponent& data = Component_GetStorage<TComponent>()->Get(index);
-		RPG_PLATFORM_Check(data.GameObject == gameObject);
+		RPG_Check(data.GameObject == gameObject);
 
 		return &data;
 	}
@@ -370,26 +380,28 @@ private:
 	inline void RemoveGameObjectScriptAtIndex(int index) noexcept
 	{
 		RpgGameObjectScript* script = GameObjectScripts[index];
-		RPG_PLATFORM_Check(script);
+		RPG_Check(script);
 
-		if (bHasStartedPlay)
+		script->DetachedFromGameObject();
+		script->World = nullptr;
+		script->GameObject = RpgGameObjectID();
+
+		if (script->bStartedPlay)
 		{
 			script->StopPlay();
 		}
 
-		script->Destroy();
-
-		FrameDatas[FrameIndex].PendingDestroyScripts.AddValue(script);
 		GameObjectScripts.RemoveAt(index);
 	}
 
 public:
-	template<typename TScript>
-	inline TScript* GameObject_AddScript(RpgGameObjectID gameObject) noexcept
+	inline void GameObject_AttachScript(RpgGameObjectID gameObject, RpgGameObjectScript* script) noexcept
 	{
-		static_assert(std::is_base_of<RpgGameObjectScript, TScript>::value, "RpgWorld: GameObject_AddScript type of <TScript> must be derived from type <RpgGameObjectScript>!");
+		RPG_Check(GameObject_IsValid(gameObject));
+		
+		RPG_Check(script);
+		const char* scriptTypeName = script->GetTypeName();
 
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
 		FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
 
 		int emptyIndex = RPG_INDEX_INVALID;
@@ -400,10 +412,9 @@ public:
 
 			if (scriptIndex != RPG_INDEX_INVALID)
 			{
-				if (TScript* check = dynamic_cast<TScript*>(GameObjectScripts[scriptIndex]))
+				if (GameObjectScripts[scriptIndex]->GetTypeName() == scriptTypeName)
 				{
-					RPG_PLATFORM_LogWarn(RpgLogWorld, "Script of type (%s) already exists! Ignore add script to game object (%s)", TScript::TYPE_NAME, *GameObjectNames[gameObject.Index]);
-					return check;
+					RPG_LogWarn(RpgLogWorld, "Script of type (%s) already exists! Ignore attach script to game object (%s)", scriptTypeName, *GameObjectNames[gameObject.Index]);
 				}
 			}
 			else
@@ -412,39 +423,38 @@ public:
 			}
 		}
 
-		RPG_PLATFORM_CheckV(emptyIndex != RPG_INDEX_INVALID, "Cannot add script into game object (%s). Exceeds maximum limit (%i) of scripts per game object!", 
-			TScript::TYPE_NAME, RPG_GAMEOBJECT_MAX_SCRIPT
+		RPG_CheckV(emptyIndex != RPG_INDEX_INVALID, "Cannot add script into game object (%s). Exceeds maximum limit (%i) of scripts per game object!", 
+			scriptTypeName, RPG_GAMEOBJECT_MAX_SCRIPT
 		);
-
-		TScript* script = new TScript();
-		script->World = this;
-		script->GameObject = gameObject;
 
 		info.ScriptIndices[emptyIndex] = GameObjectScripts.GetCount();
 		GameObjectScripts.AddValue(script);
 
-		RPG_PLATFORM_Log(RpgLogWorld, "Added script of type (%s) to game object (%s)", TScript::TYPE_NAME, *GameObjectNames[gameObject.Index]);
+		script->World = this;
+		script->GameObject = gameObject;
+		script->AttachedToGameObject();
 
-		script->Initialize();
+		RPG_Log(RpgLogWorld, "Attached script of type (%s) to game object (%s)", scriptTypeName, *GameObjectNames[gameObject.Index]);
 
-		if (bHasStartedPlay)
+		if (bHasStartedPlay && !script->bStartedPlay)
 		{
 			script->StartPlay();
+			script->bStartedPlay;
 		}
-
-		return script;
 	}
 
 
-	template<typename TScript>
-	inline bool GameObject_RemoveScript(RpgGameObjectID gameObject) noexcept
+	inline void GameObject_DetachScript(RpgGameObjectID gameObject, RpgGameObjectScript* script) noexcept
 	{
-		static_assert(std::is_base_of<RpgGameObjectScript, TScript>::value, "RpgWorld: GameObject_AddScript type of <TScript> must be derived from type <RpgGameObjectScript>!");
+		RPG_Check(GameObject_IsValid(gameObject));
 
-		RPG_PLATFORM_Check(GameObject_IsValid(gameObject));
+		RPG_Check(script);
+		const char* scriptTypeName = script->GetTypeName();
+
+		RPG_Check(GameObject_IsValid(gameObject));
 		FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
 
-		for (int i = 0; i < info.ScriptIndices.GetCount(); ++i)
+		for (int i = 0; i < RPG_GAMEOBJECT_MAX_SCRIPT; ++i)
 		{
 			const int scriptIndex = info.ScriptIndices[i];
 			if (scriptIndex == RPG_INDEX_INVALID)
@@ -452,17 +462,18 @@ public:
 				continue;
 			}
 
-			if (TScript* script = dynamic_cast<TScript*>(GameObjectScripts[scriptIndex]))
+			if (GameObjectScripts[scriptIndex] == script)
 			{
+				RPG_Check(GameObjectScripts[scriptIndex]->GetTypeName() == scriptTypeName);
 				RemoveGameObjectScriptAtIndex(scriptIndex);
-				info.ScriptIndices[i] = nullptr;
-				RPG_PLATFORM_Log(RpgLogWorld, "Removed script of type (%s) from game object (%s)", TScript::TYPE_NAME, *GameObjectNames[gameObject.Index]);
+				info.ScriptIndices[i] = RPG_INDEX_INVALID;
+				RPG_Log(RpgLogWorld, "Detached script of type (%s) from game object (%s)", scriptTypeName, *GameObjectNames[gameObject.Index]);
 
 				return;
 			}
 		}
 
-		RPG_PLATFORM_LogWarn(RpgLogWorld, "Script of type (%s) not found! Ignore remove script from game object (%s)", TScript::TYPE_NAME, *GameObjectNames[gameObject.Index]);
+		RPG_LogWarn(RpgLogWorld, "Script of type (%s) not found! Ignore remove script from game object (%s)", scriptTypeName, *GameObjectNames[gameObject.Index]);
 	}
 
 
@@ -473,7 +484,7 @@ public:
 
 	[[nodiscard]] inline bool GameObject_IsTransformUpdated(RpgGameObjectID gameObject) const noexcept
 	{
-		RPG_PLATFORM_Check(gameObject);
+		RPG_Check(gameObject);
 		return GameObjectInfos[gameObject.Index].Flags & FLAG_TransformUpdated;
 	}
 

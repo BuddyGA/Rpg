@@ -85,7 +85,7 @@ namespace RpgAssetFileImage
 	extern RpgAssetFileImage::EType GetSupportedFileType(const RpgFilePath& filePath) noexcept;
 
 
-	[[nodiscard]] inline bool IsFileSupported(const RpgFilePath& filePath) noexcept
+	inline bool IsFileSupported(const RpgFilePath& filePath) noexcept
 	{
 		return GetSupportedFileType(filePath) != MAX_COUNT;
 	}
@@ -116,10 +116,10 @@ namespace RpgAssetFileModel
 	};
 
 
-	[[nodiscard]] extern RpgAssetFileModel::EType GetSupportedFileType(const RpgFilePath& filePath) noexcept;
+	extern RpgAssetFileModel::EType GetSupportedFileType(const RpgFilePath& filePath) noexcept;
 
 
-	[[nodiscard]] inline bool IsFileSupported(const RpgFilePath& filePath) noexcept
+	inline bool IsFileSupported(const RpgFilePath& filePath) noexcept
 	{
 		return GetSupportedFileType(filePath) != MAX_COUNT;
 	}

@@ -8,7 +8,7 @@ void RpgVertexGeometryFactory::UpdateBatchIndices(RpgVertexIndexArray& out_Indic
 
 	// Get largest count multiple of 4
 	const int sseCount = batchIndexCount & ~3;
-	RPG_PLATFORM_Check(sseCount % 4 == 0);
+	RPG_Check(sseCount % 4 == 0);
 
 	// SSE
 	for (int i = 0; i < sseCount; i += 4)
@@ -30,7 +30,7 @@ void RpgVertexGeometryFactory::UpdateBatchIndices(RpgVertexIndexArray& out_Indic
 
 void RpgVertexGeometryFactory::CalculateSmoothTangents(RpgVertexMeshNormalTangentArray& out_NormalTangents, const RpgVertexMeshPositionArray& positions, const RpgVertexMeshTexCoordArray& texCoords, const RpgVertexIndexArray& indices) noexcept
 {
-	RPG_PLATFORM_Check(out_NormalTangents.GetCount() == positions.GetCount());
+	RPG_Check(out_NormalTangents.GetCount() == positions.GetCount());
 
 	const int vertexCount = positions.GetCount();
 

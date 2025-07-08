@@ -4,9 +4,9 @@
 
 RpgAnimationClip::RpgAnimationClip(const RpgName& in_Name, float in_DurationSeconds) noexcept
 {
-	RPG_PLATFORM_Check(in_DurationSeconds > 0.0f);
+	RPG_Check(in_DurationSeconds > 0.0f);
 
-	RPG_PLATFORM_Log(RpgLogTemp, "Create animation (%s)", *in_Name);
+	RPG_Log(RpgLogTemp, "Create animation (%s)", *in_Name);
 
 	Name = in_Name;
 	DurationSeconds = in_DurationSeconds;
@@ -43,7 +43,7 @@ void RpgAnimationClip::AddTrack(const RpgAnimationTrack& in_Track) noexcept
 		}
 	}
 
-	RPG_PLATFORM_Check(bShouldAdd);
+	RPG_Check(bShouldAdd);
 
 	if (bShouldAdd)
 	{

@@ -47,13 +47,13 @@ namespace RpgPlatformMemory
 	extern void MemSet(void* data, int value, size_t sizeBytes) noexcept;
 	extern void MemZero(void* data, size_t sizeBytes) noexcept;
 
-	[[nodiscard]] extern int CStringLength(const char* cstr) noexcept;
-	[[nodiscard]] extern bool CStringCompare(const char* cstrA, const char* cstrB, bool bIgnoreCase) noexcept;
+	extern int CStringLength(const char* cstr) noexcept;
+	extern bool CStringCompare(const char* cstrA, const char* cstrB, bool bIgnoreCase) noexcept;
 	extern void CStringCopy(char* dst, const char* src) noexcept;
 	extern void CStringToWide(wchar_t* dst, const char* src, size_t maxBufferCount) noexcept;
 	extern void CStringToLower(char* cstr, int len) noexcept;
-	[[nodiscard]] extern int CStringToInt(const char* cstr) noexcept;
-	[[nodiscard]] extern uint64_t CStringHash(const char* cstr) noexcept;
+	extern int CStringToInt(const char* cstr) noexcept;
+	extern uint64_t CStringHash(const char* cstr) noexcept;
 
 }; // RpgPlatformMemory
 
@@ -93,9 +93,9 @@ namespace RpgPlatformConsole
 // ========================================================================================================================= //
 // PLATFORM - LOG
 // ========================================================================================================================= //
-#define RPG_PLATFORM_LOG_MAX_OUTPUT_BUFFER_COUNT		(2048)
-#define RPG_PLATFORM_LOG_CATEGORY_NAME_LENGTH			(31)	// Includes null terminator
-#define RPG_PLATFORM_LOG_CATEGORY_MAX_FORMAT_COUNT		(RPG_PLATFORM_LOG_MAX_OUTPUT_BUFFER_COUNT - RPG_PLATFORM_LOG_CATEGORY_NAME_LENGTH)
+#define RPG_LOG_MAX_OUTPUT_BUFFER		2048
+#define RPG_LOG_CATEGORY_NAME_LENGTH	32	// Includes null terminator
+#define RPG_LOG_CATEGORY_MAX_FORMAT		(RPG_LOG_MAX_OUTPUT_BUFFER - RPG_LOG_CATEGORY_NAME_LENGTH)
 
 
 namespace RpgPlatformLog
@@ -127,27 +127,27 @@ namespace RpgPlatformLog
 }; // RpgPlatformLog
 
 
-#define RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(catName)	extern RpgPlatformLog::FCategory catName;
+#define RPG_LOG_DECLARE_CATEGORY_EXTERN(catName)	extern RpgPlatformLog::FCategory catName;
 
 
-#define RPG_PLATFORM_LOG_DECLARE_CATEGORY_STATIC(catName, defaultVerbosity)												\
-static RpgPlatformLog::FCategory catName{#catName, RpgPlatformLog::defaultVerbosity};									\
-static_assert(sizeof(#catName) <= RPG_PLATFORM_LOG_CATEGORY_NAME_LENGTH, "Exceeds maximum log category name length!");
+#define RPG_LOG_DECLARE_CATEGORY_STATIC(catName, defaultVerbosity)												\
+static RpgPlatformLog::FCategory catName{#catName, RpgPlatformLog::defaultVerbosity};							\
+static_assert(sizeof(#catName) <= RPG_LOG_CATEGORY_NAME_LENGTH, "Exceeds maximum log category name length!");
 
 
-#define RPG_PLATFORM_LOG_DEFINE_CATEGORY(catName, defaultVerbosity)														\
-RpgPlatformLog::FCategory catName{#catName, RpgPlatformLog::defaultVerbosity};											\
-static_assert(sizeof(#catName) <= RPG_PLATFORM_LOG_CATEGORY_NAME_LENGTH, "Exceeds maximum log category name length!");
+#define RPG_LOG_DEFINE_CATEGORY(catName, defaultVerbosity)														\
+RpgPlatformLog::FCategory catName{#catName, RpgPlatformLog::defaultVerbosity};									\
+static_assert(sizeof(#catName) <= RPG_LOG_CATEGORY_NAME_LENGTH, "Exceeds maximum log category name length!");
 
 
-#define RPG_PLATFORM_Log(category, format, ...)			RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_LOG, format, __VA_ARGS__)
-#define RPG_PLATFORM_LogDebug(category, format, ...)	RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_DEBUG, format, __VA_ARGS__)
-#define RPG_PLATFORM_LogWarn(category, format, ...)		RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_WARN, format, __VA_ARGS__)
-#define RPG_PLATFORM_LogError(category, format, ...)	RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_ERROR, format, __VA_ARGS__)
+#define RPG_Log(category, format, ...)		RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_LOG, format, __VA_ARGS__)
+#define RPG_LogDebug(category, format, ...)	RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_DEBUG, format, __VA_ARGS__)
+#define RPG_LogWarn(category, format, ...)	RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_WARN, format, __VA_ARGS__)
+#define RPG_LogError(category, format, ...)	RpgPlatformLog::OutputMessageLogCategoryFormat(category, RpgPlatformLog::VERBOSITY_ERROR, format, __VA_ARGS__)
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogTemp)
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogSystem)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogTemp)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogSystem)
 
 
 
@@ -162,13 +162,13 @@ namespace RpgPlatformProcess
 	extern void Exit(uint32_t code) noexcept;
 	extern void ShowMessageBoxError(const char* title, const char* message) noexcept;
 	extern void SetMainWindowHandle(HWND handle) noexcept;
-	[[nodiscard]] extern HWND GetMainWindowHandle() noexcept;
-	[[nodiscard]] extern uint32_t GetMainThreadId() noexcept;
+	extern HWND GetMainWindowHandle() noexcept;
+	extern uint32_t GetMainThreadId() noexcept;
 
 
 	// Check if function running on main thread
 	// @returns True if running on main thread
-	[[nodiscard]] extern bool IsMainThread() noexcept;
+	extern bool IsMainThread() noexcept;
 
 }; // RpgPlatformProcess
 
@@ -179,61 +179,61 @@ namespace RpgPlatformProcess
 // PLATFORM - ASSERT
 // ========================================================================================================================= //
 #ifdef RPG_BUILD_DEBUG
-#define RPG_PLATFORM_ASSERT_LEVEL	(0)
+#define RPG_ASSERT_LEVEL	0
 #elif RPG_BUILD_DEVELOPMENT
-#define RPG_PLATFORM_ASSERT_LEVEL	(1)
+#define RPG_ASSERT_LEVEL	1
 #else
-#define RPG_PLATFORM_ASSERT_LEVEL	(2)
+#define RPG_ASSERT_LEVEL	2
 #endif // RPG_BUILD_DEBUG
 
 
-#define RPG_PLATFORM_ASSERT_MESSAGE_EXIT(message)								\
+#define RPG_ASSERT_MESSAGE_EXIT(message)								\
 RpgPlatformLog::OutputMessage(RpgPlatformConsole::OUTPUT_COLOR_RED, message);	\
 RpgPlatformProcess::ShowMessageBoxError("ERROR (333)", message);				\
 RPG_DebugBreak();																\
 RpgPlatformProcess::Exit(333);		
 
 
-#define RPG_PLATFORM_AssertMessageV(cond, format, ...)																				\
+#define RPG_AssertMessageV(cond, format, ...)																				\
 if (!(cond))																														\
 {																																	\
 	char message[512];																												\
 	snprintf(message, 512, format, __VA_ARGS__);																					\
 	char assertMessage[512];																										\
 	snprintf(assertMessage, 512, "AssertionFailed: (%s)\nMessage: %s\nFile: %s\nLine: %i\n", #cond, message, __FILE__, __LINE__);	\
-	RPG_PLATFORM_ASSERT_MESSAGE_EXIT(assertMessage);																				\
+	RPG_ASSERT_MESSAGE_EXIT(assertMessage);																				\
 }
 
 
-#define RPG_PLATFORM_AssertMessage(cond)																		\
+#define RPG_AssertMessage(cond)																		\
 if (!(cond))																									\
 {																												\
 	char assertMessage[512];																					\
 	snprintf(assertMessage, 512, "AssertionFailed: (%s)\nFile: %s\nLine: %i\n", #cond, __FILE__, __LINE__);		\
-	RPG_PLATFORM_ASSERT_MESSAGE_EXIT(assertMessage);															\
+	RPG_ASSERT_MESSAGE_EXIT(assertMessage);															\
 }
 
 
-#if RPG_PLATFORM_ASSERT_LEVEL < 1
-#define RPG_PLATFORM_AssertV(cond, format, ...)	RPG_PLATFORM_AssertMessageV(cond, format, __VA_ARGS__)
-#define RPG_PLATFORM_Assert(cond)				RPG_PLATFORM_AssertMessage(cond)
+#if RPG_ASSERT_LEVEL < 1
+#define RPG_AssertV(cond, format, ...)	RPG_AssertMessageV(cond, format, __VA_ARGS__)
+#define RPG_Assert(cond)				RPG_AssertMessage(cond)
 #else
-#define RPG_PLATFORM_AssertV(cond, format, ...)
-#define RPG_PLATFORM_Assert(cond)
+#define RPG_AssertV(cond, format, ...)
+#define RPG_Assert(cond)
 #endif // RPG_PLATFORM_ASSERT_LEVEL < 1
 
 
-#if RPG_PLATFORM_ASSERT_LEVEL < 2
-#define RPG_PLATFORM_CheckV(cond, format, ...)	RPG_PLATFORM_AssertMessageV(cond, format, __VA_ARGS__)
-#define RPG_PLATFORM_Check(cond)				RPG_PLATFORM_AssertMessage(cond)
+#if RPG_ASSERT_LEVEL < 2
+#define RPG_CheckV(cond, format, ...)	RPG_AssertMessageV(cond, format, __VA_ARGS__)
+#define RPG_Check(cond)					RPG_AssertMessage(cond)
 #else
-#define RPG_PLATFORM_CheckV(cond, format, ...)
-#define RPG_PLATFORM_Check(cond)
+#define RPG_CheckV(cond, format, ...)
+#define RPG_Check(cond)
 #endif // RPG_PLATFORM_ASSERT_LEVEL < 2
 
 
-#define RPG_PLATFORM_ValidateV(cond, format, ...)	RPG_PLATFORM_AssertMessageV(cond, format, __VA_ARGS__)
-#define RPG_PLATFORM_Validate(cond)					RPG_PLATFORM_AssertMessage(cond)
+#define RPG_ValidateV(cond, format, ...)	RPG_AssertMessageV(cond, format, __VA_ARGS__)
+#define RPG_Validate(cond)					RPG_AssertMessage(cond)
 
 
 #define RPG_RuntimeErrorCheck(cond, message)															\
@@ -248,7 +248,7 @@ if (!(cond))																							\
 
 #define RPG_NotImplementedYet()		RPG_RuntimeErrorCheck(false, "Function or scope not implemented yet!");
 
-#define RPG_IsMainThread()			RPG_PLATFORM_Check(RpgPlatformProcess::IsMainThread())
+#define RPG_IsMainThread()			RPG_Check(RpgPlatformProcess::IsMainThread())
 
 
 

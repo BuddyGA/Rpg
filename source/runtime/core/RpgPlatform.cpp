@@ -115,8 +115,8 @@ void RpgPlatformMemory::CStringToWide(wchar_t* dst, const char* src, size_t maxB
 
 void RpgPlatformMemory::CStringToLower(char* cstr, int len) noexcept
 {
-	RPG_PLATFORM_Assert(cstr);
-	RPG_PLATFORM_Assert(len > 0);
+	RPG_Assert(cstr);
+	RPG_Assert(len > 0);
 
 	for (int i = 0; i < len; ++i)
 	{
@@ -321,11 +321,11 @@ void RpgPlatformLog::OutputMessage(RpgPlatformConsole::EOutputColor consoleOutpu
 
 void RpgPlatformLog::OutputMessageFormat(RpgPlatformConsole::EOutputColor consoleOutputColor, const char* format, ...) noexcept
 {
-	char message[RPG_PLATFORM_LOG_MAX_OUTPUT_BUFFER_COUNT]{};
+	char message[RPG_LOG_MAX_OUTPUT_BUFFER]{};
 	
 	va_list args;
 	va_start(args, format);
-	vsnprintf(message, RPG_PLATFORM_LOG_MAX_OUTPUT_BUFFER_COUNT, format, args);
+	vsnprintf(message, RPG_LOG_MAX_OUTPUT_BUFFER, format, args);
 	va_end(args);
 
 	OutputMessage(consoleOutputColor, message);
@@ -339,11 +339,11 @@ void RpgPlatformLog::OutputMessageLogCategoryFormat(const FCategory& category, E
 		return;
 	}
 
-	char message[RPG_PLATFORM_LOG_CATEGORY_MAX_FORMAT_COUNT]{};
+	char message[RPG_LOG_CATEGORY_MAX_FORMAT]{};
 
 	va_list args;
 	va_start(args, format);
-	vsnprintf(message, RPG_PLATFORM_LOG_CATEGORY_MAX_FORMAT_COUNT, format, args);
+	vsnprintf(message, RPG_LOG_CATEGORY_MAX_FORMAT, format, args);
 	va_end(args);
 
 	RpgPlatformConsole::EOutputColor consoleOutputColor = RpgPlatformConsole::OUTPUT_COLOR_DEFAULT;
@@ -382,8 +382,8 @@ void RpgPlatformLog::OutputMessageLogCategoryFormat(const FCategory& category, E
 }
 
 
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogTemp, VERBOSITY_DEBUG)
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogSystem, VERBOSITY_LOG)
+RPG_LOG_DEFINE_CATEGORY(RpgLogTemp, VERBOSITY_DEBUG)
+RPG_LOG_DEFINE_CATEGORY(RpgLogSystem, VERBOSITY_LOG)
 
 
 
@@ -414,7 +414,7 @@ void RpgPlatformProcess::Initialize() noexcept
 		return;
 	}
 
-	RPG_PLATFORM_Log(RpgLogSystem, "Initialize platform process [WINDOWS]");
+	RPG_Log(RpgLogSystem, "Initialize platform process [WINDOWS]");
 
 	mi_option_enable(mi_option_allow_large_os_pages);
 
@@ -439,7 +439,7 @@ void RpgPlatformProcess::Shutdown() noexcept
 		return;
 	}
 
-	RPG_PLATFORM_Log(RpgLogSystem, "Shutdown platform process [WINDOWS]");
+	RPG_Log(RpgLogSystem, "Shutdown platform process [WINDOWS]");
 
 	SDL_Quit();
 
@@ -461,7 +461,7 @@ void RpgPlatformProcess::ShowMessageBoxError(const char* title, const char* mess
 
 void RpgPlatformProcess::SetMainWindowHandle(HWND handle) noexcept
 {
-	RPG_PLATFORM_Assert(handle);
+	RPG_Assert(handle);
 	MainWindowHandle = handle;
 }
 
@@ -494,13 +494,13 @@ bool RpgPlatformFile::File_Write(const char* filePath, const void* data, size_t 
 	SDL_IOStream* ctx = SDL_IOFromFile(filePath, "w");
 	if (ctx == nullptr)
 	{
-		RPG_PLATFORM_LogError(RpgLogSystem, "Write data to file (%s) failed. Cannot open file!", filePath);
+		RPG_LogError(RpgLogSystem, "Write data to file (%s) failed. Cannot open file!", filePath);
 		return false;
 	}
 
 	if (data == nullptr || sizeBytes == 0)
 	{
-		RPG_PLATFORM_LogError(RpgLogSystem, "Write data to file (%s) failed. Invalid data or sizeBytes!", filePath);
+		RPG_LogError(RpgLogSystem, "Write data to file (%s) failed. Invalid data or sizeBytes!", filePath);
 		return false;
 	}
 

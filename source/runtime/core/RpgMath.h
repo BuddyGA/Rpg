@@ -29,48 +29,48 @@
 
 namespace RpgMath
 {
-	[[nodiscard]] inline bool FloatEquals(float a, float b, float eps = RPG_MATH_EPS_MP) noexcept
+	inline bool FloatEquals(float a, float b, float eps = RPG_MATH_EPS_MP) noexcept
 	{
 		return fabsf(a - b) <= eps;
 	}
 
-	[[nodiscard]] inline bool IsZero(float value, float eps = RPG_MATH_EPS_MP) noexcept
+	inline bool IsZero(float value, float eps = RPG_MATH_EPS_MP) noexcept
 	{
 		return FloatEquals(value, 0.0f, eps);
 	}
 
-	[[nodiscard]] constexpr inline bool IsPowerOfTwo(uint32_t value) noexcept
+	constexpr inline bool IsPowerOfTwo(uint32_t value) noexcept
 	{
 		return (value > 0) && !(value & (value - 1));
 	}
 
-	[[nodiscard]] constexpr inline float RadToDeg(float rad) noexcept
+	constexpr inline float RadToDeg(float rad) noexcept
 	{
 		return rad * (180.0f / RPG_MATH_PI);
 	}
 
-	[[nodiscard]] constexpr inline float DegToRad(float deg) noexcept
+	constexpr inline float DegToRad(float deg) noexcept
 	{
 		return deg * (RPG_MATH_PI / 180.0f);
 	}
 
 
 	template<typename T>
-	[[nodiscard]] constexpr inline T Abs(T value) noexcept
+	constexpr inline T Abs(T value) noexcept
 	{
 		static_assert(RpgType::IsArithmetic<T>::Value, "Type of <T> must be arithmetic type!");
 		return std::abs(value);
 	}
 
 
-	[[nodiscard]] inline float ModF(float a, float b) noexcept
+	inline float ModF(float a, float b) noexcept
 	{
 		return fmodf(a, b);
 	}
 
 
 	template<typename T>
-	[[nodiscard]] constexpr inline T Clamp(T value, T minValue, T maxValue) noexcept
+	constexpr inline T Clamp(T value, T minValue, T maxValue) noexcept
 	{
 		static_assert(RpgType::IsArithmetic<T>::Value, "Type of <T> must be arithmetic type!");
 
@@ -81,7 +81,7 @@ namespace RpgMath
 	}
 
 
-	[[nodiscard]] inline float ClampDegree(float degree) noexcept
+	inline float ClampDegree(float degree) noexcept
 	{
 		float clamped = ModF(degree + 180.0f, 360.0f);
 
@@ -95,7 +95,7 @@ namespace RpgMath
 
 
 	template<typename T>
-	[[nodiscard]] constexpr inline T Min(T a, T b) noexcept
+	constexpr inline T Min(T a, T b) noexcept
 	{
 		static_assert(RpgType::IsArithmetic<T>::Value, "Type of <T> must be arithmetic type!");
 		return a < b ? a : b;
@@ -103,7 +103,7 @@ namespace RpgMath
 
 
 	template<typename T>
-	[[nodiscard]] constexpr inline T Max(T a, T b) noexcept
+	constexpr inline T Max(T a, T b) noexcept
 	{
 		static_assert(RpgType::IsArithmetic<T>::Value, "Type of <T> must be arithmetic type!");
 		return a > b ? a : b;
@@ -111,7 +111,7 @@ namespace RpgMath
 
 
 	template<typename T>
-	[[nodiscard]] constexpr inline T Sqrt(T value) noexcept
+	constexpr inline T Sqrt(T value) noexcept
 	{
 		static_assert(RpgType::IsArithmetic<T>::Value, "Type of <T> must be arithmetic type!");
 		return sqrt(value);
@@ -296,26 +296,26 @@ public:
 
 
 public:
-	[[nodiscard]] inline float GetMagnitudeSqr() const noexcept
+	inline float GetMagnitudeSqr() const noexcept
 	{
 		float magSqr = 0.0f;
 		DirectX::XMStoreFloat(&magSqr, DirectX::XMVector3LengthSq(Xmm));
 		return magSqr;
 	}
 
-	[[nodiscard]] inline float GetMagnitude() const noexcept
+	inline float GetMagnitude() const noexcept
 	{
 		float mag = 0.0f;
 		DirectX::XMStoreFloat(&mag, DirectX::XMVector3Length(Xmm));
 		return mag;
 	}
 
-	[[nodiscard]] inline void Normalize() noexcept
+	inline void Normalize() noexcept
 	{
 		Xmm = DirectX::XMVector3Normalize(Xmm);
 	}
 
-	[[nodiscard]] inline RpgVector3 GetNormalize() const noexcept
+	inline RpgVector3 GetNormalize() const noexcept
 	{
 		RpgVector3 result = Xmm;
 		result.Normalize();
@@ -323,61 +323,61 @@ public:
 	}
 
 
-	[[nodiscard]] static inline RpgVector3 Min(const RpgVector3& vecA, const RpgVector3& vecB) noexcept
+	static inline RpgVector3 Min(const RpgVector3& vecA, const RpgVector3& vecB) noexcept
 	{
 		return DirectX::XMVectorMin(vecA.Xmm, vecB.Xmm);
 	}
 
-	[[nodiscard]] static inline RpgVector3 Max(const RpgVector3& vecA, const RpgVector3& vecB) noexcept
+	static inline RpgVector3 Max(const RpgVector3& vecA, const RpgVector3& vecB) noexcept
 	{
 		return DirectX::XMVectorMax(vecA.Xmm, vecB.Xmm);
 	}
 
-	[[nodiscard]] static inline float DotProduct(const RpgVector3& vecA, const RpgVector3& vecB) noexcept
+	static inline float DotProduct(const RpgVector3& vecA, const RpgVector3& vecB) noexcept
 	{
 		float dot = 0.0f;
 		DirectX::XMStoreFloat(&dot, DirectX::XMVector3Dot(vecA.Xmm, vecB.Xmm));
 		return dot;
 	}
 
-	[[nodiscard]] static inline RpgVector3 CrossProduct(const RpgVector3& a, const RpgVector3& b) noexcept
+	static inline RpgVector3 CrossProduct(const RpgVector3& a, const RpgVector3& b) noexcept
 	{
 		return DirectX::XMVector3Cross(a.Xmm, b.Xmm);
 	}
 
-	[[nodiscard]] static inline RpgVector3 Reflect(const RpgVector3& v, const RpgVector3& n) noexcept
+	static inline RpgVector3 Reflect(const RpgVector3& v, const RpgVector3& n) noexcept
 	{
 		return DirectX::XMVector3Reflect(v.Xmm, n.Xmm);
 	}
 
-	[[nodiscard]] static inline RpgVector3 Lerp(const RpgVector3& a, const RpgVector3& b, float t) noexcept
+	static inline RpgVector3 Lerp(const RpgVector3& a, const RpgVector3& b, float t) noexcept
 	{
 		return DirectX::XMVectorLerp(a.Xmm, b.Xmm, t);
 	}
 
-	[[nodiscard]] static inline float DistanceSqr(const RpgVector3& a, const RpgVector3& b) noexcept
+	static inline float DistanceSqr(const RpgVector3& a, const RpgVector3& b) noexcept
 	{
 		return (b - a).GetMagnitudeSqr();
 	}
 
-	[[nodiscard]] static inline float Distance(const RpgVector3& a, const RpgVector3& b) noexcept
+	static inline float Distance(const RpgVector3& a, const RpgVector3& b) noexcept
 	{
 		return (b - a).GetMagnitude();
 	}
 
-	[[nodiscard]] static inline float AngleBetweenRadian(const RpgVector3& a, const RpgVector3& b) noexcept
+	static inline float AngleBetweenRadian(const RpgVector3& a, const RpgVector3& b) noexcept
 	{
 		float radian = 0.0f;
 		DirectX::XMStoreFloat(&radian, DirectX::XMVector3AngleBetweenVectors(a.Xmm, b.Xmm));
 		return radian;
 	}
 
-	[[nodiscard]] static inline RpgVector3 ProjectOnNormal(const RpgVector3& v, const RpgVector3& n) noexcept
+	static inline RpgVector3 ProjectOnNormal(const RpgVector3& v, const RpgVector3& n) noexcept
 	{
 		return n * DotProduct(v, n);
 	}
 
-	[[nodiscard]] static inline RpgVector3 ProjectOnPlane(const RpgVector3& v, const RpgVector3& n) noexcept
+	static inline RpgVector3 ProjectOnPlane(const RpgVector3& v, const RpgVector3& n) noexcept
 	{
 		return v - ProjectOnNormal(v, n);
 	}
@@ -446,13 +446,13 @@ public:
 
 
 public:
-	[[nodiscard]] inline void Normalize() noexcept
+	inline void Normalize() noexcept
 	{
 		Xmm = DirectX::XMVector4Normalize(Xmm);
 	}
 
 
-	[[nodiscard]] inline RpgVector4 GetNormalize() const noexcept
+	inline RpgVector4 GetNormalize() const noexcept
 	{
 		RpgVector4 result = Xmm;
 		result.Normalize();
@@ -461,19 +461,19 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgVector3 ToVector3() const noexcept
+	inline RpgVector3 ToVector3() const noexcept
 	{
 		return DirectX::XMVectorSet(X, Y, Z, 0.0f);
 	}
 
 
 public:
-	[[nodiscard]] static inline RpgVector4 Min(const RpgVector4& vecA, const RpgVector4& vecB) noexcept
+	static inline RpgVector4 Min(const RpgVector4& vecA, const RpgVector4& vecB) noexcept
 	{
 		return DirectX::XMVectorMin(vecA.Xmm, vecB.Xmm);
 	}
 
-	[[nodiscard]] static inline RpgVector4 Max(const RpgVector4& vecA, const RpgVector4& vecB) noexcept
+	static inline RpgVector4 Max(const RpgVector4& vecA, const RpgVector4& vecB) noexcept
 	{
 		return DirectX::XMVectorMax(vecA.Xmm, vecB.Xmm);
 	}
@@ -511,28 +511,28 @@ public:
 		Xmm = DirectX::XMQuaternionNormalize(Xmm);
 	}
 
-	[[nodiscard]] RpgQuaternion GetNormalize() const noexcept
+	RpgQuaternion GetNormalize() const noexcept
 	{
 		return DirectX::XMQuaternionNormalize(Xmm);
 	}
 
 public:
-	[[nodiscard]] static inline RpgQuaternion FromPitchYawRollDegree(float pitchDeg, float yawDeg, float rollDeg) noexcept
+	static inline RpgQuaternion FromPitchYawRollDegree(float pitchDeg, float yawDeg, float rollDeg) noexcept
 	{
 		return DirectX::XMQuaternionRotationRollPitchYaw(RpgMath::DegToRad(pitchDeg), RpgMath::DegToRad(yawDeg), RpgMath::DegToRad(rollDeg));
 	}
 
-	[[nodiscard]] static inline RpgQuaternion FromPitchYawRollDegree(const RpgVector3& pitchYawRollDeg) noexcept
+	static inline RpgQuaternion FromPitchYawRollDegree(const RpgVector3& pitchYawRollDeg) noexcept
 	{
 		return DirectX::XMQuaternionRotationRollPitchYaw(RpgMath::DegToRad(pitchYawRollDeg.X), RpgMath::DegToRad(pitchYawRollDeg.Y), RpgMath::DegToRad(pitchYawRollDeg.Z));
 	}
 
-	[[nodiscard]] static inline RpgQuaternion Slerp(const RpgQuaternion& a, const RpgQuaternion& b, float t) noexcept
+	static inline RpgQuaternion Slerp(const RpgQuaternion& a, const RpgQuaternion& b, float t) noexcept
 	{
 		return DirectX::XMQuaternionSlerp(a.Xmm, b.Xmm, t);
 	}
 
-	[[nodiscard]] static inline RpgVector3 RotateVector(const RpgQuaternion& q, const RpgVector3& v) noexcept
+	static inline RpgVector3 RotateVector(const RpgQuaternion& q, const RpgVector3& v) noexcept
 	{
 		RpgVector3 result = v.GetNormalize();
 		result.Xmm = DirectX::XMVector3Rotate(result.Xmm, q.Xmm);
@@ -596,7 +596,7 @@ public:
 		Xmm = DirectX::XMMatrixTranspose(Xmm);
 	}
 
-	[[nodiscard]] inline RpgMatrixTransform GetTranspose() const noexcept
+	inline RpgMatrixTransform GetTranspose() const noexcept
 	{
 		return DirectX::XMMatrixTranspose(Xmm);
 	}
@@ -606,7 +606,7 @@ public:
 		Xmm = DirectX::XMMatrixInverse(nullptr, Xmm);
 	}
 
-	[[nodiscard]] RpgMatrixTransform GetInverse() const noexcept
+	RpgMatrixTransform GetInverse() const noexcept
 	{
 		RpgMatrixTransform result = Xmm;
 		result.InverseInPlace();
@@ -619,7 +619,7 @@ public:
 		DirectX::XMMatrixDecompose(&out_Scale.Xmm, &out_Rotation.Xmm, &out_Position.Xmm, Xmm);
 	}
 
-	[[nodiscard]] inline RpgVector3 GetPosition() const noexcept
+	inline RpgVector3 GetPosition() const noexcept
 	{
 		return Xmm.r[3];
 	}
@@ -647,7 +647,7 @@ public:
 	}
 
 public:
-	[[nodiscard]] static inline RpgMatrixProjection CreatePerspective(float aspect, float fovDegree, float nearClipZ, float farClipZ) noexcept
+	static inline RpgMatrixProjection CreatePerspective(float aspect, float fovDegree, float nearClipZ, float farClipZ) noexcept
 	{
 		RpgMatrixProjection perspective;
 		perspective.Xmm = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(fovDegree), aspect, nearClipZ, farClipZ);
@@ -655,7 +655,7 @@ public:
 		return perspective;
 	}
 
-	[[nodiscard]] static inline RpgMatrixProjection CreateOrthographic(float left, float right, float top, float bottom, float nearClipZ, float farClipZ) noexcept
+	static inline RpgMatrixProjection CreateOrthographic(float left, float right, float top, float bottom, float nearClipZ, float farClipZ) noexcept
 	{
 		RpgMatrixProjection orthographic;
 		orthographic.Xmm = DirectX::XMMatrixOrthographicOffCenterLH(left, right, bottom, top, nearClipZ, farClipZ);
@@ -722,22 +722,22 @@ public:
 
 
 public:
-	[[nodiscard]] inline RpgMatrixTransform ToMatrixTransform() const noexcept
+	inline RpgMatrixTransform ToMatrixTransform() const noexcept
 	{
 		return RpgMatrixTransform(Position, Rotation, Scale);
 	}
 
-	[[nodiscard]] inline RpgVector3 GetAxisRight() const noexcept
+	inline RpgVector3 GetAxisRight() const noexcept
 	{
 		return RpgQuaternion::RotateVector(Rotation, RpgVector3::RIGHT);
 	}
 
-	[[nodiscard]] inline RpgVector3 GetAxisUp() const noexcept
+	inline RpgVector3 GetAxisUp() const noexcept
 	{
 		return RpgQuaternion::RotateVector(Rotation, RpgVector3::UP);
 	}
 
-	[[nodiscard]] inline RpgVector3 GetAxisForward() const noexcept
+	inline RpgVector3 GetAxisForward() const noexcept
 	{
 		return RpgQuaternion::RotateVector(Rotation, RpgVector3::FORWARD);
 	}
@@ -769,27 +769,27 @@ public:
 
 
 public:
-	[[nodiscard]] inline RpgVector3 GetDirection() const noexcept
+	inline RpgVector3 GetDirection() const noexcept
 	{
 		RpgVector3 direction = B - A;
 		direction.Normalize();
 		return direction;
 	}
 
-	[[nodiscard]] inline float GetLength() const noexcept
+	inline float GetLength() const noexcept
 	{
 		return RpgVector3::Distance(A, B);
 	}
 
 
-	[[nodiscard]] inline float GetShortestDistancePoint(const RpgVector3& point) const noexcept
+	inline float GetShortestDistancePoint(const RpgVector3& point) const noexcept
 	{
 		float distance = FLT_MAX;
 		DirectX::XMStoreFloat(&distance, DirectX::XMVector3LinePointDistance(A.Xmm, B.Xmm, point.Xmm));
 		return distance;
 	}
 
-	[[nodiscard]] inline float GetShortestDistanceLine(const RpgLine& line) const noexcept
+	inline float GetShortestDistanceLine(const RpgLine& line) const noexcept
 	{
 		const RpgVector3 vecA = GetDirection();
 		const RpgVector3 vecB = line.GetDirection();
@@ -856,7 +856,7 @@ public:
 
 
 public:
-	[[nodiscard]] inline float DotProduct(const RpgVector3& normal) const noexcept
+	inline float DotProduct(const RpgVector3& normal) const noexcept
 	{
 		float dot = 0.0f;
 		DirectX::XMStoreFloat(&dot, DirectX::XMPlaneDotNormal(Plane.Xmm, normal.Xmm));
@@ -864,13 +864,13 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgVector3 GetNormal() const noexcept
+	inline RpgVector3 GetNormal() const noexcept
 	{
 		return Plane.ToVector3();
 	}
 
 
-	[[nodiscard]] inline bool TestIntersectRay(RpgVector3& out_IntersectionPoint, RpgVector3 rayOrigin, RpgVector3 rayDirection, float* optOut_t = nullptr) const noexcept
+	inline bool TestIntersectRay(RpgVector3& out_IntersectionPoint, RpgVector3 rayOrigin, RpgVector3 rayDirection, float* optOut_t = nullptr) const noexcept
 	{
 		const RpgVector3 planeNormal = RpgVector3(Plane.X, Plane.Y, Plane.Z);
 		const float denom = RpgVector3::DotProduct(rayDirection, planeNormal);
@@ -893,12 +893,12 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgVector3 GetLineIntersectionPoint(RpgVector3 start, RpgVector3 end) const noexcept
+	inline RpgVector3 GetLineIntersectionPoint(RpgVector3 start, RpgVector3 end) const noexcept
 	{
 		return DirectX::XMPlaneIntersectLine(Plane.Xmm, start.Xmm, end.Xmm);
 	}
 
-	[[nodiscard]] inline RpgVector3 GetLineIntersectionPoint(const RpgLine& line) const noexcept
+	inline RpgVector3 GetLineIntersectionPoint(const RpgLine& line) const noexcept
 	{
 		return DirectX::XMPlaneIntersectLine(Plane.Xmm, line.A.Xmm, line.B.Xmm);
 	}
@@ -970,23 +970,23 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgVector3 GetCenter() const noexcept
+	inline RpgVector3 GetCenter() const noexcept
 	{
 		return (Min + Max) * 0.5f;
 	}
 
-	[[nodiscard]] inline RpgVector3 GetHalfExtents() const noexcept
+	inline RpgVector3 GetHalfExtents() const noexcept
 	{
 		return (Max - Min) * 0.5f;
 	}
 
-	[[nodiscard]] inline float GetDiagonalLength() const noexcept
+	inline float GetDiagonalLength() const noexcept
 	{
 		return (Max - Min).GetMagnitude();
 	}
 
 
-	[[nodiscard]] inline bool TestIntersectBoundingAABB(const RpgBoundingAABB& other) const noexcept
+	inline bool TestIntersectBoundingAABB(const RpgBoundingAABB& other) const noexcept
 	{
 		DirectX::BoundingBox first;
 		DirectX::XMStoreFloat3(&first.Center, GetCenter().Xmm);
@@ -1055,7 +1055,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline FCornerPoints GetCornerPoints() const noexcept
+	inline FCornerPoints GetCornerPoints() const noexcept
 	{
 		DirectX::BoundingOrientedBox box;
 		DirectX::XMStoreFloat3(&box.Center, Center.Xmm);
@@ -1079,7 +1079,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgBoundingAABB ToAABB() const noexcept
+	inline RpgBoundingAABB ToAABB() const noexcept
 	{
 		const FCornerPoints corners = GetCornerPoints();
 
@@ -1144,22 +1144,22 @@ public:
 	}
 
 
-	[[nodiscard]] inline RpgVector3 GetCenterBottomSphere() const noexcept
+	inline RpgVector3 GetCenterBottomSphere() const noexcept
 	{
 		return Center + RpgVector3::DOWN * HalfHeight;
 	}
 
-	[[nodiscard]] inline RpgVector3 GetCenterTopSphere() const noexcept
+	inline RpgVector3 GetCenterTopSphere() const noexcept
 	{
 		return Center + RpgVector3::UP * HalfHeight;
 	}
 
-	[[nodiscard]] inline RpgVector3 GetFootPosition() const noexcept
+	inline RpgVector3 GetFootPosition() const noexcept
 	{
 		return Center + RpgVector3::DOWN * (HalfHeight + Radius);
 	}
 
-	[[nodiscard]] inline float GetCapsuleHeight() const noexcept
+	inline float GetCapsuleHeight() const noexcept
 	{
 		return (HalfHeight + Radius) * 2.0f;
 	}
@@ -1207,7 +1207,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline FCornerPoints GetCornerPoints() const noexcept
+	inline FCornerPoints GetCornerPoints() const noexcept
 	{
 		DirectX::XMFLOAT3 tempPoints[8];
 		DxFrustum.GetCorners(tempPoints);
@@ -1226,7 +1226,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline bool TestIntersectBoundingSphere(const RpgBoundingSphere& boundingSphere) const noexcept
+	inline bool TestIntersectBoundingSphere(const RpgBoundingSphere& boundingSphere) const noexcept
 	{
 		DirectX::BoundingSphere dxSphere;
 		DirectX::XMStoreFloat3(&dxSphere.Center, boundingSphere.Center.Xmm);
@@ -1235,7 +1235,7 @@ public:
 		return DxFrustum.Intersects(dxSphere);
 	}
 
-	[[nodiscard]] inline bool TestIntersectBoundingAABB(const RpgBoundingAABB& boundingAABB) const noexcept
+	inline bool TestIntersectBoundingAABB(const RpgBoundingAABB& boundingAABB) const noexcept
 	{
 		DirectX::XMFLOAT3 aabbCenter;
 		DirectX::XMStoreFloat3(&aabbCenter, boundingAABB.GetCenter().Xmm);
@@ -1246,7 +1246,7 @@ public:
 		return DxFrustum.Intersects(DirectX::BoundingBox(aabbCenter, aabbHalfExtents));
 	}
 
-	[[nodiscard]] inline bool TestIntersectBoundingBox(const RpgBoundingBox& boundingBox) const noexcept
+	inline bool TestIntersectBoundingBox(const RpgBoundingBox& boundingBox) const noexcept
 	{
 		DirectX::BoundingOrientedBox box;
 		DirectX::XMStoreFloat3(&box.Center, boundingBox.Center.Xmm);
@@ -1256,12 +1256,12 @@ public:
 		return DxFrustum.Intersects(box);
 	}
 
-	[[nodiscard]] inline bool TestIntersectPlane(const RpgPlane& plane) const noexcept
+	inline bool TestIntersectPlane(const RpgPlane& plane) const noexcept
 	{
 		return false;
 	}
 
-	[[nodiscard]] inline bool TestIntersectFrustum(const RpgBoundingFrustum& frustum) const noexcept
+	inline bool TestIntersectFrustum(const RpgBoundingFrustum& frustum) const noexcept
 	{
 		return DxFrustum.Intersects(frustum.DxFrustum);
 	}

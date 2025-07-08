@@ -32,7 +32,7 @@ void RpgMaterialResource::UpdateResources() noexcept
 		RpgMaterialParameterTextureArray& materialParameterTextures = material->ParameterTexturesReadLock();
 		for (int t = 0; t < materialParameterTextures.GetCount(); ++t)
 		{
-			RPG_PLATFORM_Assert(parameterRootConstantTextureIndexes[t] == RPG_INDEX_INVALID);
+			RPG_Assert(parameterRootConstantTextureIndexes[t] == RPG_INDEX_INVALID);
 
 			RpgSharedTexture2D& texture = materialParameterTextures[t];
 			if (!texture)
@@ -45,7 +45,7 @@ void RpgMaterialResource::UpdateResources() noexcept
 			{
 				FTextureDescriptor& td = TextureDescriptors[texIndex];
 				RpgSharedTexture2D sharedTexture = td.WeakTexture.AsShared();
-				RPG_PLATFORM_Assert(sharedTexture == texture);
+				RPG_Assert(sharedTexture == texture);
 
 				sharedTexture->GPU_UpdateResource();
 
@@ -57,8 +57,8 @@ void RpgMaterialResource::UpdateResources() noexcept
 				td.Descriptor = RpgD3D12::AllocateDescriptor_TDI(sharedTexture->GPU_GetResource());
 			}
 
-			RPG_PLATFORM_Assert(texIndex != RPG_INDEX_INVALID);
-			RPG_PLATFORM_Assert(texture == TextureDescriptors[texIndex].WeakTexture);
+			RPG_Assert(texIndex != RPG_INDEX_INVALID);
+			RPG_Assert(texture == TextureDescriptors[texIndex].WeakTexture);
 			parameterRootConstantTextureIndexes[t] = TextureDescriptors[texIndex].Descriptor.Index;
 		}
 		material->ParameterTexturesReadUnlock();
@@ -116,7 +116,7 @@ void RpgMaterialResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexce
 	for (int t = 0; t < TextureDescriptors.GetCount(); ++t)
 	{
 		RpgSharedTexture2D texture = TextureDescriptors[t].WeakTexture.AsShared();
-		RPG_PLATFORM_Check(texture.IsValid());
+		RPG_Check(texture.IsValid());
 
 		if (!texture->GPU_IsLoading())
 		{
@@ -130,19 +130,19 @@ void RpgMaterialResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexce
 	{
 		const int index = UploadTextureIndices[i];
 		RpgSharedTexture2D texture = TextureDescriptors[index].WeakTexture.AsShared();
-		RPG_PLATFORM_CheckV(texture.IsValid() && texture->IsDirty(), "Texture: %s", *texture->GetName());
+		RPG_CheckV(texture.IsValid() && texture->IsDirty(), "Texture: %s", *texture->GetName());
 
 		texture->GPU_CommandCopy(cmdList);
 		texture->GPU_SetLoaded();
 
-		RPG_PLATFORM_LogDebug(RpgLogTemp, "Texture loaded to GPU (%s)", *texture->GetName());
+		RPG_LogDebug(RpgLogTemp, "Texture loaded to GPU (%s)", *texture->GetName());
 	}
 }
 
 
 void RpgMaterialResource::CommandBindShaderResources(ID3D12GraphicsCommandList* cmdList) const noexcept
 {
-	RPG_PLATFORM_Check(!Materials.IsEmpty());
+	RPG_Check(!Materials.IsEmpty());
 
 	// Set root signature and global texture descriptor table (dynamic indexing)
 	cmdList->SetGraphicsRootSignature(RpgRenderPipeline::GetRootSignatureGraphics());
@@ -161,8 +161,8 @@ void RpgMaterialResource::CommandBindShaderResources(ID3D12GraphicsCommandList* 
 
 void RpgMaterialResource::CommandBindMaterial(ID3D12GraphicsCommandList* cmdList, FMaterialID materialId) const noexcept
 {
-	RPG_PLATFORM_Check(!Materials.IsEmpty());
-	RPG_PLATFORM_Check(materialId >= 0 && materialId < Materials.GetCount());
+	RPG_Check(!Materials.IsEmpty());
+	RPG_Check(materialId >= 0 && materialId < Materials.GetCount());
 
 	const RpgSharedMaterial& material = Materials[materialId];
 

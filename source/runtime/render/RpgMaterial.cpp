@@ -1,7 +1,7 @@
 #include "RpgMaterial.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_STATIC(RpgLogMaterial, VERBOSITY_DEBUG)
+RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogMaterial, VERBOSITY_DEBUG)
 
 
 
@@ -32,7 +32,7 @@ RpgMaterial::RpgMaterial(const RpgName& in_Name, const RpgSharedMaterial& in_Par
 
 RpgMaterial::~RpgMaterial() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogTemp, "Destroy material [%s]", *Name);
+	RPG_LogDebug(RpgLogTemp, "Destroy material [%s]", *Name);
 
 	SDL_DestroyRWLock(ParameterTextureLock);
 	SDL_DestroyRWLock(ParameterVectorLock);
@@ -60,7 +60,7 @@ static RpgArray<RpgSharedMaterial> DefaultMaterials;
 
 void RpgMaterial::s_CreateDefaults() noexcept
 {
-	RPG_PLATFORM_LogDebug(RpgLogMaterial, "Create default materials...");
+	RPG_LogDebug(RpgLogMaterial, "Create default materials...");
 
 	DefaultMaterials.Resize(RpgMaterialDefault::MAX_COUNT);
 

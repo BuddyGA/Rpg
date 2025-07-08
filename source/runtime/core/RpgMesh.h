@@ -2,7 +2,7 @@
 
 #include "RpgConfig.h"
 #include "RpgString.h"
-#include "RpgSharedPtr.h"
+#include "RpgPointer.h"
 #include "RpgVertex.h"
 
 
@@ -71,7 +71,7 @@ public:
 	void AddBatchVertexData(int vertexCount, const RpgVertex::FMeshPosition* positionData, const RpgVertex::FMeshNormalTangent* normalTangentData, const RpgVertex::FMeshTexCoord* texCoordData, const RpgVertex::FMeshSkin* skinData, int indexCount, const RpgVertex::FIndex* indexData) noexcept;
 
 	// Calculate bounding AABB
-	[[nodiscard]] RpgBoundingAABB CalculateBounding() const noexcept;
+	RpgBoundingAABB CalculateBounding() const noexcept;
 
 
 	// Reset vertex data memory. if <bFreeMemory> is TRUE, free memory instead of only reset the container
@@ -90,7 +90,7 @@ public:
 
 
 	// Reader lock vertex data. Must call VertexReadUnlock after done reading!
-	[[nodiscard]] inline FVertexData VertexReadLock() const noexcept
+	inline FVertexData VertexReadLock() const noexcept
 	{
 		SDL_LockRWLockForReading(Lock);
 
@@ -160,25 +160,25 @@ public:
 
 
 	// Get mesh name
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
 
 	// Get vertex count
-	[[nodiscard]] inline int GetVertexCount() const noexcept
+	inline int GetVertexCount() const noexcept
 	{
 		return Positions.GetCount();
 	}
 
 	// Get index count
-	[[nodiscard]] inline int GetIndexCount() const noexcept
+	inline int GetIndexCount() const noexcept
 	{
 		return Indices.GetCount();
 	}
 
 	// TRUE if vertex data contains skin (skinned mesh)
-	[[nodiscard]] inline bool HasSkin() const noexcept
+	inline bool HasSkin() const noexcept
 	{
 		return Skins.GetCount() > 0;
 	}

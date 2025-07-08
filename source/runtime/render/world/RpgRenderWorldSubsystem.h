@@ -8,6 +8,7 @@ class RpgRenderWorldSubsystem : public RpgWorldSubsystem
 {
 public:
 	bool bDebugDrawMeshBounds;
+	bool bDebugDrawLightBounds;
 
 
 public:

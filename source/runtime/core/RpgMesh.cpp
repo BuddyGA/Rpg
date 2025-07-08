@@ -17,10 +17,10 @@ RpgMesh::~RpgMesh() noexcept
 
 void RpgMesh::UpdateVertexData(int vertexCount, const RpgVertex::FMeshPosition* positionData, const RpgVertex::FMeshNormalTangent* normalTangentData, const RpgVertex::FMeshTexCoord* texCoordData, const RpgVertex::FMeshSkin* skinData, int indexCount, const RpgVertex::FIndex* indexData) noexcept
 {
-	RPG_PLATFORM_Assert(vertexCount > 0);
-	RPG_PLATFORM_Assert(positionData && normalTangentData && texCoordData);
-	RPG_PLATFORM_Assert(indexCount > 0);
-	RPG_PLATFORM_Assert(indexData);
+	RPG_Assert(vertexCount > 0);
+	RPG_Assert(positionData && normalTangentData && texCoordData);
+	RPG_Assert(indexCount > 0);
+	RPG_Assert(indexData);
 
 	SDL_LockRWLockForWriting(Lock);
 	{
@@ -49,10 +49,10 @@ void RpgMesh::UpdateVertexData(int vertexCount, const RpgVertex::FMeshPosition* 
 
 void RpgMesh::AddBatchVertexData(int vertexCount, const RpgVertex::FMeshPosition* positionData, const RpgVertex::FMeshNormalTangent* normalTangentData, const RpgVertex::FMeshTexCoord* texCoordData, const RpgVertex::FMeshSkin* skinData, int indexCount, const RpgVertex::FIndex* indexData) noexcept
 {
-	RPG_PLATFORM_Assert(vertexCount > 0);
-	RPG_PLATFORM_Assert(positionData && normalTangentData && texCoordData);
-	RPG_PLATFORM_Assert(indexCount > 0);
-	RPG_PLATFORM_Assert(indexData);
+	RPG_Assert(vertexCount > 0);
+	RPG_Assert(positionData && normalTangentData && texCoordData);
+	RPG_Assert(indexCount > 0);
+	RPG_Assert(indexData);
 
 	const uint32_t baseVertex = static_cast<uint32_t>(Positions.GetCount());
 
@@ -60,11 +60,11 @@ void RpgMesh::AddBatchVertexData(int vertexCount, const RpgVertex::FMeshPosition
 	{
 		if (HasSkin())
 		{
-			RPG_PLATFORM_CheckV(skinData, "Vertex data added to batch must have skin data if original mesh contains skin data!");
+			RPG_CheckV(skinData, "Vertex data added to batch must have skin data if original mesh contains skin data!");
 		}
 		else
 		{
-			RPG_PLATFORM_CheckV(skinData == nullptr, "Vertex data added to batch must not contain skin data if original mesh does not have skin data!");
+			RPG_CheckV(skinData == nullptr, "Vertex data added to batch must not contain skin data if original mesh does not have skin data!");
 		}
 	}
 

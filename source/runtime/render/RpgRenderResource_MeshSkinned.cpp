@@ -107,8 +107,8 @@ void RpgMeshSkinnedResource::UpdateResources() noexcept
 		skinnedIdxOffset += param.IndexCount;
 	}
 
-	RPG_PLATFORM_Check(skinnedVtxOffset == SkinnedVertexCount);
-	RPG_PLATFORM_Check(skinnedIdxOffset == SkinnedIndexCount);
+	RPG_Check(skinnedVtxOffset == SkinnedVertexCount);
+	RPG_Check(skinnedIdxOffset == SkinnedIndexCount);
 
 	RpgD3D12::ResizeBuffer(SkinnedVertexPositionBuffer, sizeof(RpgVertex::FMeshPosition) * SkinnedVertexCount, false);
 	RPG_D3D12_SetDebugNameAllocation(SkinnedVertexPositionBuffer, "RES_MeshSkin_SkinnedVtxPos");
@@ -199,7 +199,7 @@ void RpgMeshSkinnedResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noe
 		stagingOffset += skeletonBoneSkinningSizeBytes;
 
 		// Sanity check 
-		RPG_PLATFORM_Check(stagingOffset == stagingSizeBytes);	
+		RPG_Check(stagingOffset == stagingSizeBytes);	
 	}
 	RpgD3D12::UnmapBuffer(StagingBuffer.Get());
 

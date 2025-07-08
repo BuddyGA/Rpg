@@ -35,7 +35,7 @@ namespace RpgCompressonator
 
 		if (cmpStatus != CMP_OK)
 		{
-			RPG_PLATFORM_LogError(RpgLogAssetImporter, "Fail to import texture from source file (%s). Load file data failed!", *filePath);
+			RPG_LogError(RpgLogAssetImporter, "Fail to import texture from source file (%s). Load file data failed!", *filePath);
 			return;
 		}
 
@@ -43,18 +43,18 @@ namespace RpgCompressonator
 		{
 			if (!(RpgMath::IsPowerOfTwo(srcMipSet.m_nWidth) && RpgMath::IsPowerOfTwo(srcMipSet.m_nHeight)))
 			{
-				RPG_PLATFORM_LogError(RpgLogAssetImporter, "Fail to import texture from source file (%s). If generate mip-maps, width and height must be power of two! (W: %i, H: %i)", *filePath, srcMipSet.m_nWidth, srcMipSet.m_nHeight);
+				RPG_LogError(RpgLogAssetImporter, "Fail to import texture from source file (%s). If generate mip-maps, width and height must be power of two! (W: %i, H: %i)", *filePath, srcMipSet.m_nWidth, srcMipSet.m_nHeight);
 				CMP_FreeMipSet(&srcMipSet);
 
 				return;
 			}
 
 			const CMP_INT maxMipLevels = CMP_CalcMaxMipLevel(srcMipSet.m_nHeight, srcMipSet.m_nWidth, false);
-			RPG_PLATFORM_Check(srcMipSet.m_nMaxMipLevels == maxMipLevels);
+			RPG_Check(srcMipSet.m_nMaxMipLevels == maxMipLevels);
 
 			const CMP_INT minSize = CMP_CalcMinMipSize(srcMipSet.m_nHeight, srcMipSet.m_nWidth, maxMipLevels);
 			const CMP_INT status = CMP_GenerateMIPLevels(&srcMipSet, minSize);
-			RPG_PLATFORM_Check(status == 0);
+			RPG_Check(status == 0);
 		}
 
 
@@ -74,7 +74,7 @@ namespace RpgCompressonator
 
 			if (cmpStatus != CMP_OK)
 			{
-				RPG_PLATFORM_LogError(RpgLogAssetImporter, "Fail to import texture from source file (%s). Process texture compression failed!", *filePath);
+				RPG_LogError(RpgLogAssetImporter, "Fail to import texture from source file (%s). Process texture compression failed!", *filePath);
 				CMP_FreeMipSet(&srcMipSet);
 
 				return;
@@ -84,10 +84,10 @@ namespace RpgCompressonator
 
 		// Result
 		CMP_MipSet* mipSet = bCompressTexture ? &compressedMipSet : &srcMipSet;
-		RPG_PLATFORM_Check(mipSet);
+		RPG_Check(mipSet);
 
 		out_Texture = RpgTexture2D::s_CreateShared2D(filePath.GetFileName(), format, mipSet->m_nWidth, mipSet->m_nHeight, mipSet->m_nMipLevels);
-		RPG_PLATFORM_Check(out_Texture->GetMipCount() == mipSet->m_nMipLevels);
+		RPG_Check(out_Texture->GetMipCount() == mipSet->m_nMipLevels);
 
 		for (int m = 0; m < mipSet->m_nMipLevels; ++m)
 		{
@@ -96,9 +96,9 @@ namespace RpgCompressonator
 			RpgTexture2D::FMipData dstMipData;
 			uint8_t* dstPixelData = out_Texture->MipWriteLock(m, dstMipData);
 			{
-				RPG_PLATFORM_Check(srcMipData->m_nWidth == dstMipData.Width);
-				RPG_PLATFORM_Check(srcMipData->m_nHeight == dstMipData.Height);
-				RPG_PLATFORM_Check(srcMipData->m_dwLinearSize == dstMipData.SizeBytes);
+				RPG_Check(srcMipData->m_nWidth == dstMipData.Width);
+				RPG_Check(srcMipData->m_nHeight == dstMipData.Height);
+				RPG_Check(srcMipData->m_dwLinearSize == dstMipData.SizeBytes);
 
 				for (int r = 0; r < dstMipData.RowCount; ++r)
 				{
@@ -123,9 +123,9 @@ namespace RpgCompressonator
 
 	static void ImportFromEmbedded(RpgSharedTexture2D& out_Texture, const RpgAssimp::FTextureEmbedded& embedded, RpgTextureFormat::EType format, bool bGenerateMipMaps) noexcept
 	{
-		RPG_PLATFORM_Check(embedded.Data);
-		RPG_PLATFORM_Check(embedded.Width > 0);
-		RPG_PLATFORM_Check(embedded.Height == 0);
+		RPG_Check(embedded.Data);
+		RPG_Check(embedded.Width > 0);
+		RPG_Check(embedded.Height == 0);
 
 		RpgName extension;
 		const int sizeBytes = embedded.Height > 0 ? embedded.Width * embedded.Height : embedded.Width;
@@ -156,7 +156,7 @@ namespace RpgCompressonator
 
 			if (!RpgPlatformFile::File_Write(*sourceFilePath, embedded.Data, sizeBytes))
 			{
-				RPG_PLATFORM_LogError(RpgLogAssetImporter, "Fail to import texture from embedded data (%s). Write file failed!", *embedded.Name);
+				RPG_LogError(RpgLogAssetImporter, "Fail to import texture from embedded data (%s). Write file failed!", *embedded.Name);
 				return;
 			}
 
@@ -305,22 +305,22 @@ void RpgAsyncTask_ImportTexture::Reset() noexcept
 
 void RpgAsyncTask_ImportTexture::Execute() noexcept
 {
-	RPG_PLATFORM_Check(SourceFilePath.IsFilePath() || SourceEmbedded.Data);
+	RPG_Check(SourceFilePath.IsFilePath() || SourceEmbedded.Data);
 
 	if (SourceFilePath.IsFilePath())
 	{
-		RPG_PLATFORM_Log(RpgLogAssetImporter, "[Thread-%u]: Import texture from file (%s)", SDL_GetCurrentThreadID(), *SourceFilePath);
+		RPG_Log(RpgLogAssetImporter, "[Thread-%u]: Import texture from file (%s)", SDL_GetCurrentThreadID(), *SourceFilePath);
 		RpgCompressonator::ImportFromFile(Result, SourceFilePath, Format, bGenerateMipMaps);
 	}
 	else
 	{
-		RPG_PLATFORM_Log(RpgLogAssetImporter, "[Thread-%u]: Import texture from embedded data (%s)", SDL_GetCurrentThreadID(), *SourceEmbedded.Name);
+		RPG_Log(RpgLogAssetImporter, "[Thread-%u]: Import texture from embedded data (%s)", SDL_GetCurrentThreadID(), *SourceEmbedded.Name);
 		RpgCompressonator::ImportFromEmbedded(Result, SourceEmbedded, Format, bGenerateMipMaps);
 	}
 
 	if (Result)
 	{
-		RPG_PLATFORM_Log(RpgLogAssetImporter, "[Thread-%u]: Import texture SUCCESS!\n"
+		RPG_Log(RpgLogAssetImporter, "[Thread-%u]: Import texture SUCCESS!\n"
 			"\tSourceFile: %s\n"
 			"\tTexture: %s\n"
 			"\tFormat: %s\n"

@@ -38,15 +38,15 @@ namespace RpgRenderPipeline
     extern void Shutdown() noexcept;
 
 
-    [[nodiscard]] extern ID3D12RootSignature* GetRootSignatureGraphics() noexcept;
-    [[nodiscard]] extern ID3D12RootSignature* GetRootSignatureCompute() noexcept;
+    extern ID3D12RootSignature* GetRootSignatureGraphics() noexcept;
+    extern ID3D12RootSignature* GetRootSignatureCompute() noexcept;
 
     extern void AddMaterials(RpgSharedMaterial* materialArray, int materialCount) noexcept;
     extern void CompileMaterialPSOs(bool bWaitAll) noexcept;
-    [[nodiscard]] extern ID3D12PipelineState* GetMaterialPSO(const RpgSharedMaterial& material) noexcept;
+    extern ID3D12PipelineState* GetMaterialPSO(const RpgSharedMaterial& material) noexcept;
 
 
     // Compute
-    [[nodiscard]] extern ID3D12PipelineState* GetComputeSkinningPSO() noexcept;
+    extern ID3D12PipelineState* GetComputeSkinningPSO() noexcept;
 
 };

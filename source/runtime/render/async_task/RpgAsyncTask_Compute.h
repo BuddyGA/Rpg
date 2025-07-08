@@ -31,7 +31,7 @@ public:
 	}
 
 
-	[[nodiscard]] inline ID3D12CommandList* GetCommandList() const noexcept
+	inline ID3D12CommandList* GetCommandList() const noexcept
 	{
 		return CmdListCompute.Get();
 	}

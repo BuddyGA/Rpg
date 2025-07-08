@@ -1,27 +1,22 @@
-#include "RpgGameApp.h"
+#include "RpgEngine.h"
 #include "core/RpgCommandLine.h"
-#include "input/RpgInputManager.h"
 #include "physics/world/RpgPhysicsComponent.h"
 #include "physics/world/RpgPhysicsWorldSubsystem.h"
-#include "render/RpgRenderer.h"
-#include "render/RpgSceneViewport.h"
 #include "render/world/RpgRenderComponent.h"
 #include "render/world/RpgRenderWorldSubsystem.h"
 #include "animation/world/RpgAnimationComponent.h"
 #include "animation/world/RpgAnimationWorldSubsystem.h"
-#include "gui/RpgGuiContext.h"
-#include "script/RpgScriptCamera.h"
 
 
 
 
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogGame, VERBOSITY_DEBUG)
+RPG_LOG_DEFINE_CATEGORY(RpgLogEngine, VERBOSITY_DEBUG)
 
 
-RpgGameApp* g_GameApp = nullptr;
+RpgEngine* g_Engine = nullptr;
 
 
-RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
+RpgEngine::RpgEngine(const char* windowTitle) noexcept
 {
 	RpgPointInt windowResolution(1600, 900);
 
@@ -37,19 +32,17 @@ RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
 		windowResolution.Y = cmdArgResY;
 	}
 
-	RPG_PLATFORM_Log(RpgLogSystem, "Create game window (%i, %i)", windowResolution.X, windowResolution.Y);
+	RPG_Log(RpgLogEngine, "Create game window (%i, %i)", windowResolution.X, windowResolution.Y);
 
 	// main window
 	Window = SDL_CreateWindow(windowTitle, windowResolution.X, windowResolution.Y, SDL_WINDOW_RESIZABLE);
 	NativeWindowHandle = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(Window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
 	RpgPlatformProcess::SetMainWindowHandle(NativeWindowHandle);
 
-	// input manager
-	InputManager = new RpgInputManager();
 
 	// main world
 	{
-		MainWorld = new RpgWorld("world_main");
+		MainWorld = CreateWorld("world_main");
 
 		// Subsystems
 		MainWorld->Subsystem_Add<RpgPhysicsWorldSubsystem>(0);
@@ -66,13 +59,7 @@ RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
 
 
 	// main renderer
-	Renderer = new RpgRenderer(NativeWindowHandle, !RpgCommandLine::HasCommand("novsync"));
-
-	// main viewport
-	Viewport = new RpgSceneViewport();
-
-	// gui context
-	GuiContext = new RpgGuiContext();
+	Renderer = RpgPointer::MakeUnique<RpgRenderer>(NativeWindowHandle, !RpgCommandLine::HasCommand("novsync"));
 
 	// fps info
 	FpsLimit = 60;
@@ -83,48 +70,42 @@ RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
 }
 
 
-RpgGameApp::~RpgGameApp() noexcept
+RpgEngine::~RpgEngine() noexcept
 {
-	delete GuiContext;
-	delete Viewport;
-	delete Renderer;
-	delete MainWorld;
-	delete InputManager;
-
 	SDL_DestroyWindow(Window);
 }
 
 
-void RpgGameApp::Initialize() noexcept
+void RpgEngine::Initialize() noexcept
 {
 	CreateTestLevel();
 
-	MainCamera = MainWorld->GameObject_Create("camera_main");
-	MainWorld->GameObject_AddScript<RpgScriptCamera>(MainCamera);
+	SetMainCamera(MainWorld->GameObject_Create("camera_main"));
+	MainWorld->GameObject_AttachScript(MainCameraObject, &ScriptDebugCamera);
 }
 
 
-void RpgGameApp::WindowSizeChanged(const SDL_WindowEvent& e) noexcept
+void RpgEngine::WindowSizeChanged(const SDL_WindowEvent& e) noexcept
 {
 	const RpgRectInt cameraViewportRect(0, 0, e.data1, e.data2);
 }
 
 
-void RpgGameApp::MouseMove(const SDL_MouseMotionEvent& e) noexcept
+void RpgEngine::MouseMove(const SDL_MouseMotionEvent& e) noexcept
 {
-	InputManager->MouseMove(e);
+	InputManager.MouseMove(e);
 }
 
 
-void RpgGameApp::MouseButton(const SDL_MouseButtonEvent& e) noexcept
+void RpgEngine::MouseButton(const SDL_MouseButtonEvent& e) noexcept
 {
-	InputManager->MouseButton(e);
+	InputManager.MouseButton(e);
 }
 
 
-void RpgGameApp::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
+void RpgEngine::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 {
-	InputManager->KeyboardButton(e);
+	InputManager.KeyboardButton(e);
 
 	if (e.down)
 	{
@@ -138,7 +119,8 @@ void RpgGameApp::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 		}
 		else if (e.scancode == SDL_SCANCODE_0)
 		{
-			Viewport->bFrustumCulling = !Viewport->bFrustumCulling;
+			RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_GetComponent<RpgRenderComponent_Camera>(MainCameraObject);
+			cameraComp->bFrustumCulling = !cameraComp->bFrustumCulling;
 		}
 		else if (e.scancode == SDL_SCANCODE_9)
 		{
@@ -165,7 +147,7 @@ void RpgGameApp::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 }
 
 
-void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
+void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 {
 	RpgPointInt windowDimension;
 	SDL_GetWindowSize(Window, &windowDimension.X, &windowDimension.Y);
@@ -173,7 +155,7 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 
 	// Calculate average FPS
 	{
-		const int FPS_SAMPLE_COUNT = 12;
+		const int FPS_SAMPLE_COUNT = 3;
 
 		if (FpsSampleFrameCount == FPS_SAMPLE_COUNT)
 		{
@@ -192,12 +174,15 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 	// Begin frame
 	{
 		MainWorld->BeginFrame(frameIndex);
+
+		RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_GetComponent<RpgRenderComponent_Camera>(MainCameraObject);
+		cameraComp->RenderTargetDimension = windowDimension;
 	}
 
 
 	// GUI
 	{
-		GuiContext->Begin(RpgRectInt(0, 0, windowDimension.X, windowDimension.Y));
+		GuiContext.Begin(RpgRectInt(0, 0, windowDimension.X, windowDimension.Y));
 
 		//GuiContext->AddRect(RpgPointInt(128, 128), RpgColorRGBA(255, 0, 0));
 		//GuiContext->AddRect(RpgPointInt(128, 128), RpgColorRGBA(0, 255, 0));
@@ -220,35 +205,29 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 	// Render
 	Renderer->BeginRender(frameIndex, deltaTime);
 	{
-		// Setup main scene viewport
-		const RpgTransform mainCameraTransform = MainWorld->GameObject_GetWorldTransform(MainCamera);
-		Viewport->SetCameraRotationAndPosition(mainCameraTransform.Rotation, mainCameraTransform.Position);
-		Viewport->RenderTargetDimension = windowDimension;
-
 		Renderer->RegisterWorld(MainWorld);
-		Renderer->AddWorldViewport(frameIndex, MainWorld, Viewport);
-		Renderer->FinalTexture = Viewport->GetRenderTargetTexture(frameIndex);
+
+		// Setup renderer default final texture
+		Renderer->FinalTexture = SceneViewport.GetRenderTargetTexture(frameIndex);
 
 		// Dispatch render
-		MainWorld->DispatchRender(frameIndex, Renderer);
+		MainWorld->DispatchRender(frameIndex, Renderer.Get());
 
 		// Render 2D
 		RpgRenderer2D& r2 = Renderer->GetRenderer2D();
 
 		// GUI
-		GuiContext->End(r2);
+		GuiContext.End(r2);
 
 		// Debug info
 		{
 			static RpgString debugInfoText;
 
-			/*
-			const RpgVector3 position = CameraActive->GetPosition();
+			RpgTransform mainCameraTransform = MainWorld->GameObject_GetWorldTransform(MainCameraObject);
 			float pitch, yaw;
-			CameraActive->GetRotationPitchYaw(pitch, yaw);
-
+			ScriptDebugCamera.GetRotationPitchYaw(pitch, yaw);
+			
 			debugInfoText = RpgString::Format(
-				"CameraMode: %s\n"
 				"CameraPosition: %.2f, %.2f, %.2f\n"
 				"CameraPitchYaw: %.2f, %.2f\n"
 				"CameraFrustumCulling: %d\n"
@@ -256,17 +235,15 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 				"VSync: %d\n"
 				"\n"
 				"GameObject: %i\n"
-				, CameraActive == &CameraFreeFly ? "FREE_FLY" : "TOP_DOWN"
-				, position.X, position.Y, position.Z
+				, mainCameraTransform.Position.X, mainCameraTransform.Position.Y, mainCameraTransform.Position.Z
 				, pitch, yaw
-				, Viewport->bFrustumCulling
+				, SceneViewport.bFrustumCulling
 				, Renderer->Gamma
 				, Renderer->GetVsync()
 				, MainWorld->GameObject_GetCount()
 			);
 
 			r2.AddText(*debugInfoText, debugInfoText.GetLength(), 8, 16, RpgColorRGBA(255, 255, 255));
-			*/
 		}
 
 		// Fps info
@@ -294,5 +271,46 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 
 	// End frame
 	MainWorld->EndFrame(frameIndex);
-	InputManager->Flush();
+	InputManager.Flush();
+}
+
+
+RpgWorld* RpgEngine::CreateWorld(const RpgName& name) noexcept
+{
+	const int index = Worlds.GetCount();
+	Worlds.AddValue(RpgPointer::MakeUnique<RpgWorld>(name));
+
+	return Worlds[index].Get();
+}
+
+
+void RpgEngine::DestroyWorld(RpgWorld*& world) noexcept
+{
+	RPG_Check(world);
+
+	const int index = Worlds.FindIndexByCompare(world);
+	if (index != RPG_INDEX_INVALID)
+	{
+		Worlds.RemoveAt(index);
+		world = nullptr;
+
+		return;
+	}
+
+	RPG_LogWarn(RpgLogEngine, "Fail to destroy world. World (%s) not found!", *world->GetName());
+}
+
+
+void RpgEngine::SetMainCamera(RpgGameObjectID cameraObject) noexcept
+{
+	if (MainCameraObject == cameraObject)
+	{
+		return;
+	}
+
+	MainCameraObject = cameraObject;
+
+	RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_AddComponent<RpgRenderComponent_Camera>(MainCameraObject);
+	cameraComp->Viewport = &SceneViewport;
+	cameraComp->bActivated = true;
 }

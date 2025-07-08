@@ -3,7 +3,7 @@
 #include "core/RpgPlatform.h"
 
 
-RPG_PLATFORM_LOG_DECLARE_CATEGORY_EXTERN(RpgLogGUI)
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogGUI)
 
 
 class RpgGuiContext;

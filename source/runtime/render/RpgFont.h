@@ -5,7 +5,7 @@
 
 
 
-struct RpgFontUnicode
+struct RpgFontUnicodeRange
 {
 	int CodeStart{ 0 };
 	int CodeCount{ 0 };
@@ -31,7 +31,7 @@ class RpgFont
 
 private:
 	RpgName Name;
-	RpgFontUnicode Unicode;
+	RpgFontUnicodeRange UnicodeRange;
 	RpgFontMetric Metric;
 	RpgSharedTexture2D Texture;
 
@@ -42,21 +42,21 @@ private:
 public:
 	~RpgFont() noexcept;
 
-	[[nodiscard]] RpgPointInt CalculateTextDimension(const char* text, int length) const noexcept;
+	RpgPointInt CalculateTextDimension(const char* text, int length) const noexcept;
 	int GenerateTextVertex(const char* text, int length, int x, int y, RpgColorRGBA color, RpgVertexMesh2DArray& out_Vertexes, RpgVertexIndexArray& out_Indexes, int* optOut_VertexCount = nullptr, int* optOut_IndexCount = nullptr) const noexcept;
 
 
-	[[nodiscard]] inline const RpgFontUnicode& GetUnicode() const noexcept
+	inline const RpgFontUnicodeRange& GetUnicodeRange() const noexcept
 	{
-		return Unicode;
+		return UnicodeRange;
 	}
 
-	[[nodiscard]] inline RpgFontMetric GetMetric() const noexcept
+	inline RpgFontMetric GetMetric() const noexcept
 	{
 		return Metric;
 	}
 
-	[[nodiscard]] inline const RpgSharedTexture2D& GetTexture() const noexcept
+	inline const RpgSharedTexture2D& GetTexture() const noexcept
 	{
 		return Texture;
 	}

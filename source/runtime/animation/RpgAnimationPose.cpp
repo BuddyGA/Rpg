@@ -22,7 +22,7 @@ void RpgAnimationPose::UpdateBonePoseTransforms(const RpgAnimationSkeleton* skel
 	{
 		const int boneIndex = updateBoneIndices[i];
 		const int boneParentIndex = skeleton->GetBoneParentIndex(boneIndex);
-		RPG_PLATFORM_Check(boneParentIndex == RPG_SKELETON_BONE_INDEX_INVALID || boneParentIndex < boneIndex);
+		RPG_Check(boneParentIndex == RPG_SKELETON_BONE_INDEX_INVALID || boneParentIndex < boneIndex);
 
 		BonePoseTransforms[boneIndex] = (boneParentIndex != RPG_SKELETON_BONE_INDEX_INVALID) ? BoneLocalTransforms[boneIndex] * BonePoseTransforms[boneParentIndex] : BoneLocalTransforms[boneIndex];
 	}

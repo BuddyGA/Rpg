@@ -68,7 +68,7 @@ namespace RpgAssimp
 			default: break;
 		}
 
-		RPG_PLATFORM_Check(0);
+		RPG_Check(0);
 		return RpgTextureFormat::NONE;
 	}
 
@@ -94,7 +94,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 	}
 
 	const int assimpMaterialCount = static_cast<int>(assimpScene->mNumMaterials);
-	RPG_PLATFORM_Check(assimpMaterialCount > 0);
+	RPG_Check(assimpMaterialCount > 0);
 
 	constexpr aiTextureType PHONG_TEXTURE_TYPES[] =
 	{
@@ -141,7 +141,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 		{
 			const aiTextureType assimpTextureType = PHONG_TEXTURE_TYPES[t];
 			const int assimpMaterialTextureCount = assimpMaterial->GetTextureCount(assimpTextureType);
-			RPG_PLATFORM_Check(assimpMaterialTextureCount <= 1);
+			RPG_Check(assimpMaterialTextureCount <= 1);
 
 			if (assimpMaterialTextureCount == 0)
 			{
@@ -162,7 +162,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 			if (filePath.data[0] == '*')
 			{
 				const int assimpTextureIndex = RpgPlatformMemory::CStringToInt(filePath.data + 1);
-				RPG_PLATFORM_Check(assimpTextureIndex >= 0 && assimpTextureIndex < 32);
+				RPG_Check(assimpTextureIndex >= 0 && assimpTextureIndex < 32);
 
 				const aiTexture* assimpTexture = assimpScene->mTextures[assimpTextureIndex];
 
@@ -184,7 +184,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 				}
 				else
 				{
-					RPG_PLATFORM_Log(RpgLogAssetImporter, "Ignore import embedded texture (%s). Has been added to import list!", *sourceEmbeddedName);
+					RPG_Log(RpgLogAssetImporter, "Ignore import embedded texture (%s). Has been added to import list!", *sourceEmbeddedName);
 					textureIndex = importingIndex;
 				}
 			}
@@ -207,7 +207,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 				}
 				else
 				{
-					RPG_PLATFORM_Log(RpgLogAssetImporter, "Ignore import external texture (%s). Has been added to import list!", *absoluteFilePath);
+					RPG_Log(RpgLogAssetImporter, "Ignore import external texture (%s). Has been added to import list!", *absoluteFilePath);
 					textureIndex = importingIndex;
 				}
 			}
@@ -254,7 +254,7 @@ void RpgAsyncTask_ImportModel::ExtractSkeleton(const aiMesh* assimpMesh) noexcep
 		return;
 	}
 
-	RPG_PLATFORM_Check(assimpBoneCount <= RPG_SKELETON_MAX_BONE);
+	RPG_Check(assimpBoneCount <= RPG_SKELETON_MAX_BONE);
 
 	RpgAssimp::FSkeleton tempSkel;
 	tempSkel.BoneNames.Reserve(assimpBoneCount);
@@ -263,7 +263,7 @@ void RpgAsyncTask_ImportModel::ExtractSkeleton(const aiMesh* assimpMesh) noexcep
 	tempSkel.BoneInverseBindPoseTransforms.Reserve(assimpBoneCount);
 
 	const aiNode* assimpArmatureNode = assimpMesh->mBones[0]->mArmature;
-	RPG_PLATFORM_Check(assimpArmatureNode);
+	RPG_Check(assimpArmatureNode);
 
 	tempSkel.BoneNames.AddValue(assimpArmatureNode->mName.C_Str());
 	tempSkel.BoneParentIndices.AddValue(RPG_SKELETON_BONE_INDEX_INVALID);
@@ -291,7 +291,7 @@ void RpgAsyncTask_ImportModel::ExtractSkeleton(const aiMesh* assimpMesh) noexcep
 		}
 
 		const int boneParentIndex = out_Skeleton.GetBoneIndex(assimpParentBoneNode->mName.C_Str());
-		RPG_PLATFORM_Check(boneParentIndex != RPG_SKELETON_BONE_INDEX_INVALID && boneParentIndex < boneIndex);
+		RPG_Check(boneParentIndex != RPG_SKELETON_BONE_INDEX_INVALID && boneParentIndex < boneIndex);
 		out_Skeleton.BoneParentIndices[boneIndex] = boneParentIndex;
 	};
 
@@ -320,7 +320,7 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 			const uint32_t meshIndex = assimpNode->mMeshes[m];
 			const aiMesh* assimpMesh = assimpScene->mMeshes[meshIndex];
 			const int assimpBoneCount = static_cast<int>(assimpMesh->mNumBones);
-			RPG_PLATFORM_Check(assimpBoneCount <= RPG_SKELETON_MAX_BONE);
+			RPG_Check(assimpBoneCount <= RPG_SKELETON_MAX_BONE);
 
 			if (assimpBoneCount > 0)
 			{
@@ -355,10 +355,10 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 			const bool bHasVertexIndex = assimpMesh->HasFaces();
 
 			const int assimpVertexCount = static_cast<int>(assimpMesh->mNumVertices);
-			RPG_PLATFORM_Check(assimpVertexCount > 0);
+			RPG_Check(assimpVertexCount > 0);
 
 			const int assimpIndexCount = static_cast<int>(assimpMesh->mNumFaces * 3);
-			RPG_PLATFORM_Check(assimpIndexCount > 0 && assimpIndexCount % 3 == 0);
+			RPG_Check(assimpIndexCount > 0 && assimpIndexCount % 3 == 0);
 
 			// Vertex position
 			tempVertexPositions.Clear();
@@ -405,11 +405,11 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 
 			// Vertex skin
 			const int assimpBoneCount = static_cast<int>(assimpMesh->mNumBones);
-			RPG_PLATFORM_Check(assimpBoneCount <= RPG_SKELETON_MAX_BONE);
+			RPG_Check(assimpBoneCount <= RPG_SKELETON_MAX_BONE);
 
 			if (assimpBoneCount > 0)
 			{
-				RPG_PLATFORM_Check(ImportedSkeleton);
+				RPG_Check(ImportedSkeleton);
 
 				tempVertexSkins.Clear();
 				tempVertexSkins.Resize(assimpVertexCount);
@@ -419,7 +419,7 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 					const aiBone* assimpBone = assimpMesh->mBones[b];
 
 					const int boneIndex = ImportedSkeleton->GetBoneIndex(assimpBone->mName.C_Str());
-					RPG_PLATFORM_Check(boneIndex != RPG_SKELETON_BONE_INDEX_INVALID);
+					RPG_Check(boneIndex != RPG_SKELETON_BONE_INDEX_INVALID);
 
 					const int assimpWeightCount = static_cast<int>(assimpBone->mNumWeights);
 					for (int w = 0; w < assimpWeightCount; ++w)
@@ -429,7 +429,7 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 
 						RpgVertex::FMeshSkin& vertexSkin = tempVertexSkins[vtxId];
 						const uint8_t i = vertexSkin.BoneCount++;
-						RPG_PLATFORM_Check(i < 8);
+						RPG_Check(i < 8);
 
 						if (i < 4)
 						{
@@ -452,11 +452,11 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 					{
 						if (b < 4)
 						{
-							RPG_PLATFORM_Check(skin.BoneIndices0[b] != 0);
+							RPG_Check(skin.BoneIndices0[b] != 0);
 						}
 						else
 						{
-							RPG_PLATFORM_Check(skin.BoneIndices1[b - 4] != 0);
+							RPG_Check(skin.BoneIndices1[b - 4] != 0);
 						}
 					}
 				}
@@ -509,7 +509,7 @@ void RpgAsyncTask_ImportModel::ExtractAnimations(const aiScene* assimpScene) noe
 			clipName = RpgName::Format("ANIM_import_%i", i);
 		}
 
-		RPG_PLATFORM_Check(assimpAnimation->mTicksPerSecond > 0.0);
+		RPG_Check(assimpAnimation->mTicksPerSecond > 0.0);
 		const float durationInSeconds = static_cast<float>(assimpAnimation->mDuration / assimpAnimation->mTicksPerSecond);
 		RpgSharedAnimationClip animClip = RpgAnimationClip::s_CreateShared(clipName, durationInSeconds);
 
@@ -571,7 +571,7 @@ void RpgAsyncTask_ImportModel::Reset() noexcept
 
 void RpgAsyncTask_ImportModel::Execute() noexcept
 {
-	RPG_PLATFORM_Check(SourceFilePath.IsFilePath());
+	RPG_Check(SourceFilePath.IsFilePath());
 
 	Assimp::Importer assimpImporter;
 	assimpImporter.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, Scale);

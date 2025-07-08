@@ -64,6 +64,30 @@ public:
 	}
 
 public:
+	inline RpgPointInt operator+(const RpgPointInt& rhs) const noexcept
+	{
+		return RpgPointInt(X + rhs.X, Y + rhs.Y);
+	}
+
+	inline RpgPointInt& operator+=(const RpgPointInt& rhs) noexcept
+	{
+		X += rhs.X;
+		Y += rhs.Y;
+		return *this;
+	}
+
+	inline RpgPointInt operator-(const RpgPointInt& rhs) const noexcept
+	{
+		return RpgPointInt(X - rhs.X, Y - rhs.Y);
+	}
+
+	inline RpgPointInt& operator-=(const RpgPointInt& rhs) noexcept
+	{
+		X -= rhs.X;
+		Y -= rhs.Y;
+		return *this;
+	}
+
 	inline bool operator==(const RpgPointInt& rhs) const noexcept
 	{
 		return X == rhs.X && Y == rhs.Y;
@@ -94,7 +118,32 @@ public:
 	{
 	}
 
+
 public:
+	inline RpgPointFloat operator+(const RpgPointFloat& rhs) const noexcept
+	{
+		return RpgPointFloat(X + rhs.X, Y + rhs.Y);
+	}
+
+	inline RpgPointFloat& operator+=(const RpgPointFloat& rhs) noexcept
+	{
+		X += rhs.X;
+		Y += rhs.Y;
+		return *this;
+	}
+
+	inline RpgPointFloat operator-(const RpgPointFloat& rhs) const noexcept
+	{
+		return RpgPointFloat(X - rhs.X, Y - rhs.Y);
+	}
+
+	inline RpgPointFloat& operator-=(const RpgPointFloat& rhs) noexcept
+	{
+		X -= rhs.X;
+		Y -= rhs.Y;
+		return *this;
+	}
+
 	inline bool operator==(const RpgPointFloat& rhs) const noexcept
 	{
 		return X == rhs.X && Y == rhs.Y;

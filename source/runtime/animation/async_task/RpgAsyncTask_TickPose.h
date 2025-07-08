@@ -1,7 +1,11 @@
 #pragma once
 
 #include "core/RpgThreadPool.h"
-#include "../RpgAnimationComponent.h"
+#include "core/dsa/RpgArray.h"
+
+
+class RpgWorld;
+class RpgAnimationComponent;
 
 
 

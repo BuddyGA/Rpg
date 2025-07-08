@@ -78,19 +78,7 @@
     <ClCompile Include="source\runtime\game\RpgGameApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgGameState_Editor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgGameState_Intro.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgGameState_MainMenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\runtime\render\RpgRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgGameState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgSceneViewport.cpp">
@@ -126,16 +114,13 @@
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\game\RpgPlayerCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\runtime\render\RpgFont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\gui\RpgGuiContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\navigation\RpgNavigationWorldSubsystem.cpp">
+    <ClCompile Include="source\runtime\navigation\world\RpgNavigationWorldSubsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\thirdparty\clay\__clay__build.cpp">
@@ -183,13 +168,13 @@
     <ClCompile Include="source\runtime\animation\RpgAnimationClip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\animation\RpgAnimationWorldSubsystem.cpp">
+    <ClCompile Include="source\runtime\animation\world\RpgAnimationWorldSubsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\collision\RpgCollisionWorldSubsystem.cpp">
+    <ClCompile Include="source\runtime\physics\world\RpgPhysicsWorldSubsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\RpgRenderWorldSubsystem.cpp">
+    <ClCompile Include="source\runtime\render\world\RpgRenderWorldSubsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\core\RpgTypes.cpp">
@@ -210,7 +195,13 @@
     <ClCompile Include="source\runtime\render\RpgRenderResource_MeshSkinned.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\RpgRenderThread.cpp">
+    <ClCompile Include="source\runtime\render\world\RpgRenderComponent_Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\game\script\RpgScriptCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\input\RpgInputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -296,9 +287,6 @@
     <ClInclude Include="source\runtime\game\RpgGameApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\game\RpgGameState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\runtime\render\RpgRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -326,16 +314,13 @@
     <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Compute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\game\RpgPlayerCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\runtime\render\RpgFont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\gui\RpgGuiContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\navigation\RpgNavigationWorldSubsystem.h">
+    <ClInclude Include="source\runtime\navigation\world\RpgNavigationWorldSubsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\gui\RpgGuiWidget.h">
@@ -389,13 +374,13 @@
     <ClInclude Include="source\runtime\render\RpgRenderTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\animation\RpgAnimationWorldSubsystem.h">
+    <ClInclude Include="source\runtime\animation\world\RpgAnimationWorldSubsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\collision\RpgCollisionWorldSubsystem.h">
+    <ClInclude Include="source\runtime\physics\world\RpgPhysicsWorldSubsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\collision\RpgCollisionTypes.h">
+    <ClInclude Include="source\runtime\physics\RpgPhysicsTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\animation\RpgAnimationTypes.h">
@@ -404,19 +389,16 @@
     <ClInclude Include="source\runtime\navigation\RpgNavigationTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\RpgRenderWorldSubsystem.h">
+    <ClInclude Include="source\runtime\render\world\RpgRenderWorldSubsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\RpgRenderComponent.h">
+    <ClInclude Include="source\runtime\render\world\RpgRenderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\collision\RpgCollisionComponent.h">
+    <ClInclude Include="source\runtime\physics\world\RpgPhysicsComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\animation\RpgAnimationComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\runtime\game\RpgGameTypes.h">
+    <ClInclude Include="source\runtime\animation\world\RpgAnimationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\core\RpgAssetFile.h">
@@ -426,6 +408,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\asset\async_task\RpgAssimpTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\game\script\RpgScriptCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\input\RpgInputTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\input\RpgInputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\game\world\RpgAttributeComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\game\world\RpgAttributeWorldSubsystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

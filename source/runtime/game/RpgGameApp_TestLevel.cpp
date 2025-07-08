@@ -1,8 +1,8 @@
 #include "RpgGameApp.h"
 #include "asset/RpgAssetImporter.h"
 #include "core/world/RpgWorld.h"
-#include "render/RpgRenderComponent.h"
-#include "animation/RpgAnimationComponent.h"
+#include "render/world/RpgRenderComponent.h"
+#include "animation/world/RpgAnimationComponent.h"
 
 
 
@@ -28,9 +28,9 @@ static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 	const RpgGameObjectID box0 = world->GameObject_Create("box_0", RpgTransform());
 	{
 		// Add render component
-		RpgRenderComponent_Mesh& meshComp = world->GameObject_AddComponent<RpgRenderComponent_Mesh>(box0);
-		meshComp.Model = boxModel;
-		meshComp.bIsVisible = true;
+		RpgRenderComponent_Mesh* meshComp = world->GameObject_AddComponent<RpgRenderComponent_Mesh>(box0);
+		meshComp->Model = boxModel;
+		meshComp->bIsVisible = true;
 	}
 }
 
@@ -59,18 +59,18 @@ static void TestLevel_OBJ(RpgWorld* world, const RpgFilePath& sourceFilePath, fl
 		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(0.0f, 0.0f, 0.0f);
 
 		RpgGameObjectID gameObject = world->GameObject_Create(model->GetName(), transform);
-		RpgRenderComponent_Mesh& meshComp = world->GameObject_AddComponent<RpgRenderComponent_Mesh>(gameObject);
-		meshComp.Model = model;
-		meshComp.bIsVisible = true;
+		RpgRenderComponent_Mesh* meshComp = world->GameObject_AddComponent<RpgRenderComponent_Mesh>(gameObject);
+		meshComp->Model = model;
+		meshComp->bIsVisible = true;
 
 		if (model->HasSkin())
 		{
 			RPG_PLATFORM_Check(importedSkeleton);
-			RpgAnimationComponent& animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
-			animComp.SetSkeleton(importedSkeleton);
-			animComp.Clip = importedAnimations[0];
-			animComp.PlayRate = 1.0f;
-			animComp.bLoopAnim = true;
+			RpgAnimationComponent* animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
+			animComp->SetSkeleton(importedSkeleton);
+			animComp->Clip = importedAnimations[0];
+			animComp->PlayRate = 1.0f;
+			animComp->bLoopAnim = true;
 		}
 	}
 
@@ -126,15 +126,15 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 
 			RpgGameObjectID gameObject = world->GameObject_Create(RpgName::Format("test_%i_%i", x, z), transform);
 
-			RpgRenderComponent_Mesh& meshComp = world->GameObject_AddComponent<RpgRenderComponent_Mesh>(gameObject);
-			meshComp.Model = models[modelIndex];
-			meshComp.bIsVisible = true;
+			RpgRenderComponent_Mesh* meshComp = world->GameObject_AddComponent<RpgRenderComponent_Mesh>(gameObject);
+			meshComp->Model = models[modelIndex];
+			meshComp->bIsVisible = true;
 
-			RpgAnimationComponent& animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
-			animComp.SetSkeleton(skeletons[modelIndex]);
-			animComp.Clip = animationClips[modelIndex];
-			animComp.PlayRate = 1.5f;
-			animComp.bLoopAnim = true;
+			RpgAnimationComponent* animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
+			animComp->SetSkeleton(skeletons[modelIndex]);
+			animComp->Clip = animationClips[modelIndex];
+			animComp->PlayRate = 1.5f;
+			animComp->bLoopAnim = true;
 
 			spawnPos.Z += OFFSET;
 			modelIndex = (modelIndex + 1) % 2;
@@ -148,7 +148,7 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 void RpgGameApp::CreateTestLevel() noexcept
 {
 	//TestLevel_PrimitiveShapes(MainWorld);
-	TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sponza_phong/sponza.obj", 1.0f);
+	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sponza_phong/sponza.obj", 1.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/san_miguel/san-miguel-low-poly.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/lost_empire/lost_empire.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/sibenik/sibenik.obj", 100.0f);

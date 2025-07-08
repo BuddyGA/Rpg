@@ -1,7 +1,7 @@
 #include "RpgWorld.h"
 
 
-RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogWorld, VERBOSITY_LOG)
+RPG_PLATFORM_LOG_DEFINE_CATEGORY(RpgLogWorld, VERBOSITY_DEBUG)
 
 
 
@@ -11,6 +11,7 @@ RpgWorld::RpgWorld(const RpgName& name) noexcept
 
     Name = name;
     bHasStartedPlay = false;
+    FrameIndex = 0;
 }
 
 
@@ -18,7 +19,7 @@ RpgWorld::~RpgWorld() noexcept
 {
     RPG_PLATFORM_LogDebug(RpgLogWorld, "Destroy world (%s)", *Name);
 
-    for (int i = 0; i < RPG_COMPONENT_TYPE_MAX_COUNT; ++i)
+    for (int i = 0; i < ComponentStorages.GetCount(); ++i)
     {
         if (ComponentStorages[i])
         {
@@ -31,6 +32,47 @@ RpgWorld::~RpgWorld() noexcept
     {
         RPG_PLATFORM_LogDebug(RpgLogWorld, "Destroy subsystem (%s)", *Subsystems[i]->Name);
         delete Subsystems[i];
+    }
+}
+
+
+void RpgWorld::BeginFrame(int frameIndex) noexcept
+{
+    FrameIndex = frameIndex;
+    FFrameData& frame = FrameDatas[FrameIndex];
+
+    for (int i = 0; i < frame.PendingDestroyScripts.GetCount(); ++i)
+    {
+        RPG_PLATFORM_Assert(frame.PendingDestroyScripts[i]);
+        delete frame.PendingDestroyScripts[i];
+    }
+    frame.PendingDestroyScripts.Clear();
+
+    for (int i = 0; i < frame.PendingDestroyObjects.GetCount(); ++i)
+    {
+        const int index = frame.PendingDestroyObjects[i];
+        FGameObjectInfo& info = GameObjectInfos[index];
+
+        for (int c = 0; c < RPG_COMPONENT_TYPE_MAX_COUNT; ++c)
+        {
+            if (info.ComponentIndices[c] != RPG_COMPONENT_ID_INVALID)
+            {
+                ComponentStorages[c]->Remove(info.ComponentIndices[c]);
+                info.ComponentIndices[c] = RPG_COMPONENT_ID_INVALID;
+            }
+        }
+
+        info.Flags = 0;
+    }
+}
+
+
+void RpgWorld::EndFrame(int frameIndex) noexcept
+{
+    for (auto it = GameObjectInfos.CreateIterator(); it; ++it)
+    {
+        FGameObjectInfo& gameObjectInfo = it.GetValue();
+        gameObjectInfo.Flags &= ~FLAG_TransformUpdated;
     }
 }
 
@@ -126,16 +168,6 @@ void RpgWorld::DispatchRender(int frameIndex, RpgRenderer* renderer) noexcept
 }
 
 
-void RpgWorld::PostRender() noexcept
-{
-    for (auto it = GameObjectInfos.CreateIterator(); it; ++it)
-    {
-        FGameObjectInfo& gameObjectInfo = it.GetValue();
-        gameObjectInfo.Flags &= ~FLAG_TransformUpdated;
-    }
-}
-
-
 RpgGameObjectID RpgWorld::GameObject_Create(const RpgName& name, const RpgTransform& worldTransform) noexcept
 {
     RPG_IsMainThread();
@@ -152,16 +184,13 @@ RpgGameObjectID RpgWorld::GameObject_Create(const RpgName& name, const RpgTransf
     GameObjectNames[nameId] = name;
     
     FGameObjectInfo& info = GameObjectInfos[infoId];
-    info.ComponentTypes = 0;
-
-    for (int i = 0; i < RPG_COMPONENT_TYPE_MAX_COUNT; ++i)
-    {
-        info.ComponentIndices[i] = RPG_COMPONENT_ID_INVALID;
-    }
+    RpgPlatformMemory::MemSet(info.ComponentIndices, RPG_COMPONENT_ID_INVALID, sizeof(uint16_t) * RPG_COMPONENT_TYPE_MAX_COUNT);
 
     ++info.Gen;
     info.Flags = FLAG_Allocated | FLAG_TransformUpdated;
     RPG_PLATFORM_Check(info.Gen < UINT16_MAX);
+
+    RpgPlatformMemory::MemSet(info.ScriptIndices, RPG_INDEX_INVALID, sizeof(int16_t) * RPG_GAMEOBJECT_MAX_SCRIPT);
 
     FGameObjectTransform& transform = GameObjectTransforms[transformId];
     transform.LocalMatrix = RpgMatrixTransform();
@@ -176,12 +205,26 @@ void RpgWorld::GameObject_Destroy(RpgGameObjectID& gameObject) noexcept
 {
     RPG_IsMainThread();
 
-    if (!GameObject_IsValid(gameObject))
+    if (GameObject_IsValid(gameObject))
     {
-        return;
+        FGameObjectInfo& info = GameObjectInfos[gameObject.Index];
+        info.Flags |= FLAG_PendingDestroy;
+
+        // cleanup scripts
+        for (int i = 0; i < RPG_GAMEOBJECT_MAX_SCRIPT; ++i)
+        {
+            const int scriptIndex = info.ScriptIndices[i];
+            if (scriptIndex != RPG_INDEX_INVALID)
+            {
+                RemoveGameObjectScriptAtIndex(scriptIndex);
+                info.ScriptIndices[i] = RPG_INDEX_INVALID;
+            }
+        }
+
+        FrameDatas[FrameIndex].PendingDestroyObjects.AddValue(gameObject.Index);
+
+        RPG_PLATFORM_LogDebug(RpgLogWorld, "Mark game object (%s) as pending destroy", *GameObjectNames[gameObject.Index]);
     }
-
-
 
     gameObject = RpgGameObjectID();
 }

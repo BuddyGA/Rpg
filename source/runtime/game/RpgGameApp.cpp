@@ -1,15 +1,17 @@
 #include "RpgGameApp.h"
-#include "RpgGameState.h"
 #include "core/RpgCommandLine.h"
+#include "input/RpgInputManager.h"
+#include "physics/world/RpgPhysicsComponent.h"
+#include "physics/world/RpgPhysicsWorldSubsystem.h"
 #include "render/RpgRenderer.h"
 #include "render/RpgSceneViewport.h"
-#include "collision/RpgCollisionComponent.h"
-#include "collision/RpgCollisionWorldSubsystem.h"
-#include "render/RpgRenderComponent.h"
-#include "render/RpgRenderWorldSubsystem.h"
-#include "animation/RpgAnimationComponent.h"
-#include "animation/RpgAnimationWorldSubsystem.h"
+#include "render/world/RpgRenderComponent.h"
+#include "render/world/RpgRenderWorldSubsystem.h"
+#include "animation/world/RpgAnimationComponent.h"
+#include "animation/world/RpgAnimationWorldSubsystem.h"
 #include "gui/RpgGuiContext.h"
+#include "script/RpgScriptCamera.h"
+
 
 
 
@@ -42,22 +44,24 @@ RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
 	NativeWindowHandle = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(Window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
 	RpgPlatformProcess::SetMainWindowHandle(NativeWindowHandle);
 
+	// input manager
+	InputManager = new RpgInputManager();
 
 	// main world
 	{
 		MainWorld = new RpgWorld("world_main");
 
 		// Subsystems
-		MainWorld->Subsystem_Add<RpgCollisionWorldSubsystem>(0);
+		MainWorld->Subsystem_Add<RpgPhysicsWorldSubsystem>(0);
 		MainWorld->Subsystem_Add<RpgAnimationWorldSubsystem>(1);
 		MainWorld->Subsystem_Add<RpgRenderWorldSubsystem>(2);
 
 		// Components
-		MainWorld->Component_AddStorage<RpgCollisionComponent_Primitive>();
-		MainWorld->Component_AddStorage<RpgRenderComponent_Camera>();
-		MainWorld->Component_AddStorage<RpgRenderComponent_Mesh>();
-		MainWorld->Component_AddStorage<RpgRenderComponent_Light>();
-		MainWorld->Component_AddStorage<RpgAnimationComponent>();
+		MainWorld->Component_Register<RpgPhysicsComponent_Collision>();
+		MainWorld->Component_Register<RpgRenderComponent_Camera>();
+		MainWorld->Component_Register<RpgRenderComponent_Mesh>();
+		MainWorld->Component_Register<RpgRenderComponent_Light>();
+		MainWorld->Component_Register<RpgAnimationComponent>();
 	}
 
 
@@ -70,23 +74,7 @@ RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
 	// gui context
 	GuiContext = new RpgGuiContext();
 
-	// game state
-	GameStateMachine = new RpgGameStateMachine();
-
-	// cameras
-	const RpgRectInt cameraViewportRect(0, 0, windowResolution.X, windowResolution.Y);
-
-	CameraFreeFly.SetRotationPitchYaw(70.0f, 0.0f);
-	CameraFreeFly.SetPosition(RpgVector3(0.0f, 300.0f, -200.0f));
-	CameraFreeFly.SetViewportRect(cameraViewportRect);
-
-	CameraTopDown.SetRotationPitchYaw(70.0f, 0.0f);
-	CameraTopDown.SetPosition(RpgVector3(0.0f, 300.0f, -200.0f));
-	CameraTopDown.SetViewportRect(cameraViewportRect);
-
-	CameraActive = &CameraFreeFly;
-	CameraActive->Activated();
-
+	// fps info
 	FpsLimit = 60;
 	FpsSampleTimer = 0.0f;
 	FpsSampleFrameCount = 0;
@@ -97,11 +85,11 @@ RpgGameApp::RpgGameApp(const char* windowTitle) noexcept
 
 RpgGameApp::~RpgGameApp() noexcept
 {
-	delete GameStateMachine;
 	delete GuiContext;
 	delete Viewport;
 	delete Renderer;
 	delete MainWorld;
+	delete InputManager;
 
 	SDL_DestroyWindow(Window);
 }
@@ -111,37 +99,32 @@ void RpgGameApp::Initialize() noexcept
 {
 	CreateTestLevel();
 
-	GameStateMachine->SetState("EDITOR");
+	MainCamera = MainWorld->GameObject_Create("camera_main");
+	MainWorld->GameObject_AddScript<RpgScriptCamera>(MainCamera);
 }
 
 
 void RpgGameApp::WindowSizeChanged(const SDL_WindowEvent& e) noexcept
 {
 	const RpgRectInt cameraViewportRect(0, 0, e.data1, e.data2);
-	CameraFreeFly.SetViewportRect(cameraViewportRect);
-	CameraTopDown.SetViewportRect(cameraViewportRect);
 }
 
 
 void RpgGameApp::MouseMove(const SDL_MouseMotionEvent& e) noexcept
 {
-	GameStateMachine->GetCurrentState<RpgGameState>()->MouseMove(e);
-	CameraActive->MouseMove(e);
+	InputManager->MouseMove(e);
 }
 
 
 void RpgGameApp::MouseButton(const SDL_MouseButtonEvent& e) noexcept
 {
-	GameStateMachine->GetCurrentState<RpgGameState>()->MouseButton(e);
-	CameraActive->MouseButton(e);
+	InputManager->MouseButton(e);
 }
 
 
 void RpgGameApp::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 {
-	GameStateMachine->GetCurrentState<RpgGameState>()->KeyboardButton(e);
-
-	CameraActive->KeyboardButton(e);
+	InputManager->KeyboardButton(e);
 
 	if (e.down)
 	{
@@ -206,6 +189,12 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 	}
 
 
+	// Begin frame
+	{
+		MainWorld->BeginFrame(frameIndex);
+	}
+
+
 	// GUI
 	{
 		GuiContext->Begin(RpgRectInt(0, 0, windowDimension.X, windowDimension.Y));
@@ -218,9 +207,7 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 
 	// Tick update
 	{
-		GameStateMachine->TickUpdate(deltaTime);
 		MainWorld->DispatchTickUpdate(deltaTime);
-		CameraActive->TickUpdate(deltaTime);
 	}
 
 
@@ -234,7 +221,8 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 	Renderer->BeginRender(frameIndex, deltaTime);
 	{
 		// Setup main scene viewport
-		Viewport->SetCameraRotationAndPosition(CameraActive->GetRotationQuaternion(), CameraActive->GetPosition());
+		const RpgTransform mainCameraTransform = MainWorld->GameObject_GetWorldTransform(MainCamera);
+		Viewport->SetCameraRotationAndPosition(mainCameraTransform.Rotation, mainCameraTransform.Position);
 		Viewport->RenderTargetDimension = windowDimension;
 
 		Renderer->RegisterWorld(MainWorld);
@@ -254,12 +242,12 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 		{
 			static RpgString debugInfoText;
 
+			/*
 			const RpgVector3 position = CameraActive->GetPosition();
 			float pitch, yaw;
 			CameraActive->GetRotationPitchYaw(pitch, yaw);
 
 			debugInfoText = RpgString::Format(
-				"GameState: %s\n"
 				"CameraMode: %s\n"
 				"CameraPosition: %.2f, %.2f, %.2f\n"
 				"CameraPitchYaw: %.2f, %.2f\n"
@@ -268,7 +256,6 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 				"VSync: %d\n"
 				"\n"
 				"GameObject: %i\n"
-				, *GameStateMachine->GetCurrentState<RpgGameState>()->GetName()
 				, CameraActive == &CameraFreeFly ? "FREE_FLY" : "TOP_DOWN"
 				, position.X, position.Y, position.Z
 				, pitch, yaw
@@ -279,6 +266,7 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 			);
 
 			r2.AddText(*debugInfoText, debugInfoText.GetLength(), 8, 16, RpgColorRGBA(255, 255, 255));
+			*/
 		}
 
 		// Fps info
@@ -304,6 +292,7 @@ void RpgGameApp::FrameTick(int frameIndex, float deltaTime) noexcept
 	Renderer->EndRender(frameIndex);
 
 
-	// Post render
-	MainWorld->PostRender();
+	// End frame
+	MainWorld->EndFrame(frameIndex);
+	InputManager->Flush();
 }

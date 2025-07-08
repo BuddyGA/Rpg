@@ -1,10 +1,8 @@
 #include "RpgSceneViewport.h"
 #include "core/world/RpgWorld.h"
-#include "RpgRenderPipeline.h"
-#include "RpgRenderComponent.h"
+#include "world/RpgRenderComponent.h"
 #include "async_task/RpgAsyncTask_RenderPass.h"
-#include "animation/RpgAnimationComponent.h"
-#include <algorithm>
+#include "animation/world/RpgAnimationComponent.h"
 
 
 

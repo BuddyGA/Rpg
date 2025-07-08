@@ -1,14 +1,14 @@
 #pragma once
 
 #include "core/RpgString.h"
-#include "RpgPlayerCamera.h"
+#include "core/world/RpgGameObject.h"
 
 
+class RpgInputManager;
 class RpgWorld;
 class RpgRenderer;
 class RpgSceneViewport;
 class RpgGuiContext;
-class RpgGameStateMachine;
 
 
 
@@ -21,25 +21,22 @@ private:
 	SDL_Window* Window;
 	HWND NativeWindowHandle;
 
+	// Input
+	RpgInputManager* InputManager;
+
 	// Main world
 	RpgWorld* MainWorld;
 
 	// Main renderer
 	RpgRenderer* Renderer;
 	
-	// Scene viewport
+	// Main scene viewport
 	RpgSceneViewport* Viewport;
 
 	// GUI context
 	RpgGuiContext* GuiContext;
 
-	// Game state
-	RpgGameStateMachine* GameStateMachine;
-
-	// Cameras
-	RpgPlayerCameraFreeFly CameraFreeFly;
-	RpgPlayerCameraTopDown CameraTopDown;
-	RpgPlayerCamera* CameraActive;
+	RpgGameObjectID MainCamera;
 
 
 public:
@@ -93,30 +90,9 @@ public:
 	}
 
 
-private:
-	inline void SetCameraActive(RpgPlayerCamera* camera) noexcept
+	[[nodiscard]] inline RpgInputManager* GetInputManager() const noexcept
 	{
-		if (CameraActive != camera)
-		{
-			if (CameraActive)
-			{
-				CameraActive->Deactivated();
-			}
-
-			CameraActive = camera;
-			CameraActive->Activated();
-		}
-	}
-
-public:
-	inline void SetCameraFreeFly() noexcept
-	{
-		SetCameraActive(&CameraFreeFly);
-	}
-
-	inline void SetCameraTopDown() noexcept
-	{
-		SetCameraActive(&CameraTopDown);
+		return InputManager;
 	}
 
 

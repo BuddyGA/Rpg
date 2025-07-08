@@ -52,8 +52,17 @@ public:
 };
 
 
+#define RPG_GAMEOBJECT_MAX_SCRIPT		4
 
-class RpgGameObjectScript
+
+#define RPG_GAMEOBJECT_SCRIPT(name)				\
+public:											\
+static constexpr const char* TYPE_NAME = name;	\
+friend RpgWorld;
+
+
+
+class RpgGameObjectScript abstract
 {
 	RPG_NOCOPY(RpgGameObjectScript)
 
@@ -65,17 +74,17 @@ private:
 	bool bHasStartedPlay;
 
 
-private:
+protected:
 	RpgGameObjectScript() noexcept
 	{
 		World = nullptr;
 		bHasStartedPlay = false;
 	}
 
-public:
 	virtual ~RpgGameObjectScript() noexcept = default;
 
-protected:
+	virtual void Initialize() noexcept {}
+	virtual void Destroy() noexcept {}
 	virtual void StartPlay() noexcept {}
 	virtual void StopPlay() noexcept {}
 	virtual void TickUpdate(float deltaTime) noexcept {}

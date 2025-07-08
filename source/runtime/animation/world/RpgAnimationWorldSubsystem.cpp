@@ -2,7 +2,7 @@
 #include "RpgAnimationComponent.h"
 #include "render/RpgRenderer.h"
 #include "render/RpgRenderer2D.h"
-#include "async_task/RpgAsyncTask_TickPose.h"
+#include "../async_task/RpgAsyncTask_TickPose.h"
 
 
 

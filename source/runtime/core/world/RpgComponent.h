@@ -4,16 +4,21 @@
 #include "RpgGameObject.h"
 
 
-#define RPG_COMPONENT_ID_INVALID		-1
-#define RPG_COMPONENT_TYPE_MAX_COUNT	8
+class RpgWorld;
 
 
-#define RPG_COMPONENT_TYPE(id, name)			\
-static constexpr uint16_t TYPE_ID = id;			\
-static constexpr const char* TYPE_NAME = name;	\
-typedef int ID;									\
-public:											\
-RpgGameObjectID GameObject;		
+#define RPG_COMPONENT_ID_INVALID		UINT16_MAX
+#define RPG_COMPONENT_TYPE_MAX_COUNT	16
+
+
+
+#define RPG_COMPONENT_TYPE(name)																	\
+friend RpgWorld;																					\
+private:																							\
+inline static uint16_t TYPE_ID = UINT16_MAX;														\
+public:																								\
+static constexpr const char* TYPE_NAME = name;														\
+RpgGameObjectID GameObject;
 
 
 
@@ -25,6 +30,8 @@ class RpgComponentStorageInterface
 public:
 	RpgComponentStorageInterface() noexcept = default;
 	virtual ~RpgComponentStorageInterface() noexcept = default;
+
+	virtual void Remove(int index) noexcept = 0;
 
 };
 
@@ -55,7 +62,7 @@ public:
 		return Components.Add();
 	}
 
-	inline void Remove(int id) noexcept 
+	virtual void Remove(int id) noexcept override
 	{
 		Components.RemoveAt(id);
 	}

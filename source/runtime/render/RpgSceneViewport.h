@@ -61,6 +61,26 @@ public:
 		out_Position = CameraPosition;
 	}
 
+
+	inline void SetProjectionPerspective(float in_FovDegree, float in_NearClipZ, float in_FarClipZ) noexcept
+	{
+		CameraFovDegree = in_FovDegree;
+		CameraNearClipZ = in_NearClipZ;
+		CameraFarClipZ = in_FarClipZ;
+		bOrthographicProjection = false;
+		bDirtyProjection = true;
+	}
+
+
+	inline void SetProjectionOrthographic(float in_NearClipZ, float in_FarClipZ) noexcept
+	{
+		CameraNearClipZ = in_NearClipZ;
+		CameraFarClipZ = in_FarClipZ;
+		bOrthographicProjection = true;
+		bDirtyProjection = true;
+	}
+
+
 	[[nodiscard]] inline const RpgSharedTexture2D& GetRenderTargetTexture(int frameIndex) const noexcept
 	{
 		return FrameDatas[frameIndex].RenderTargetTexture;

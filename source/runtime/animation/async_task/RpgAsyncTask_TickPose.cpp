@@ -1,5 +1,6 @@
 #include "RpgAsyncTask_TickPose.h"
 #include "core/world/RpgWorld.h"
+#include "../world/RpgAnimationComponent.h"
 
 
 

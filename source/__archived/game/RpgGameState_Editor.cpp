@@ -26,11 +26,9 @@ void RpgGameState_Editor::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 	{
 		if (e.scancode == SDL_SCANCODE_F1)
 		{
-			g_GameApp->SetCameraFreeFly();
 		}
 		else if (e.scancode == SDL_SCANCODE_F2)
 		{
-			g_GameApp->SetCameraTopDown();
 		}
 	}
 }

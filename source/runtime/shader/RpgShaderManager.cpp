@@ -142,7 +142,14 @@ public:
 				RPG_PLATFORM_Check(major >= 1 && minor >= 8);
 			}
 		}
+
+		if (fileVersionData)
+		{
+			RpgPlatformMemory::MemFree(fileVersionData);
+			fileVersionData = nullptr;
+		}
 	#endif // RPG_BUILD_DEBUG
+
 
 		ComPtr<IDxcUtils> dxcUtils;
 		RPG_SHADER_Check(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils)));

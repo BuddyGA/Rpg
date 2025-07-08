@@ -1,6 +1,7 @@
 #include "RpgRenderWorldSubsystem.h"
 #include "RpgRenderComponent.h"
-#include "RpgRenderer.h"
+#include "../RpgSceneViewport.h"
+#include "../RpgRenderer.h"
 
 
 
@@ -29,16 +30,60 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
         // transform bound into world space
         comp.Bound = RpgBoundingBox(comp.Bound, world->GameObject_GetWorldTransformMatrix(comp.GameObject)).ToAABB();
     }
+
+
+	for (auto it = world->Component_CreateIterator<RpgRenderComponent_Camera>(); it; ++it)
+	{
+		RpgRenderComponent_Camera& comp = it.GetValue();
+		if (!comp.bActivated)
+		{
+			continue;
+		}
+
+		if (comp.SceneViewport == nullptr)
+		{
+			comp.SceneViewport = new RpgSceneViewport();
+		}
+
+		RpgSceneViewport* sceneViewport = comp.SceneViewport;
+		sceneViewport->RenderTargetDimension = comp.RenderTargetDimension;
+		
+		const RpgTransform worldTransform(world->GameObject_GetWorldTransformMatrix(comp.GameObject));
+		sceneViewport->SetCameraRotationAndPosition(worldTransform.Rotation, worldTransform.Position);
+
+		if (comp.ProjectionMode == RpgRenderProjectionMode::PERSPECTIVE)
+		{
+			sceneViewport->SetProjectionPerspective(comp.PerspectiveFoVDegree, comp.NearClipZ, comp.FarClipZ);
+		}
+		else
+		{
+			sceneViewport->SetProjectionOrthographic(comp.NearClipZ, comp.FarClipZ);
+		}
+
+		sceneViewport->bFrustumCulling = comp.bFrustumCulling;
+	}
 }
 
 
 void RpgRenderWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) noexcept
 {
+	const RpgWorld* world = GetWorld();
+
+	for (auto it = world->Component_CreateConstIterator<RpgRenderComponent_Camera>(); it; ++it)
+	{
+		const RpgRenderComponent_Camera& comp = it.GetValue();
+		if (!comp.bActivated)
+		{
+			continue;
+		}
+
+		renderer->AddWorldViewport(frameIndex, world, comp.SceneViewport);
+	}
+
 
 #ifndef RPG_BUILD_SHIPPING
 	if (bDebugDrawMeshBounds)
 	{
-		RpgWorld* world = GetWorld();
 		RpgVertexPrimitiveBatchLine* debugLine = renderer->Debug_GetPrimitiveBatchLine(frameIndex, world, false);
 
 		for (auto it = world->Component_CreateConstIterator<RpgRenderComponent_Mesh>(); it; ++it)

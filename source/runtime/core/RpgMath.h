@@ -715,6 +715,12 @@ public:
 	{
 	}
 
+	RpgTransform(const RpgMatrixTransform& matrix) noexcept
+	{
+		matrix.Decompose(Position, Rotation, Scale);
+	}
+
+
 public:
 	[[nodiscard]] inline RpgMatrixTransform ToMatrixTransform() const noexcept
 	{

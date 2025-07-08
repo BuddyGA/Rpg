@@ -1,5 +1,5 @@
-#include "RpgCollisionWorldSubsystem.h"
-#include "RpgCollisionComponent.h"
+#include "RpgPhysicsWorldSubsystem.h"
+#include "RpgPhysicsComponent.h"
 #include "thirdparty/libccd/ccd.h"
 
 
@@ -68,26 +68,26 @@ namespace RpgCollisionGJK
 
 
 
-RpgCollisionWorldSubsystem::RpgCollisionWorldSubsystem() noexcept
+RpgPhysicsWorldSubsystem::RpgPhysicsWorldSubsystem() noexcept
 {
-	Name = "CollisionWorldSubsystem";
+	Name = "PhysicsWorldSubsystem";
 	bTickUpdateCollision = false;
 }
 
 
-void RpgCollisionWorldSubsystem::StartPlay() noexcept
+void RpgPhysicsWorldSubsystem::StartPlay() noexcept
 {
 	bTickUpdateCollision = true;
 }
 
 
-void RpgCollisionWorldSubsystem::StopPlay() noexcept
+void RpgPhysicsWorldSubsystem::StopPlay() noexcept
 {
 	bTickUpdateCollision = false;
 }
 
 
-void RpgCollisionWorldSubsystem::TickUpdate(float deltaTime) noexcept
+void RpgPhysicsWorldSubsystem::TickUpdate(float deltaTime) noexcept
 {
 	if (!bTickUpdateCollision)
 	{
@@ -96,9 +96,9 @@ void RpgCollisionWorldSubsystem::TickUpdate(float deltaTime) noexcept
 
 	RpgWorld* world = GetWorld();
 
-	for (auto firstIt = world->Component_CreateIterator<RpgCollisionComponent_Primitive>(); firstIt; ++firstIt)
+	for (auto firstIt = world->Component_CreateIterator<RpgPhysicsComponent_Collision>(); firstIt; ++firstIt)
 	{
-		RpgCollisionComponent_Primitive& firstCollision = firstIt.GetValue();
+		RpgPhysicsComponent_Collision& firstCollision = firstIt.GetValue();
 
 		for (auto secondIt = firstIt; secondIt; ++secondIt)
 		{
@@ -107,14 +107,14 @@ void RpgCollisionWorldSubsystem::TickUpdate(float deltaTime) noexcept
 				continue;
 			}
 
-			const RpgCollisionComponent_Primitive& secondCollision = secondIt.GetValue();
+			const RpgPhysicsComponent_Collision& secondCollision = secondIt.GetValue();
 
 		}
 	}
 }
 
 
-bool RpgCollisionWorldSubsystem::TestOverlapSphereSphere(RpgBoundingSphere first, RpgBoundingSphere second, RpgCollisionContactResult* out_Result) noexcept
+bool RpgPhysicsWorldSubsystem::TestOverlapSphereSphere(RpgBoundingSphere first, RpgBoundingSphere second, RpgPhysicsContactResult* out_Result) noexcept
 {
 	const RpgVector3 delta = second.Center - first.Center;
 	const float magSqr = delta.GetMagnitudeSqr();
@@ -133,7 +133,7 @@ bool RpgCollisionWorldSubsystem::TestOverlapSphereSphere(RpgBoundingSphere first
 }
 
 
-bool RpgCollisionWorldSubsystem::TestOverlapSphereBox(RpgBoundingSphere sphere, RpgBoundingBox box, RpgCollisionContactResult* out_Result) noexcept
+bool RpgPhysicsWorldSubsystem::TestOverlapSphereBox(RpgBoundingSphere sphere, RpgBoundingBox box, RpgPhysicsContactResult* out_Result) noexcept
 {
 	ccd_t ccd;
 	CCD_INIT(&ccd);
@@ -172,7 +172,7 @@ bool RpgCollisionWorldSubsystem::TestOverlapSphereBox(RpgBoundingSphere sphere, 
 }
 
 
-bool RpgCollisionWorldSubsystem::TestOverlapBoxBox(RpgBoundingBox first, RpgBoundingBox second, RpgCollisionContactResult* out_Result) noexcept
+bool RpgPhysicsWorldSubsystem::TestOverlapBoxBox(RpgBoundingBox first, RpgBoundingBox second, RpgPhysicsContactResult* out_Result) noexcept
 {
 	ccd_t ccd;
 	CCD_INIT(&ccd);
@@ -186,7 +186,7 @@ bool RpgCollisionWorldSubsystem::TestOverlapBoxBox(RpgBoundingBox first, RpgBoun
 }
 
 
-bool RpgCollisionWorldSubsystem::TestOverlapBoxSphere(RpgBoundingBox box, RpgBoundingSphere sphere, RpgCollisionContactResult* out_Result) noexcept
+bool RpgPhysicsWorldSubsystem::TestOverlapBoxSphere(RpgBoundingBox box, RpgBoundingSphere sphere, RpgPhysicsContactResult* out_Result) noexcept
 {
 	ccd_t ccd;
 	CCD_INIT(&ccd);

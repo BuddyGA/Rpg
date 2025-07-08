@@ -1,42 +1,44 @@
 #pragma once
 
 #include "core/world/RpgComponent.h"
-#include "RpgAnimationTypes.h"
+#include "../RpgAnimationTypes.h"
 
 
 
 // ======================================================================================================================= //
 // ANIMATION COMPONENT
 // ======================================================================================================================= //
-struct RpgAnimationComponent
+class RpgAnimationComponent
 {
-	RPG_COMPONENT_TYPE(4, "Animation")
+	RPG_COMPONENT_TYPE("Animation")
 
 public:
 	RpgSharedAnimationClip Clip;
-	float PlayRate{ 1.0f };
-	bool bLoopAnim{ false };
-	bool bPauseAnim{ false };
-	bool bDebugDrawSkeletonPose{ false };
+	float PlayRate;
+	bool bLoopAnim;
+	bool bPauseAnim;
+	bool bDebugDrawSkeletonPose;
 
 private:
 	RpgSharedAnimationSkeleton Skeleton;
 	RpgAnimationPose FinalPose;
-	float AnimTimer{ 0.0f };
+	float AnimTimer;
 
 
 public:
-	inline void Reset() noexcept
+	RpgAnimationComponent() noexcept
 	{
-		Clip.Release();
 		PlayRate = 1.0f;
 		bLoopAnim = false;
 		bPauseAnim = false;
 		bDebugDrawSkeletonPose = false;
-
-		Skeleton.Release();
-		FinalPose.Clear(true);
 		AnimTimer = 0.0f;
+	}
+
+
+	inline void Destroy() noexcept
+	{
+		// Nothing to do
 	}
 
 

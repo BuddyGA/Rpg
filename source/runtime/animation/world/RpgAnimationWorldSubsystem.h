@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/world/RpgWorld.h"
-#include "RpgAnimationTypes.h"
+#include "../RpgAnimationTypes.h"
 
 
 

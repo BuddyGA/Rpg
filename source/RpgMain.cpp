@@ -146,19 +146,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 
-		// Begin frame
 		const int frameIndex = FrameCounter % RPG_FRAME_BUFFERING;
 		const uint64_t fpsTickStart = SDL_GetPerformanceCounter();
 
 		RpgD3D12::BeginFrame(frameIndex);
 
-
-		// Frame tick update
 		Timer.Tick();
 		g_GameApp->FrameTick(frameIndex, Timer.GetDeltaTimeSeconds());
 
-
-		// End frame
 		const int fpsLimit = g_GameApp->FpsLimit;
 
 		if (g_GameApp->IsWindowMinimized())

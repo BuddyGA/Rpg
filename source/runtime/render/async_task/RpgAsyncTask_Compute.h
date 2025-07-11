@@ -15,8 +15,7 @@ public:
 	ID3D12Fence* FenceSignal;
 	uint64_t WaitFenceCopyValue;
 	uint64_t FenceSignalValue;
-	const RpgMeshResource* MeshResource;
-	const RpgMeshSkinnedResource* MeshSkinnedResource;
+	RpgRenderFrameContext FrameContext;
 
 
 public:

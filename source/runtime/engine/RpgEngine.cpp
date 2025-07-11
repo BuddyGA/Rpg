@@ -6,7 +6,8 @@
 #include "render/world/RpgRenderWorldSubsystem.h"
 #include "animation/world/RpgAnimationComponent.h"
 #include "animation/world/RpgAnimationWorldSubsystem.h"
-
+#include "camera/world/RpgCameraComponent.h"
+#include "camera/world/RpgCameraWorldSubsystem.h"
 
 
 
@@ -48,13 +49,14 @@ RpgEngine::RpgEngine(const char* windowTitle) noexcept
 		MainWorld->Subsystem_Add<RpgPhysicsWorldSubsystem>(0);
 		MainWorld->Subsystem_Add<RpgAnimationWorldSubsystem>(1);
 		MainWorld->Subsystem_Add<RpgRenderWorldSubsystem>(2);
+		MainWorld->Subsystem_Add<RpgCameraWorldSubsystem>(3);
 
 		// Components
 		MainWorld->Component_Register<RpgPhysicsComponent_Collision>();
-		MainWorld->Component_Register<RpgRenderComponent_Camera>();
 		MainWorld->Component_Register<RpgRenderComponent_Mesh>();
 		MainWorld->Component_Register<RpgRenderComponent_Light>();
 		MainWorld->Component_Register<RpgAnimationComponent>();
+		MainWorld->Component_Register<RpgCameraComponent>();
 	}
 
 
@@ -119,7 +121,7 @@ void RpgEngine::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 		}
 		else if (e.scancode == SDL_SCANCODE_0)
 		{
-			RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_GetComponent<RpgRenderComponent_Camera>(MainCameraObject);
+			RpgCameraComponent* cameraComp = MainWorld->GameObject_GetComponent<RpgCameraComponent>(MainCameraObject);
 			cameraComp->bFrustumCulling = !cameraComp->bFrustumCulling;
 		}
 		else if (e.scancode == SDL_SCANCODE_9)
@@ -130,7 +132,7 @@ void RpgEngine::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 		else if (e.scancode == SDL_SCANCODE_8)
 		{
 			RpgRenderWorldSubsystem* subsystem = MainWorld->Subsystem_Get<RpgRenderWorldSubsystem>();
-			subsystem->bDebugDrawMeshBounds = !subsystem->bDebugDrawMeshBounds;
+			subsystem->bDebugDrawMeshBound = !subsystem->bDebugDrawMeshBound;
 		}
 		else if (e.scancode == SDL_SCANCODE_F9)
 		{
@@ -147,11 +149,12 @@ void RpgEngine::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 }
 
 
-void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
+void RpgEngine::FrameTick(uint64_t frameCounter, float deltaTime) noexcept
 {
+	const int frameIndex = frameCounter % RPG_FRAME_BUFFERING;
+
 	RpgPointInt windowDimension;
 	SDL_GetWindowSize(Window, &windowDimension.X, &windowDimension.Y);
-
 
 	// Calculate average FPS
 	{
@@ -171,12 +174,16 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 	}
 
 
+	RpgCameraComponent* mainCameraComp = MainCameraObject.IsValid() ? MainWorld->GameObject_GetComponent<RpgCameraComponent>(MainCameraObject) : nullptr;
+	if (mainCameraComp)
+	{
+		mainCameraComp->RenderTargetDimension = windowDimension;
+	}
+
+
 	// Begin frame
 	{
 		MainWorld->BeginFrame(frameIndex);
-
-		RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_GetComponent<RpgRenderComponent_Camera>(MainCameraObject);
-		cameraComp->RenderTargetDimension = windowDimension;
 	}
 
 
@@ -194,7 +201,7 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 	{
 		MainWorld->DispatchTickUpdate(deltaTime);
 	}
-
+	
 
 	// Post tick update
 	{
@@ -203,6 +210,8 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 
 
 	// Render
+	RpgD3D12::BeginFrame(frameIndex);
+
 	Renderer->BeginRender(frameIndex, deltaTime);
 	{
 		Renderer->RegisterWorld(MainWorld);
@@ -219,11 +228,13 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 		// GUI
 		GuiContext.End(r2);
 
+
+	#ifndef RPG_BUILD_SHIPPING
 		// Debug info
 		{
 			static RpgString debugInfoText;
 
-			RpgTransform mainCameraTransform = MainWorld->GameObject_GetWorldTransform(MainCameraObject);
+			RpgTransform mainCameraTransform = MainCameraObject.IsValid() ? MainWorld->GameObject_GetWorldTransform(MainCameraObject) : RpgTransform();
 			float pitch, yaw;
 			ScriptDebugCamera.GetRotationPitchYaw(pitch, yaw);
 			
@@ -237,7 +248,7 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 				"GameObject: %i\n"
 				, mainCameraTransform.Position.X, mainCameraTransform.Position.Y, mainCameraTransform.Position.Z
 				, pitch, yaw
-				, SceneViewport.bFrustumCulling
+				, mainCameraComp ? mainCameraComp->bFrustumCulling : false
 				, Renderer->Gamma
 				, Renderer->GetVsync()
 				, MainWorld->GameObject_GetCount()
@@ -245,6 +256,8 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 
 			r2.AddText(*debugInfoText, debugInfoText.GetLength(), 8, 16, RpgColorRGBA(255, 255, 255));
 		}
+	#endif // !RPG_BUILD_SHIPPING
+
 
 		// Fps info
 		{
@@ -266,7 +279,7 @@ void RpgEngine::FrameTick(int frameIndex, float deltaTime) noexcept
 			r2.AddText(*FpsString, FpsString.GetLength(), r2.GetViewportDimension().X - 110, 16, fpsTextColor);
 		}
 	}
-	Renderer->EndRender(frameIndex);
+	Renderer->EndRender(frameIndex, deltaTime);
 
 
 	// End frame
@@ -310,7 +323,7 @@ void RpgEngine::SetMainCamera(RpgGameObjectID cameraObject) noexcept
 
 	MainCameraObject = cameraObject;
 
-	RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_AddComponent<RpgRenderComponent_Camera>(MainCameraObject);
+	RpgCameraComponent* cameraComp = MainWorld->GameObject_AddComponent<RpgCameraComponent>(MainCameraObject);
 	cameraComp->Viewport = &SceneViewport;
 	cameraComp->bActivated = true;
 }

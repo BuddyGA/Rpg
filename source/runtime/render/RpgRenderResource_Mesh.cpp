@@ -48,7 +48,7 @@ void RpgMeshResource::UpdateResources() noexcept
 	RPG_D3D12_SetDebugNameAllocation(VertexPositionBuffer, "RES_Mesh_VtxPos");
 
 	RpgD3D12::ResizeBuffer(VertexNormalTangentBuffer, sizeof(RpgVertex::FMeshNormalTangent) * TotalVertexCount, false);
-	RPG_D3D12_SetDebugNameAllocation(VertexTexCoordBuffer, "RES_Mesh_VtxNormTan");
+	RPG_D3D12_SetDebugNameAllocation(VertexNormalTangentBuffer, "RES_Mesh_VtxNormTan");
 
 	RpgD3D12::ResizeBuffer(VertexTexCoordBuffer, sizeof(RpgVertex::FMeshTexCoord) * TotalVertexCount, false);
 	RPG_D3D12_SetDebugNameAllocation(VertexTexCoordBuffer, "RES_Mesh_VtxTexCoord");

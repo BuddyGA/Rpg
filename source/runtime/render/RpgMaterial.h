@@ -1,62 +1,7 @@
 #pragma once
 
 #include "core/RpgMath.h"
-#include "RpgTexture2D.h"
-
-
-
-enum class RpgMaterialVertexMode : uint8_t
-{
-	NONE = 0,
-
-	PRIMITIVE_2D,
-	MESH_2D,
-	PRIMITIVE,
-	MESH,
-	SKELETAL_MESH,
-	POST_PROCESS,
-
-	MAX_COUNT
-};
-
-
-enum class RpgMaterialRasterMode : uint8_t
-{
-	NONE = 0,
-	LINE,
-	SOLID,
-	WIREFRAME,
-	MAX_COUNT
-};
-
-
-enum class RpgMaterialBlendMode : uint8_t
-{
-	NONE = 0,
-	ADDITIVE,
-	OPACITY_MASK,
-	FADE,
-	TRANSPARENCY,
-	MAX_COUNT
-};
-
-
-struct RpgMaterialRenderState
-{
-	RpgName PixelShaderName;
-	RpgMaterialVertexMode VertexMode{ RpgMaterialVertexMode::NONE };
-	RpgMaterialRasterMode RasterMode{ RpgMaterialRasterMode::NONE };
-	RpgMaterialBlendMode BlendMode{ RpgMaterialBlendMode::NONE };
-	int RenderTargetCount{ 1 };
-	int DepthBias{ 0 };
-	float DepthBiasSlope{ 0.0f };
-	float DepthBiasClamp{ 0.0f };
-	bool bDepthTest{ false };
-	bool bDepthWrite{ false };
-	bool bStencilTest{ false };
-	bool bTwoSides{ false };
-	bool bConservativeRasterization{ false };
-};
+#include "RpgTexture.h"
 
 
 
@@ -225,8 +170,8 @@ namespace RpgMaterialDefault
 		MESH_2D = 0,
 		FONT_2D,
 		MESH_PHONG,
-		//SKELMESH_PHONG,
 		FULLSCREEN,
+
 		DEBUG_PRIMITIVE_2D_LINE,
 		DEBUG_PRIMITIVE_2D_MESH,
 		DEBUG_PRIMITIVE_LINE,
@@ -249,7 +194,7 @@ class RpgMaterial
 private:
 	RpgName Name;
 	RpgSharedMaterial ParentMaterial;
-	RpgMaterialRenderState RenderState;
+	RpgRenderPipelineState RenderState;
 	RpgMaterialParameterLayout ParameterLayout;
 	SDL_RWLock* ParameterTextureLock;
 	SDL_RWLock* ParameterVectorLock;
@@ -270,7 +215,7 @@ private:
 
 
 private:
-	RpgMaterial(const RpgName& in_Name, const RpgMaterialRenderState& in_RenderState, const RpgMaterialParameterLayout& in_ParameterLayout) noexcept;
+	RpgMaterial(const RpgName& in_Name, const RpgRenderPipelineState& in_RenderState, const RpgMaterialParameterLayout& in_ParameterLayout) noexcept;
 	RpgMaterial(const RpgName& in_Name, const RpgSharedMaterial& in_ParentMaterial) noexcept;
 
 public:
@@ -287,7 +232,7 @@ public:
 		return ParentMaterial;
 	}
 
-	inline const RpgMaterialRenderState& GetRenderState() const noexcept
+	inline const RpgRenderPipelineState& GetRenderState() const noexcept
 	{
 		return RenderState;
 	}
@@ -299,7 +244,7 @@ public:
 
 	inline bool IsTransparency() const noexcept
 	{
-		return RenderState.BlendMode == RpgMaterialBlendMode::TRANSPARENCY;
+		return RenderState.BlendMode == RpgRenderColorBlendMode::TRANSPARENCY;
 	}
 
 
@@ -425,7 +370,7 @@ public:
 
 
 public:
-	[[nodiscard]] static RpgSharedMaterial s_CreateShared(const RpgName& name, const RpgMaterialRenderState& renderState, const RpgMaterialParameterLayout& parameterLayout = RpgMaterialParameterLayout()) noexcept;
+	[[nodiscard]] static RpgSharedMaterial s_CreateShared(const RpgName& name, const RpgRenderPipelineState& renderState, const RpgMaterialParameterLayout& parameterLayout = RpgMaterialParameterLayout()) noexcept;
 	[[nodiscard]] static RpgSharedMaterial s_CreateSharedInstance(const RpgName& name, const RpgSharedMaterial& parentMaterial) noexcept;
 
 	static void s_CreateDefaults() noexcept;

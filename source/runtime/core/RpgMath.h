@@ -294,6 +294,11 @@ public:
 		return *this;
 	}
 
+	inline RpgVector3 operator-() const noexcept
+	{
+		return DirectX::XMVectorSet(-X, -Y, -Z, 0.0f);
+	}
+
 
 public:
 	inline float GetMagnitudeSqr() const noexcept
@@ -708,7 +713,7 @@ public:
 	{
 	}
 
-	RpgTransform(const RpgVector3& in_Position, const RpgQuaternion& in_Rotation, const RpgVector3& in_Scale = RpgVector3(1.0f)) noexcept
+	RpgTransform(const RpgVector3& in_Position, const RpgQuaternion& in_Rotation = RpgQuaternion(), const RpgVector3& in_Scale = RpgVector3(1.0f)) noexcept
 		: Position(in_Position)
 		, Rotation(in_Rotation)
 		, Scale(in_Scale)
@@ -909,48 +914,6 @@ public:
 
 
 // =============================================================================================================================================================== //
-// BOUNDING - SPHERE
-// =============================================================================================================================================================== //
-class RpgBoundingSphere
-{
-public:
-	RpgVector3 Center;
-	float Radius;
-
-
-public:
-	RpgBoundingSphere() noexcept = default;
-
-	RpgBoundingSphere(RpgVector3 inCenter, float inRadius) noexcept
-		: Center(inCenter)
-		, Radius(inRadius)
-	{
-	}
-
-
-	inline bool TestIntersectRay(const RpgVector3& rayOrigin, const RpgVector3& rayDirection, float* outDistance = nullptr) const noexcept
-	{
-		DirectX::BoundingSphere dxSphere;
-		DirectX::XMStoreFloat3(&dxSphere.Center, Center.Xmm);
-		dxSphere.Radius = Radius;
-
-		float distance = 999999999.0f;
-		const bool bIntersect = dxSphere.Intersects(rayOrigin.Xmm, rayDirection.Xmm, distance);
-
-		if (outDistance)
-		{
-			*outDistance = distance;
-		}
-
-		return bIntersect;
-	}
-
-};
-
-
-
-
-// =============================================================================================================================================================== //
 // BOUNDING - AABB
 // =============================================================================================================================================================== //
 class RpgBoundingAABB
@@ -986,7 +949,7 @@ public:
 	}
 
 
-	inline bool TestIntersectBoundingAABB(const RpgBoundingAABB& other) const noexcept
+	inline bool TestIntersectAABB(const RpgBoundingAABB& other) const noexcept
 	{
 		DirectX::BoundingBox first;
 		DirectX::XMStoreFloat3(&first.Center, GetCenter().Xmm);
@@ -997,6 +960,61 @@ public:
 		DirectX::XMStoreFloat3(&second.Extents, other.GetHalfExtents().Xmm);
 
 		return first.Intersects(second);
+	}
+
+};
+
+
+
+
+// =============================================================================================================================================================== //
+// BOUNDING - SPHERE
+// =============================================================================================================================================================== //
+class RpgBoundingSphere
+{
+public:
+	RpgVector3 Center;
+	float Radius;
+
+
+public:
+	RpgBoundingSphere() noexcept = default;
+
+	RpgBoundingSphere(RpgVector3 inCenter, float inRadius) noexcept
+		: Center(inCenter)
+		, Radius(inRadius)
+	{
+	}
+
+
+	inline bool TestIntersectAABB(const RpgBoundingAABB& aabb) const noexcept
+	{
+		DirectX::BoundingSphere dxSphere;
+		DirectX::XMStoreFloat3(&dxSphere.Center, Center.Xmm);
+		dxSphere.Radius = Radius;
+
+		DirectX::BoundingBox dxAABB;
+		DirectX::XMStoreFloat3(&dxAABB.Center, aabb.GetCenter().Xmm);
+		DirectX::XMStoreFloat3(&dxAABB.Extents, aabb.GetHalfExtents().Xmm);
+
+		return dxSphere.Intersects(dxAABB);
+	}
+
+	inline bool TestIntersectRay(const RpgVector3& rayOrigin, const RpgVector3& rayDirection, float* outDistance = nullptr) const noexcept
+	{
+		DirectX::BoundingSphere dxSphere;
+		DirectX::XMStoreFloat3(&dxSphere.Center, Center.Xmm);
+		dxSphere.Radius = Radius;
+
+		float distance = 999999999.0f;
+		const bool bIntersect = dxSphere.Intersects(rayOrigin.Xmm, rayDirection.Xmm, distance);
+
+		if (outDistance)
+		{
+			*outDistance = distance;
+		}
+
+		return bIntersect;
 	}
 
 };
@@ -1226,16 +1244,7 @@ public:
 	}
 
 
-	inline bool TestIntersectBoundingSphere(const RpgBoundingSphere& boundingSphere) const noexcept
-	{
-		DirectX::BoundingSphere dxSphere;
-		DirectX::XMStoreFloat3(&dxSphere.Center, boundingSphere.Center.Xmm);
-		dxSphere.Radius = boundingSphere.Radius;
-
-		return DxFrustum.Intersects(dxSphere);
-	}
-
-	inline bool TestIntersectBoundingAABB(const RpgBoundingAABB& boundingAABB) const noexcept
+	inline bool TestIntersectAABB(const RpgBoundingAABB& boundingAABB) const noexcept
 	{
 		DirectX::XMFLOAT3 aabbCenter;
 		DirectX::XMStoreFloat3(&aabbCenter, boundingAABB.GetCenter().Xmm);
@@ -1246,7 +1255,18 @@ public:
 		return DxFrustum.Intersects(DirectX::BoundingBox(aabbCenter, aabbHalfExtents));
 	}
 
-	inline bool TestIntersectBoundingBox(const RpgBoundingBox& boundingBox) const noexcept
+
+	inline bool TestIntersectSphere(const RpgBoundingSphere& boundingSphere) const noexcept
+	{
+		DirectX::BoundingSphere dxSphere;
+		DirectX::XMStoreFloat3(&dxSphere.Center, boundingSphere.Center.Xmm);
+		dxSphere.Radius = boundingSphere.Radius;
+
+		return DxFrustum.Intersects(dxSphere);
+	}
+
+	
+	inline bool TestIntersectOBB(const RpgBoundingBox& boundingBox) const noexcept
 	{
 		DirectX::BoundingOrientedBox box;
 		DirectX::XMStoreFloat3(&box.Center, boundingBox.Center.Xmm);
@@ -1256,10 +1276,12 @@ public:
 		return DxFrustum.Intersects(box);
 	}
 
+
 	inline bool TestIntersectPlane(const RpgPlane& plane) const noexcept
 	{
 		return false;
 	}
+
 
 	inline bool TestIntersectFrustum(const RpgBoundingFrustum& frustum) const noexcept
 	{

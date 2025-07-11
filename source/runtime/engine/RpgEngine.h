@@ -56,7 +56,7 @@ public:
 	void MouseButton(const SDL_MouseButtonEvent& e) noexcept;
 	void KeyboardButton(const SDL_KeyboardEvent& e) noexcept;
 
-	void FrameTick(int frameIndex, float deltaTime) noexcept;
+	void FrameTick(uint64_t frameCounter, float deltaTime) noexcept;
 
 	[[nodiscard]] RpgWorld* CreateWorld(const RpgName& name) noexcept;
 	void DestroyWorld(RpgWorld*& world) noexcept;

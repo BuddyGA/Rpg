@@ -9,6 +9,8 @@
 RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogWorld)
 
 
+#define RPG_WORLD_MAX_GAMEOBJECT	65536
+
 
 class RpgWorld;
 class RpgRenderer;
@@ -244,7 +246,7 @@ public:
 
 	[[nodiscard]] inline bool GameObject_IsValid(RpgGameObjectID gameObject) const noexcept
 	{
-		if (!gameObject || gameObject.World != this || !GameObjectInfos.IsValid(gameObject.Index))
+		if (!gameObject.IsValid() || gameObject.World != this || !GameObjectInfos.IsValid(gameObject.Index))
 		{
 			return false;
 		}
@@ -484,7 +486,7 @@ public:
 
 	[[nodiscard]] inline bool GameObject_IsTransformUpdated(RpgGameObjectID gameObject) const noexcept
 	{
-		RPG_Check(gameObject);
+		RPG_Check(GameObject_IsValid(gameObject));
 		return GameObjectInfos[gameObject.Index].Flags & FLAG_TransformUpdated;
 	}
 

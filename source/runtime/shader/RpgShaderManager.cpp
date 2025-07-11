@@ -231,7 +231,7 @@ namespace RpgShaderManager
 
 	static RpgArray<RpgName> ShaderNames;
 	static RpgArray<FShaderData> ShaderDatas;
-	static RpgArray<RpgAsyncTask_CompileShader*> AsyncTaskCompileShaders;
+	static RpgArray<RpgAsyncTask_CompileShader> AsyncTaskCompileShaders;
 
 };
 
@@ -246,15 +246,20 @@ void RpgShaderManager::Initialize() noexcept
 
 	RPG_Log(RpgLogShader, "Initialize shader manager");
 
+	AsyncTaskCompileShaders.Reserve(64);
+
 #ifndef RPG_BUILD_SHIPPING
 	const RpgString hlslDirPath = RpgFileSystem::GetSourceDirPath() + "runtime/shader/hlsl/";
 
 	AddShader(RPG_SHADER_DEFAULT_VS_PRIMITIVE_NAME, hlslDirPath + "VS_Primitive.hlsl", RpgShader::TYPE_VERTEX);
 	AddShader(RPG_SHADER_DEFAULT_VS_MESH_NAME, hlslDirPath + "VS_Mesh.hlsl", RpgShader::TYPE_VERTEX);
-	//AddShader(RPG_SHADER_DEFAULT_VS_MESH_SKINNED_NAME, hlslDirPath + "VS_MeshSkinned.hlsl", RpgShader::TYPE_VERTEX);
 	AddShader(RPG_SHADER_DEFAULT_VS_PRIMITIVE_2D_NAME, hlslDirPath + "VS_Primitive2D.hlsl", RpgShader::TYPE_VERTEX);
 	AddShader(RPG_SHADER_DEFAULT_VS_MESH_2D_NAME, hlslDirPath + "VS_Mesh2D.hlsl", RpgShader::TYPE_VERTEX);
 	AddShader(RPG_SHADER_DEFAULT_VS_FULLSCREEN_NAME, hlslDirPath + "VS_Fullscreen.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX);
+	//AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_CUBE_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX, { "CUBE" });
+
+	//AddShader(RPG_SHADER_DEFAULT_GS_SHADOW_DEPTH_CUBE_NAME, hlslDirPath + "GS_ShadowDepthCube.hlsl", RpgShader::TYPE_GEOMETRY);
 
 	AddShader(RPG_SHADER_DEFAULT_PS_COLOR_NAME, hlslDirPath + "PS_Color.hlsl", RpgShader::TYPE_PIXEL);
 	AddShader(RPG_SHADER_DEFAULT_PS_TEXTURE_COLOR_NAME, hlslDirPath + "PS_TextureColor.hlsl", RpgShader::TYPE_PIXEL);
@@ -299,13 +304,11 @@ void RpgShaderManager::AddShader(const RpgName& in_Name, const RpgString& in_Hls
 	ShaderNames.AddValue(in_Name);
 	ShaderDatas.AddValue({ nullptr, FShaderData::COMPILE_STATE_PENDING });
 	
-	RpgAsyncTask_CompileShader* task = RpgThreadPool::CreateTask<RpgAsyncTask_CompileShader>();
-	task->Name = in_Name;
-	task->FilePath = in_HlslFilePath;
-	task->Type = in_Type;
-	task->CompileMacros = optIn_CompileMacros;
-
-	AsyncTaskCompileShaders.AddValue(task);
+	RpgAsyncTask_CompileShader& task = AsyncTaskCompileShaders.Add();
+	task.Name = in_Name;
+	task.FilePath = in_HlslFilePath;
+	task.Type = in_Type;
+	task.CompileMacros = optIn_CompileMacros;
 }
 
 
@@ -320,7 +323,7 @@ void RpgShaderManager::CompileShaders(bool bWaitAll) noexcept
 		if (data.State == FShaderData::COMPILE_STATE_PENDING)
 		{
 			data.State = FShaderData::COMPILE_STATE_COMPILING;
-			taskToSubmits.AddValue(AsyncTaskCompileShaders[i]);
+			taskToSubmits.AddValue(&AsyncTaskCompileShaders[i]);
 		}
 	}
 
@@ -337,20 +340,20 @@ void RpgShaderManager::CompileShaders(bool bWaitAll) noexcept
 			continue;
 		}
 
-		RpgAsyncTask_CompileShader* task = AsyncTaskCompileShaders[i];
-		bool bCompileDone = task->IsDone();
+		RpgAsyncTask_CompileShader& task = AsyncTaskCompileShaders[i];
+		bool bCompileDone = task.IsDone();
 
 		if (!bCompileDone && bWaitAll)
 		{
-			AsyncTaskCompileShaders[i]->Wait();
+			task.Wait();
 			bCompileDone = true;
 		}
 
 		if (bCompileDone)
 		{
-			data.CodeBlob = task->GetResult();
+			data.CodeBlob = task.GetResult();
 			data.State = FShaderData::COMPILE_STATE_COMPILED;
-			task->Reset();
+			task.Reset();
 		}
 	}
 }

@@ -59,14 +59,8 @@
 // Maximum view per world in single frame rendering
 #define RPG_RENDER_CAMERA_MAX_COUNT                 4
 
-// First index of directional light in shader constant
-#define RPG_RENDER_LIGHT_DIRECTIONAL_INDEX			0
-
-// Maximum directional light in single frame rendering
-#define RPG_RENDER_LIGHT_DIRECTIONAL_MAX_COUNT		4
-
 // First index of point light in shader constant
-#define RPG_RENDER_LIGHT_POINT_INDEX				(RPG_RENDER_LIGHT_DIRECTIONAL_INDEX + RPG_RENDER_LIGHT_DIRECTIONAL_MAX_COUNT)
+#define RPG_RENDER_LIGHT_POINT_INDEX				0
 
 // Maximum point light in single frame rendering
 #define RPG_RENDER_LIGHT_POINT_MAX_COUNT			200
@@ -76,6 +70,12 @@
 
 // Maximum spot light in single frame rendering
 #define RPG_RENDER_LIGHT_SPOT_MAX_COUNT			    64
+
+// First index of directional light in shader constant
+#define RPG_RENDER_LIGHT_DIRECTIONAL_INDEX			(RPG_RENDER_LIGHT_SPOT_INDEX + RPG_RENDER_LIGHT_SPOT_MAX_COUNT)
+
+// Maximum directional light in single frame rendering
+#define RPG_RENDER_LIGHT_DIRECTIONAL_MAX_COUNT		4
 
 // Maximum light all types in single frame rendering
 #define RPG_RENDER_MAX_LIGHT                        (RPG_RENDER_LIGHT_DIRECTIONAL_MAX_COUNT + RPG_RENDER_LIGHT_POINT_MAX_COUNT + RPG_RENDER_LIGHT_SPOT_MAX_COUNT)
@@ -93,7 +93,9 @@
 #define RPG_SHADER_DEFAULT_VS_PRIMITIVE_NAME			"VertexPrimitive"
 #define RPG_SHADER_DEFAULT_VS_PRIMITIVE_2D_NAME			"VertexPrimitive2D"
 #define RPG_SHADER_DEFAULT_VS_FULLSCREEN_NAME			"VertexFullscreen"
-#define RPG_SHADER_DEFAULT_GS_CUBE_SHADOW_NAME			"GeometryCubeShadow"
+
+#define RPG_SHADER_DEFAULT_GS_SHADOW_DEPTH_CUBE_NAME	"GeometryShadowDepthCube"
+
 #define RPG_SHADER_DEFAULT_PS_COLOR_NAME				"PixelColor"
 #define RPG_SHADER_DEFAULT_PS_TEXTURE_COLOR_NAME		"PixelTextureColor"
 #define RPG_SHADER_DEFAULT_PS_TEXTURE_FONT_NAME			"PixelTextureFont"
@@ -101,5 +103,6 @@
 #define RPG_SHADER_DEFAULT_PS_PHONG_NAME				"PixelPhong"
 #define RPG_SHADER_DEFAULT_PS_PHONG_MASK_NAME			"PixelPhongMask"
 #define RPG_SHADER_DEFAULT_PS_FULLSCREEN_GAMMA_NAME     "PixelFullscreenGamma"
+
 #define RPG_SHADER_DEFAULT_CS_FRUSTUM_NAME				"ComputeFrustum"
 #define RPG_SHADER_DEFAULT_CS_SKINNING_NAME				"ComputeSkinning"

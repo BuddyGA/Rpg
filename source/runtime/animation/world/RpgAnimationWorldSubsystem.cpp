@@ -16,7 +16,7 @@ RpgAnimationWorldSubsystem::RpgAnimationWorldSubsystem() noexcept
 
 	for (int i = 0; i < TASK_COUNT; ++i)
 	{
-		TickPoseTasks[i] = RpgThreadPool::CreateTask<RpgAsyncTask_TickPose>();
+		TickPoseTasks[i] = new RpgAsyncTask_TickPose();
 	}
 
 	bTickAnimationPose = false;
@@ -29,7 +29,7 @@ RpgAnimationWorldSubsystem::~RpgAnimationWorldSubsystem() noexcept
 {
 	for (int i = 0; i < TASK_COUNT; ++i)
 	{
-		RpgThreadPool::DestroyTask(TickPoseTasks[i]);
+		delete TickPoseTasks[i];
 	}
 }
 

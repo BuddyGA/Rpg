@@ -5,7 +5,6 @@
 
 RpgWorldResource::RpgWorldResource() noexcept
 {
-	ShadowResolutionQuality = RpgRenderLight::SHADOW_RESOLUTION_QUALITY_MEDIUM;
 }
 
 
@@ -19,6 +18,8 @@ void RpgWorldResource::Reset() noexcept
 	WorldData.PointLightCount = 0;
 	WorldData.SpotLightCount = 0;
 	WorldData.AmbientColorStrength = RpgVector4(1.0f, 1.0f, 1.0f, 0.02f).Xmm;
+
+	CachedTagTransforms.Clear();
 	TransformDatas.Clear();
 
 #ifndef RPG_BUILD_SHIPPING
@@ -68,6 +69,50 @@ void RpgWorldResource::UpdateResources() noexcept
 	}
 #endif // !RPG_BUILD_SHIPPING
 
+}
+
+
+RpgWorldResource::FTransformID RpgWorldResource::AddTransform(int uniqueTagId, const RpgMatrixTransform& worldTransformMatrix) noexcept
+{
+	const int tagIndex = CachedTagTransforms.FindIndexByCompare(uniqueTagId);
+	if (tagIndex != RPG_INDEX_INVALID)
+	{
+		return CachedTagTransforms[tagIndex].TransformId;
+	}
+
+	FTagTransformID tag;
+	tag.TagId = uniqueTagId;
+	tag.TransformId = TransformDatas.GetCount();
+
+	CachedTagTransforms.AddValue(tag);
+	TransformDatas.AddValue(worldTransformMatrix.Xmm);
+
+	return tag.TransformId;
+}
+
+
+RpgWorldResource::FLightID RpgWorldResource::AddLight_Point(int uniqueTagId, RpgVector3 worldPosition, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp) noexcept
+{
+	const int tagIndex = CachedTagLights.FindIndexByCompare(uniqueTagId);
+	if (tagIndex != RPG_INDEX_INVALID)
+	{
+		return CachedTagLights[tagIndex].LightId;
+	}
+
+	FTagLightID tag;
+	tag.TagId = uniqueTagId;
+	tag.LightId = RPG_RENDER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
+	CachedTagLights.AddValue(tag);
+
+	RpgShaderConstantLight& data = WorldData.Lights[tag.LightId];
+	data.Position = worldPosition.Xmm;
+	data.ColorIntensity = DirectX::XMVectorSet(colorIntensity.R, colorIntensity.G, colorIntensity.B, colorIntensity.A);
+	data.AttenuationRadius = attRadius;
+	data.AttenuationFallOffExp = attFallOffExp;
+	data.ShadowCameraIndex = RPG_INDEX_INVALID;
+	data.ShadowTextureDescriptorIndex = RPG_INDEX_INVALID;
+
+	return tag.LightId;
 }
 
 

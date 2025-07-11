@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/RpgMesh.h"
 #include "core/world/RpgGameObject.h"
 #include "shader/RpgShaderConstant.h"
+#include "RpgMesh.h"
 #include "RpgMaterial.h"
 
 
@@ -424,13 +424,23 @@ private:
 	RpgShaderConstantWorldData WorldData;
 	ComPtr<D3D12MA::Allocation> WorldConstantBuffer;
 
+
+	struct FTagTransformID
+	{
+		int TagId{ 0 };
+		int TransformId{ 0 };
+
+		inline bool operator==(int rhs) const noexcept
+		{
+			return TagId == rhs;
+		}
+	};
+
+	RpgArray<FTagTransformID> CachedTagTransforms;
 	RpgArray<RpgShaderConstantObjectTransform> TransformDatas;
 	ComPtr<D3D12MA::Allocation> TransformStructBuffer;
 
 	ComPtr<D3D12MA::Allocation> StagingBuffer;
-
-public:
-	RpgRenderLight::EShadowResolutionQuality ShadowResolutionQuality;
 
 
 public:
@@ -469,13 +479,11 @@ public:
 	}
 
 
-	inline FTransformID AddTransform(const RpgMatrixTransform& worldTransformMatrix) noexcept
-	{
-		const FTransformID id = TransformDatas.GetCount();
-		TransformDatas.AddValue(worldTransformMatrix.Xmm);
-
-		return id;
-	}
+	// Add transform
+	// @param uniqueTagId - Unique tag identifier. Normally the value is game object id but could be anything as long as it is to prevent adding the same transform object multiple times
+	// @param worldTransformMatrix - World transformation matrix
+	// @returns Transform id in this world resource
+	FTransformID AddTransform(int uniqueTagId, const RpgMatrixTransform& worldTransformMatrix) noexcept;
 
 
 	// Add point light
@@ -484,29 +492,16 @@ public:
 	// @param colorIntensity - Light color (RGB), and light intensity (A)
 	// @param attRadius - Attenuation radius factor
 	// @param attFallOffExp - Attenuation falloff exponential factor
-	// @param bCastShadow - Set to true if this light casts shadow
-	inline FLightID AddLight_Point(int uniqueTagId, RpgVector3 worldPosition, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp, bool bCastShadow) noexcept
-	{
-		const int tagIndex = CachedTagLights.FindIndexByCompare(uniqueTagId);
-		if (tagIndex != RPG_INDEX_INVALID)
-		{
-			return CachedTagLights[tagIndex].LightId;
-		}
-
-		const FLightID id = RPG_RENDER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
-		CachedTagLights.AddValue(FTagLightID(uniqueTagId, id));
-
-		RpgShaderConstantLight& data = WorldData.Lights[id];
-		data.Position = worldPosition.Xmm;
-		data.ColorIntensity = DirectX::XMVectorSet(colorIntensity.R, colorIntensity.G, colorIntensity.B, colorIntensity.A);
-		data.AttenuationRadius = attRadius;
-		data.AttenuationFallOffExp = attFallOffExp;
-
-		return id;
-	}
-
-
+	// @returns Light id in this world resource
+	FLightID AddLight_Point(int uniqueTagId, RpgVector3 worldPosition, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp) noexcept;
 	
+
+	inline void SetLightShadow(FLightID lightId, FCameraID shadowCameraId, int shadowTextureDescriptorIndex) noexcept
+	{
+		RpgShaderConstantLight& data = WorldData.Lights[lightId];
+		data.ShadowCameraIndex = shadowCameraId;
+		data.ShadowTextureDescriptorIndex = shadowTextureDescriptorIndex;
+	}
 
 
 #ifndef RPG_BUILD_SHIPPING
@@ -533,6 +528,15 @@ public:
 struct RpgDrawIndexed
 {
 	RpgMaterialResource::FMaterialID Material;
+	RpgShaderConstantObjectParameter ObjectParam;
+	int IndexCount{ 0 };
+	int IndexStart{ 0 };
+	int IndexVertexOffset{ 0 };
+};
+
+
+struct RpgDrawIndexedDepth
+{
 	RpgShaderConstantObjectParameter ObjectParam;
 	int IndexCount{ 0 };
 	int IndexStart{ 0 };

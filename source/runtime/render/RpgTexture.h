@@ -53,7 +53,7 @@ protected:
 	uint16_t Flags;
 
 
-private:
+protected:
 	RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height, uint8_t mipCount, uint16_t flags) noexcept;
 
 public:
@@ -150,13 +150,13 @@ public:
 	}
 
 
-private:
+protected:
 	ComPtr<D3D12MA::Allocation> GpuAlloc;
 	D3D12_RESOURCE_STATES GpuState;
 
 
 public:
-	void GPU_UpdateResource() noexcept;
+	virtual void GPU_UpdateResource() noexcept;
 	void GPU_CommandCopy(ID3D12GraphicsCommandList* cmdList) const noexcept;
 
 
@@ -211,5 +211,23 @@ public:
 	static void s_DestroyDefaults() noexcept;
 
 	static const RpgSharedTexture2D& s_GetDefault_White() noexcept;
+
+};
+
+
+
+typedef RpgSharedPtr<class RpgTextureCubeDepth> RpgSharedTextureCubeDepth;
+
+class RpgTextureCubeDepth : public RpgTexture2D
+{
+private:
+	RpgTextureCubeDepth(const RpgName name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
+
+public:
+	virtual void GPU_UpdateResource() noexcept override;
+
+
+public:
+	[[nodiscard]] static RpgSharedTextureCubeDepth s_CreateShared(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
 
 };

@@ -15,7 +15,7 @@ namespace RpgCompressonator
 			case RpgTextureFormat::TEX_2D_RGBA: return CMP_FORMAT_RGBA_8888;
 			case RpgTextureFormat::TEX_2D_BC3U: return CMP_FORMAT_BC3;
 			case RpgTextureFormat::TEX_2D_BC4U: return CMP_FORMAT_BC4;
-			case RpgTextureFormat::TEX_2D_BC5S: return CMP_FORMAT_BC5;
+			case RpgTextureFormat::TEX_2D_BC5S: return CMP_FORMAT_BC5_S;
 			case RpgTextureFormat::TEX_2D_BC6H: return CMP_FORMAT_BC6H;
 			case RpgTextureFormat::TEX_2D_BC7U: return CMP_FORMAT_BC7;
 

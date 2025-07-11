@@ -1,8 +1,8 @@
-#include "RpgTexture2D.h"
+#include "RpgTexture.h"
 #include "core/RpgMath.h"
 
 
-RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogTexture2D, VERBOSITY_DEBUG)
+RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogTexture, VERBOSITY_DEBUG)
 
 
 
@@ -34,7 +34,7 @@ RpgTexture2D::RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, 
 	, Flags(FLAG_None)
 	, GpuState(D3D12_RESOURCE_STATE_COMMON)
 {
-	RPG_LogDebug(RpgLogTexture2D, "Create texture (%s)", *name);
+	RPG_LogDebug(RpgLogTexture, "Create texture (%s)", *name);
 
 	RPG_Check(!name.IsEmpty());
 	Name = name;
@@ -77,7 +77,7 @@ RpgTexture2D::RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, 
 
 RpgTexture2D::~RpgTexture2D() noexcept
 {
-	RPG_LogDebug(RpgLogTexture2D, "Destroy texture (%s)", *Name);
+	RPG_LogDebug(RpgLogTexture, "Destroy texture (%s)", *Name);
 
 	if (PixelStagingBuffer && PixelData)
 	{
@@ -225,7 +225,7 @@ RpgSharedTexture2D RpgTexture2D::s_CreateSharedDepthStencil(const RpgName& name,
 
 void RpgTexture2D::s_CreateDefaults() noexcept
 {
-	RPG_LogDebug(RpgLogTexture2D, "Create default textures...");
+	RPG_LogDebug(RpgLogTexture, "Create default textures...");
 
 	// texture2d-white
 	{
@@ -250,4 +250,43 @@ void RpgTexture2D::s_DestroyDefaults() noexcept
 const RpgSharedTexture2D& RpgTexture2D::s_GetDefault_White() noexcept
 {
 	return DefaultTextures[0];
+}
+
+
+
+
+
+RpgTextureCubeDepth::RpgTextureCubeDepth(const RpgName name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept
+	: RpgTexture2D(name, format, width, height, 1, FLAG_IsDepthStencil)
+{
+}
+
+
+void RpgTextureCubeDepth::GPU_UpdateResource() noexcept
+{
+	bool bShouldCreateNew = (GpuAlloc == nullptr);
+
+	if (!bShouldCreateNew)
+	{
+		RPG_Assert(GpuAlloc);
+
+		const D3D12_RESOURCE_DESC desc = GpuAlloc->GetResource()->GetDesc();
+		bShouldCreateNew = (Width != desc.Width || Height != desc.Height);
+	}
+
+	if (bShouldCreateNew)
+	{
+		const DXGI_FORMAT dxgiFormat = RPG_TEXTURE_FORMAT_TO_DXGI_FORMAT[static_cast<uint8_t>(Format)];
+		GpuState = D3D12_RESOURCE_STATE_COMMON;
+		GpuAlloc = RpgD3D12::CreateDepthCube(dxgiFormat, GpuState, Width, Height);
+
+		RPG_D3D12_SetDebugNameAllocation(GpuAlloc, "RES_%s", *Name);
+	}
+}
+
+
+
+RpgSharedTextureCubeDepth RpgTextureCubeDepth::s_CreateShared(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept
+{
+	return RpgSharedTextureCubeDepth(new RpgTextureCubeDepth(name, format, width, height));
 }

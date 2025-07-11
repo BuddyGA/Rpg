@@ -1,9 +1,6 @@
 #include "RpgRenderer.h"
-#include "RpgRenderResource.h"
-#include "RpgMaterial.h"
-#include "RpgTexture2D.h"
-#include "async_task/RpgAsyncTask_Copy.h"
-#include "async_task/RpgAsyncTask_Compute.h"
+#include "RpgShadowViewport.h"
+#include "RpgSceneViewport.h"
 #include "async_task/RpgAsyncTask_RenderPass.h"
 
 
@@ -35,18 +32,19 @@ RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 		FFrameData& frame = FrameDatas[f];
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&frame.Fence)));
 		frame.FenceValue = 0;
-		frame.AsyncTaskCopy = RpgThreadPool::CreateTask<RpgAsyncTask_Copy>();
-		frame.MaterialResource = new RpgMaterialResource();
-		frame.MeshResource = new RpgMeshResource();
-		frame.MeshSkinnedResource = new RpgMeshSkinnedResource();
-		frame.AsyncTaskCompute = RpgThreadPool::CreateTask<RpgAsyncTask_Compute>();
+		frame.MaterialResource = RpgPointer::MakeUnique<RpgMaterialResource>();
+		frame.MeshResource = RpgPointer::MakeUnique<RpgMeshResource>();
+		frame.MeshSkinnedResource = RpgPointer::MakeUnique<RpgMeshSkinnedResource>();
+		frame.AsyncTaskCopy = RpgPointer::MakeUnique<RpgAsyncTask_Copy>();
+		frame.AsyncTaskCompute = RpgPointer::MakeUnique<RpgAsyncTask_Compute>();
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&frame.SwapChainCmdAlloc)));
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&frame.SwapChainCmdList)));
 
 	}
 
-	AntiAliasingMode = EAntiAliasingMode::NONE;
-	Gamma = 2.2f;
+	ShadowQuality = RpgRenderLight::SHADOW_QUALITY_MEDIUM;
+	AntiAliasingMode = RpgRenderAntiAliasing::MODE_NONE;
+	Gamma = 1.25f;
 }
 
 
@@ -61,25 +59,16 @@ RpgRenderer::~RpgRenderer() noexcept
 	{
 		WaitFrameFinished(f);
 
+		/*
 		FFrameData& frame = FrameDatas[f];
 		frame.Fence.Reset();
-		
-		RpgThreadPool::DestroyTask(frame.AsyncTaskCopy);
-
-		delete frame.MaterialResource;
-		delete frame.MeshResource;
-		delete frame.MeshSkinnedResource;
-
-		for (int w = 0; w < frame.WorldContexts.GetCount(); ++w)
-		{
-			FWorldContext& context = frame.WorldContexts[w];
-			delete context.Resource;
-		}
-
-		RpgThreadPool::DestroyTask(frame.AsyncTaskCompute);
-
+		frame.MaterialResource.Release();
+		frame.MeshResource.Release();
+		frame.MeshSkinnedResource.Release();
+		frame.AsyncTaskCopy.Release();
 		frame.SwapChainCmdAlloc.Reset();
 		frame.SwapChainCmdList.Reset();
+		*/
 	}
 }
 
@@ -234,7 +223,7 @@ void RpgRenderer::RegisterWorld(const RpgWorld* world) noexcept
 		{
 			FWorldContext& context = frame.WorldContexts.Add();
 			context.World = world;
-			context.Resource = new RpgWorldResource();
+			context.Resource = RpgPointer::MakeUnique<RpgWorldResource>();
 		}
 	}
 }
@@ -262,7 +251,7 @@ void RpgRenderer::BeginRender(int frameIndex, float deltaTime) noexcept
 		FWorldContext& context = frame.WorldContexts[i];
 		context.Resource->Reset();
 		context.Resource->SetDeltaTime(deltaTime);
-		context.Viewports.Clear();
+		context.SceneViewports.Clear();
 	}
 
 	SwapchainResize();
@@ -273,15 +262,20 @@ void RpgRenderer::BeginRender(int frameIndex, float deltaTime) noexcept
 }
 
 
-void RpgRenderer::EndRender(int frameIndex) noexcept
+void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 {
 	Renderer2d.End(frameIndex);
 
 	FFrameData& frame = FrameDatas[frameIndex];
 
-	RpgMeshResource* meshResource = frame.MeshResource;
-	RpgMeshSkinnedResource* meshSkinnedResource = frame.MeshSkinnedResource;
-	RpgMaterialResource* materialResource = frame.MaterialResource;
+	RpgRenderFrameContext frameContext;
+	frameContext.Index = frameIndex;
+	frameContext.DeltaTime = deltaTime;
+	frameContext.MaterialResource = frame.MaterialResource.Get();
+	frameContext.MeshResource = frame.MeshResource.Get();
+	frameContext.MeshSkinnedResource = frame.MeshSkinnedResource.Get();
+	frameContext.ShadowQuality = ShadowQuality;
+	frameContext.AntiAliasingMode = AntiAliasingMode;
 
 	// pre-render
 	FWorldContextArray& worldContexts = frame.WorldContexts;
@@ -289,15 +283,17 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 	for (int w = 0; w < worldContexts.GetCount(); ++w)
 	{
 		FWorldContext& context = worldContexts[w];
+		RpgWorldResource* worldResource = context.Resource.Get();
+		const RpgWorld* world = context.World;
 
-		for (int v = 0; v < context.Viewports.GetCount(); ++v)
+		for (int v = 0; v < worldContexts[w].SceneViewports.GetCount(); ++v)
 		{
-			context.Viewports[v]->PreRender(frameIndex, materialResource, meshResource, meshSkinnedResource, context.Resource, context.World);
+			context.SceneViewports[v]->PreRender(frameContext, worldResource, world);
 		}
 	}
 
 	// Renderer2d 
-	Renderer2d.PreRender(frameIndex, materialResource);
+	Renderer2d.PreRender(frameContext);
 
 	// Default material fullscreen
 	RpgMaterialResource::FMaterialID fullscreenMaterialResourceId;
@@ -309,15 +305,15 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 		}
 
 		defMatFullscreen->SetParameterScalarValue("gamma", Gamma);
-		fullscreenMaterialResourceId = materialResource->AddMaterial(defMatFullscreen);
+		fullscreenMaterialResourceId = frameContext.MaterialResource->AddMaterial(defMatFullscreen);
 	}
 
 
 	// update resource
 	{
-		materialResource->UpdateResources();
-		meshResource->UpdateResources();
-		meshSkinnedResource->UpdateResources();
+		frameContext.MaterialResource->UpdateResources();
+		frameContext.MeshResource->UpdateResources();
+		frameContext.MeshSkinnedResource->UpdateResources();
 
 		for (int w = 0; w < worldContexts.GetCount(); ++w)
 		{
@@ -326,20 +322,17 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 	}
 
 	// async copy
-	RpgAsyncTask_Copy* asyncCopy = frame.AsyncTaskCopy;
+	RpgAsyncTask_Copy* asyncCopy = frame.AsyncTaskCopy.Get();
 	{
 		asyncCopy->Reset();
-		asyncCopy->FrameIndex = frameIndex;
 		asyncCopy->FenceSignal = frame.Fence.Get();
 		asyncCopy->FenceSignalValue = ++frame.FenceValue;
+		asyncCopy->FrameContext = frameContext;
 		asyncCopy->Renderer2d = &Renderer2d;
-		asyncCopy->MaterialResource = frame.MaterialResource;
-		asyncCopy->MeshResource = frame.MeshResource;
-		asyncCopy->MeshSkinnedResource = frame.MeshSkinnedResource;
 
 		for (int w = 0; w < worldContexts.GetCount(); ++w)
 		{
-			asyncCopy->WorldResources.AddValue(worldContexts[w].Resource);
+			asyncCopy->WorldResources.AddValue(worldContexts[w].Resource.Get());
 		}
 
 		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&asyncCopy, 1);
@@ -347,33 +340,38 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 
 
 	// async compute
-	RpgAsyncTask_Compute* asyncCompute = frame.AsyncTaskCompute;
+	RpgAsyncTask_Compute* asyncCompute = frame.AsyncTaskCompute.Get();
 	{
 		asyncCompute->Reset();
 		asyncCompute->FenceSignal = frame.Fence.Get();
 		asyncCompute->WaitFenceCopyValue = frame.FenceValue;
 		asyncCompute->FenceSignalValue = ++frame.FenceValue;
-		asyncCompute->MeshResource = frame.MeshResource;
-		asyncCompute->MeshSkinnedResource = frame.MeshSkinnedResource;
+		asyncCompute->FrameContext = frameContext;
 
 		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&asyncCompute, 1);
 	}
 
 
-	// async render pass
-	RpgAsyncTask_RenderPassArray asyncRenderPasses;
+	// async task shadow pass
+	RpgAsyncTask_RenderPassShadowArray asyncShadowPasses;
+
+	// async task forward pass
+	RpgAsyncTask_RenderPassForwardArray asyncForwardPasses;
 	{
 		for (int w = 0; w < worldContexts.GetCount(); ++w)
 		{
-			FWorldContext& context = worldContexts[w];
+			const FWorldContext& context = worldContexts[w];
+			const RpgWorldResource* worldResource = context.Resource.Get();
+			const RpgWorld* world = context.World;
 
-			for (int v = 0; v < context.Viewports.GetCount(); ++v)
+			for (int v = 0; v < context.SceneViewports.GetCount(); ++v)
 			{
-				context.Viewports[v]->SetupRenderPasses(frameIndex, asyncRenderPasses, materialResource, meshResource, meshSkinnedResource, context.Resource);
+				context.SceneViewports[v]->SetupRenderPasses(frameContext, worldResource, world, asyncShadowPasses, asyncForwardPasses);
 			}
 		}
 
-		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)asyncRenderPasses.GetData(), asyncRenderPasses.GetCount());
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)asyncShadowPasses.GetData(), asyncShadowPasses.GetCount());
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)asyncForwardPasses.GetData(), asyncForwardPasses.GetCount());
 	}
 
 	
@@ -398,7 +396,7 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 		RpgD3D12Command::SetAndClearRenderTargets(cmdList, &backbufferDescriptor, 1, RpgColorLinear(0.1f, 0.15f, 0.2f), nullptr, 1.0f, 0);
 
 		// Bind shader resource material
-		materialResource->CommandBindShaderResources(cmdList);
+		frameContext.MaterialResource->CommandBindShaderResources(cmdList);
 
 		// Set topology triangle-list
 		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -416,13 +414,13 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 				);
 			}
 
-			materialResource->CommandBindMaterial(cmdList, fullscreenMaterialResourceId);
+			frameContext.MaterialResource->CommandBindMaterial(cmdList, fullscreenMaterialResourceId);
 
 			cmdList->DrawInstanced(3, 1, 0, 0);
 		}
 
 		// Render 2D
-		Renderer2d.CommandDraw(frameIndex, cmdList, materialResource);
+		Renderer2d.CommandDraw(frameContext, cmdList);
 
 		// Transition backbuffer resource to present
 		RpgD3D12Command::TransitionAllSubresources(cmdList, swapchainBackbuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -430,20 +428,39 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 	RPG_D3D12_COMMAND_End(cmdList);
 
 
-	RpgArrayInline<ID3D12CommandList*, 8> directCommandLists;
+	ID3D12CommandQueue* cmdQueueDirect = RpgD3D12::GetCommandQueueDirect();
 
-	// Wait all render passes
-	for (int i = 0; i < asyncRenderPasses.GetCount(); ++i)
+
+	// Wait all shadow pass tasks
+	RPG_THREAD_TASK_WaitAll(asyncShadowPasses.GetData(), asyncShadowPasses.GetCount());
 	{
-		RpgAsyncTask_RenderPass* renderPass = asyncRenderPasses[i];
-		renderPass->Wait();
-		directCommandLists.AddValue(renderPass->GetCommandList());
+		RpgArrayInline<ID3D12CommandList*, 32> directCommandLists;
+		for (int i = 0; i < asyncShadowPasses.GetCount(); ++i)
+		{
+			directCommandLists.AddValue(asyncShadowPasses[i]->GetCommandList());
+		}
+
+		if (!directCommandLists.IsEmpty())
+		{
+			RPG_D3D12_Validate(cmdQueueDirect->Wait(frame.Fence.Get(), frame.FenceValue++));
+			cmdQueueDirect->ExecuteCommandLists(directCommandLists.GetCount(), directCommandLists.GetData());
+			RPG_D3D12_Validate(cmdQueueDirect->Signal(frame.Fence.Get(), ++frame.FenceValue));
+		}
+	}
+
+
+	// Wait all forward pass tasks
+	RPG_THREAD_TASK_WaitAll(asyncForwardPasses.GetData(), asyncForwardPasses.GetCount());
+
+	RpgArrayInline<ID3D12CommandList*, 8> directCommandLists;
+	for (int i = 0; i < asyncForwardPasses.GetCount(); ++i)
+	{
+		directCommandLists.AddValue(asyncForwardPasses[i]->GetCommandList());
 	}
 
 	directCommandLists.AddValue(cmdList);
 
 	// Execute/submit recorded direct command lists
-	ID3D12CommandQueue* cmdQueueDirect = RpgD3D12::GetCommandQueueDirect();
 	if (!directCommandLists.IsEmpty())
 	{
 		RPG_D3D12_Validate(cmdQueueDirect->Wait(frame.Fence.Get(), frame.FenceValue));
@@ -493,7 +510,7 @@ void RpgRenderer::EndRender(int frameIndex) noexcept
 
 RpgVertexPrimitiveBatchLine* RpgRenderer::Debug_GetPrimitiveBatchLine(int frameIndex, const RpgWorld* world, bool bNoDepth) noexcept
 {
-	RpgWorldResource* resource = GetWorldContext(frameIndex, world).Resource;
+	RpgWorldResource* resource = GetWorldContext(frameIndex, world).Resource.Get();
 	RPG_Assert(resource);
 
 	return bNoDepth ? &resource->DebugLineNoDepth : &resource->DebugLine;

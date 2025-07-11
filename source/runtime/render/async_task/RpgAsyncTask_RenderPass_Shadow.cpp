@@ -1,0 +1,138 @@
+#include "RpgAsyncTask_RenderPass.h"
+#include "../RpgRenderPipeline.h"
+
+
+
+RpgAsyncTask_RenderPass_Shadow::RpgAsyncTask_RenderPass_Shadow() noexcept
+{
+	DrawMeshData = nullptr;
+	DrawMeshCount = 0;
+	DrawSkinnedMeshData = nullptr;
+	DrawSkinnedMeshCount = 0;
+	bIsOmniDirectional = false;
+}
+
+
+void RpgAsyncTask_RenderPass_Shadow::Reset() noexcept
+{
+	RpgAsyncTask_RenderPass::Reset();
+
+	DepthTextures.Clear();
+	CameraIds.Clear();
+	DrawMeshData = nullptr;
+	DrawMeshCount = 0;
+	DrawSkinnedMeshData = nullptr;
+	DrawSkinnedMeshCount = 0;
+	bIsOmniDirectional = false;
+}
+
+
+void RpgAsyncTask_RenderPass_Shadow::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
+{
+	if (bIsOmniDirectional)
+	{
+		RPG_Assert(DepthTextures.GetCount() == 6);
+		RPG_Assert(CameraIds.GetCount() == 6);
+	}
+
+	const RpgPointInt dimension = DepthTextures[0]->GetDimension();
+
+	// Set viewport
+	RpgD3D12Command::SetViewport(cmdList, 0, 0, dimension.X, dimension.Y, 0.0f, 1.0f);
+
+	// Set scissor
+	RpgD3D12Command::SetScissor(cmdList, 0, 0, dimension.X, dimension.Y);
+
+	// bind root signature
+	cmdList->SetGraphicsRootSignature(RpgRenderPipeline::GetRootSignatureGraphics());
+
+	// Bind shader resource world
+	WorldResource->CommandBindShaderResources(cmdList);
+
+	// Set topology
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// bind pipeline state
+	ID3D12PipelineState* PSO = RpgRenderPipeline::GetGraphicsPSO_ShadowDepth();
+	cmdList->SetPipelineState(PSO);
+
+
+	for (int i = 0; i < DepthTextures.GetCount(); ++i)
+	{
+		ID3D12Resource* depthStencilResource = DepthTextures[i]->GPU_GetResource();
+		const RpgD3D12::FResourceDescriptor depthStencilDescriptor = RpgD3D12::AllocateDescriptor_DSV(depthStencilResource);
+
+		// Transition resource to depth-write
+		RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, DepthTextures[i]->GPU_GetState(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		DepthTextures[i]->GPU_SetState(D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+		// Set and clear render targets
+		RpgD3D12Command::SetAndClearRenderTargets(cmdList, nullptr, 0, RpgColorLinear(), &depthStencilDescriptor, 1.0f, 0);
+
+
+		// Draw mesh
+		if (DrawMeshData)
+		{
+			RPG_Assert(DrawMeshCount > 0);
+
+			// Bind vertex buffers
+			D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[1] =
+			{
+				FrameContext.MeshResource->GetVertexBufferView_Position(),
+			};
+			cmdList->IASetVertexBuffers(0, 1, vertexBufferViews);
+
+			// Bind index buffer
+			const D3D12_INDEX_BUFFER_VIEW indexBufferView = FrameContext.MeshResource->GetIndexBufferView();
+			cmdList->IASetIndexBuffer(&indexBufferView);
+
+			// Draw calls
+			for (int d = 0; d < DrawMeshCount; ++d)
+			{
+				RpgDrawIndexedDepth draw = DrawMeshData[d];
+				draw.ObjectParam.CameraIndex = CameraIds[i];
+
+				cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / 4, &draw.ObjectParam, 0);
+				cmdList->DrawIndexedInstanced(draw.IndexCount, 1, draw.IndexStart, draw.IndexVertexOffset, 0);
+			}
+		}
+
+
+		// Draw mesh skinned
+		if (DrawSkinnedMeshData)
+		{
+			RPG_Assert(DrawSkinnedMeshCount > 0);
+
+			// Bind vertex buffers
+			const D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[1] =
+			{
+				FrameContext.MeshSkinnedResource->GetVertexBufferView_SkinnedPosition(),
+			};
+			cmdList->IASetVertexBuffers(0, 1, vertexBufferViews);
+
+			// Bind index buffer
+			const D3D12_INDEX_BUFFER_VIEW indexBufferView = FrameContext.MeshSkinnedResource->GetIndexBufferView_Skinned();
+			cmdList->IASetIndexBuffer(&indexBufferView);
+
+			const RpgArray<RpgShaderConstantSkinnedObjectParameter>& skinnedObjectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
+			RPG_Check(skinnedObjectParams.GetCount() == DrawSkinnedMeshCount);
+
+			// Draw calls
+			for (int d = 0; d < DrawSkinnedMeshCount; ++d)
+			{
+				RpgDrawIndexedDepth draw = DrawMeshData[d];
+				draw.ObjectParam.CameraIndex = CameraIds[i];
+
+				const RpgShaderConstantSkinnedObjectParameter& skinnedParam = skinnedObjectParams[d];
+
+				cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / 4, &draw.ObjectParam, 0);
+				cmdList->DrawIndexedInstanced(skinnedParam.IndexCount, 1, skinnedParam.IndexStart, skinnedParam.VertexStart, 0);
+			}
+		}
+
+
+		// Transition resource to pixel shader
+		RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, DepthTextures[i]->GPU_GetState(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		DepthTextures[i]->GPU_SetState(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	}
+}

@@ -15,9 +15,7 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> CmdListDirect;
 
 public:
-	const RpgMaterialResource* MaterialResource;
-	const RpgMeshResource* MeshResource;
-	const RpgMeshSkinnedResource* MeshSkinnedResource;
+	RpgRenderFrameContext FrameContext;
 	const RpgWorldResource* WorldResource;
 	
 
@@ -37,6 +35,37 @@ public:
 
 };
 
+
+
+class RpgAsyncTask_RenderPass_Shadow : public RpgAsyncTask_RenderPass
+{
+public:
+	RpgArrayInline<RpgTexture2D*, 6> DepthTextures;
+	RpgArrayInline<RpgWorldResource::FCameraID, 6> CameraIds;
+
+	const RpgDrawIndexedDepth* DrawMeshData;
+	int DrawMeshCount;
+
+	const RpgDrawIndexedDepth* DrawSkinnedMeshData;
+	int DrawSkinnedMeshCount;
+
+	bool bIsOmniDirectional;
+
+
+public:
+	RpgAsyncTask_RenderPass_Shadow() noexcept;
+	virtual void Reset() noexcept override;
+
+	virtual const char* GetTaskName() const noexcept override
+	{
+		return "RpgAsyncTask_RenderPass_Shadow";
+	}
+
+
+protected:
+	virtual void CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept override;
+
+};
 
 
 

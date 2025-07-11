@@ -278,7 +278,7 @@ void RpgD3D12::Initialize() noexcept
         frame.DescriptorPool_RTV = new FResourceDescriptorPool(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 8, false);
         RPG_D3D12_SetDebugName(frame.DescriptorPool_RTV->GetHeap(), "%i_DescriptorHeap_RTV", f);
 
-        frame.DescriptorPool_DSV = new FResourceDescriptorPool(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 8, false);
+        frame.DescriptorPool_DSV = new FResourceDescriptorPool(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 32, false);
         RPG_D3D12_SetDebugName(frame.DescriptorPool_DSV->GetHeap(), "%i_DescriptorHeap_DSV", f);
 
         frame.DescriptorPool_CBV_SRV_UAV = new FResourceDescriptorPool(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 4, true);
@@ -506,6 +506,26 @@ ComPtr<D3D12MA::Allocation> RpgD3D12::CreateDepthStencil(DXGI_FORMAT format, D3D
 }
 
 
+ComPtr<D3D12MA::Allocation> RpgD3D12::CreateDepthCube(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height) noexcept
+{
+    D3D12_RESOURCE_DESC depthCubeDesc = CreateResourceDesc_Texture(format, width, height, 1, 6);
+    depthCubeDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+    D3D12MA::ALLOCATION_DESC allocDesc{};
+    allocDesc.CustomPool = MemoryPoolRenderTargetGPU.Get();
+
+    D3D12_CLEAR_VALUE clearValue{};
+    clearValue.Format = format;
+    clearValue.DepthStencil.Depth = 1.0f;
+    clearValue.DepthStencil.Stencil = 0;
+
+    ComPtr<D3D12MA::Allocation> allocation;
+    RPG_D3D12_Validate(MemoryAllocator->CreateResource(&allocDesc, &depthCubeDesc, initialState, &clearValue, &allocation, IID_NULL, nullptr));
+
+    return allocation;
+}
+
+
 RpgD3D12::FResourceDescriptor RpgD3D12::AllocateDescriptor_RTV(ID3D12Resource* renderTargetResource) noexcept
 {
     const FResourceDescriptor descriptor = FrameDatas[FrameIndex].DescriptorPool_RTV->AllocateDescriptor();
@@ -524,7 +544,7 @@ RpgD3D12::FResourceDescriptor RpgD3D12::AllocateDescriptor_DSV(ID3D12Resource* d
 }
 
 
-RpgD3D12::FResourceDescriptor RpgD3D12::AllocateDescriptor_TDI(ID3D12Resource* textureResource) noexcept
+RpgD3D12::FResourceDescriptor RpgD3D12::AllocateDescriptor_TDI(ID3D12Resource* textureResource, DXGI_FORMAT format) noexcept
 {
     const FResourceDescriptor descriptor = FrameDatas[FrameIndex].DescriptorPool_TDI->AllocateDescriptor();
 
@@ -532,11 +552,29 @@ RpgD3D12::FResourceDescriptor RpgD3D12::AllocateDescriptor_TDI(ID3D12Resource* t
 
     D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{};
     viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    viewDesc.Format = resDesc.Format;
+    viewDesc.Format = (format == DXGI_FORMAT_UNKNOWN) ? resDesc.Format : format;
     viewDesc.Texture2D.MostDetailedMip = 0;
     viewDesc.Texture2D.MipLevels = -1;
     viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
+    RpgD3D12::GetDevice()->CreateShaderResourceView(textureResource, &viewDesc, descriptor.CpuHandle);
+
+    return descriptor;
+}
+
+
+RpgD3D12::FResourceDescriptor RpgD3D12::AllocateDescriptor_TDI_Cube(ID3D12Resource* textureResource, DXGI_FORMAT format) noexcept
+{
+    const FResourceDescriptor descriptor = FrameDatas[FrameIndex].DescriptorPool_TDI->AllocateDescriptor();
+
+    const D3D12_RESOURCE_DESC resDesc = textureResource->GetDesc();
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{};
+    viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+    viewDesc.Format = format;
+    viewDesc.Texture2D.MostDetailedMip = 0;
+    viewDesc.Texture2D.MipLevels = -1;
+    viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     RpgD3D12::GetDevice()->CreateShaderResourceView(textureResource, &viewDesc, descriptor.CpuHandle);
 
     return descriptor;

@@ -51,6 +51,7 @@ void RpgAssetImporter::ImportModel(RpgArray<RpgSharedModel>& out_Models, RpgShar
 	task.bImportSkeleton = setting.bImportSkeleton;
 	task.bImportAnimation = setting.bImportAnimation;
 	task.bGenerateTextureMipMaps = setting.bGenerateTextureMipMaps;
+	task.bIgnoreTextureNormals = setting.bIgnoreTextureNormals;
 	task.Execute();
 
 	out_Models = task.GetImportedModels();

@@ -21,21 +21,21 @@ void RpgAsyncTask_CompilePSO::Reset() noexcept
 
 void RpgAsyncTask_CompilePSO::Execute() noexcept
 {
-	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute compile PSO task for Material: %s", SDL_GetCurrentThreadID(), *MaterialName);
+	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute task compile PSO for (%s)", SDL_GetCurrentThreadID(), *MaterialName);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.NodeMask = 0;
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.pRootSignature = RootSignature;
-	psoDesc.PrimitiveTopologyType = (MaterialRenderState.RasterMode == RpgMaterialRasterMode::LINE) ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE : D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.PrimitiveTopologyType = (PipelineState.RasterMode == RpgRenderRasterMode::LINE) ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE : D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	// Vertex input elements
 	RpgName vertexShaderName = RPG_SHADER_DEFAULT_VS_FULLSCREEN_NAME;
 	RpgArrayInline<D3D12_INPUT_ELEMENT_DESC, 10> vertexInputElements;
 	{
-		switch (MaterialRenderState.VertexMode)
+		switch (PipelineState.VertexMode)
 		{
-			case RpgMaterialVertexMode::PRIMITIVE_2D:
+			case RpgRenderVertexMode::PRIMITIVE_2D:
 			{
 				vertexShaderName = RPG_SHADER_DEFAULT_VS_PRIMITIVE_2D_NAME;
 
@@ -45,7 +45,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgMaterialVertexMode::MESH_2D:
+			case RpgRenderVertexMode::MESH_2D:
 			{
 				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_2D_NAME;
 
@@ -56,7 +56,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgMaterialVertexMode::PRIMITIVE:
+			case RpgRenderVertexMode::PRIMITIVE:
 			{
 				vertexShaderName = RPG_SHADER_DEFAULT_VS_PRIMITIVE_NAME;
 
@@ -66,7 +66,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgMaterialVertexMode::MESH:
+			case RpgRenderVertexMode::MESH:
 			{
 				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_NAME;
 
@@ -83,32 +83,6 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgMaterialVertexMode::SKELETAL_MESH:
-			{
-				RPG_CheckV(0, "Not using this anymore!");
-
-				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_SKINNED_NAME;
-
-				// Position
-				vertexInputElements.AddValue({ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-
-				// Normal, Tangent
-				vertexInputElements.AddValue({ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-				vertexInputElements.AddValue({ "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-
-				// TexCoord
-				vertexInputElements.AddValue({ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-
-				// Skins
-				vertexInputElements.AddValue({ "BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-				vertexInputElements.AddValue({ "BONEWEIGHTS", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-				vertexInputElements.AddValue({ "BONEINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 3, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-				vertexInputElements.AddValue({ "BONEINDICES", 1, DXGI_FORMAT_R8G8B8A8_UINT, 3, 36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-				vertexInputElements.AddValue({ "BONECOUNT", 0, DXGI_FORMAT_R8_UINT, 3, 40, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-
-				break;
-			}
-
 			default:
 				break;
 		}
@@ -121,15 +95,29 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	// Shader state
 	{
 		// Vertex shader
+		if (!PipelineState.VertexShaderName.IsEmpty())
+		{
+			vertexShaderName = PipelineState.VertexShaderName;
+		}
+
 		IDxcBlob* vertexShaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(vertexShaderName);
 		RPG_Assert(vertexShaderCodeBlob);
 		psoDesc.VS.pShaderBytecode = vertexShaderCodeBlob->GetBufferPointer();
 		psoDesc.VS.BytecodeLength = vertexShaderCodeBlob->GetBufferSize();
 
-		// Pixel shader
-		if (MaterialRenderState.PixelShaderName.GetLength() > 0)
+		// Geometry shader
+		if (!PipelineState.GeometryShaderName.IsEmpty())
 		{
-			IDxcBlob* pixelShaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(MaterialRenderState.PixelShaderName);
+			IDxcBlob* geometryShaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(PipelineState.GeometryShaderName);
+			RPG_Assert(geometryShaderCodeBlob);
+			psoDesc.GS.pShaderBytecode = geometryShaderCodeBlob->GetBufferPointer();
+			psoDesc.GS.BytecodeLength = geometryShaderCodeBlob->GetBufferSize();
+		}
+
+		// Pixel shader
+		if (!PipelineState.PixelShaderName.IsEmpty())
+		{
+			IDxcBlob* pixelShaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(PipelineState.PixelShaderName);
 			RPG_Assert(pixelShaderCodeBlob);
 			psoDesc.PS.pShaderBytecode = pixelShaderCodeBlob->GetBufferPointer();
 			psoDesc.PS.BytecodeLength = pixelShaderCodeBlob->GetBufferSize();
@@ -139,28 +127,29 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 	// Rasterizer state
 	{
-		psoDesc.RasterizerState.CullMode = MaterialRenderState.bTwoSides ? D3D12_CULL_MODE_NONE : D3D12_CULL_MODE_BACK;
+		psoDesc.RasterizerState.CullMode = PipelineState.bTwoSides ? D3D12_CULL_MODE_NONE : D3D12_CULL_MODE_BACK;
 		psoDesc.RasterizerState.FrontCounterClockwise = FALSE;
-		psoDesc.RasterizerState.DepthBias = static_cast<INT>(MaterialRenderState.DepthBias);
-		psoDesc.RasterizerState.SlopeScaledDepthBias = MaterialRenderState.DepthBiasSlope;
-		psoDesc.RasterizerState.DepthBiasClamp = MaterialRenderState.DepthBiasClamp;
-		psoDesc.RasterizerState.DepthClipEnable = MaterialRenderState.bDepthWrite;
-		psoDesc.RasterizerState.AntialiasedLineEnable = MaterialRenderState.RasterMode == RpgMaterialRasterMode::LINE;
+		psoDesc.RasterizerState.DepthBias = static_cast<INT>(PipelineState.DepthBias);
+		psoDesc.RasterizerState.SlopeScaledDepthBias = PipelineState.DepthBiasSlope;
+		psoDesc.RasterizerState.DepthBiasClamp = PipelineState.DepthBiasClamp;
+		psoDesc.RasterizerState.DepthClipEnable = PipelineState.bDepthWrite;
+		psoDesc.RasterizerState.AntialiasedLineEnable = PipelineState.RasterMode == RpgRenderRasterMode::LINE;
 		psoDesc.RasterizerState.MultisampleEnable = FALSE;
 		psoDesc.RasterizerState.ForcedSampleCount = 0;
-		psoDesc.RasterizerState.ConservativeRaster = MaterialRenderState.bConservativeRasterization ? D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON : D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-		psoDesc.RasterizerState.FillMode = (MaterialRenderState.RasterMode == RpgMaterialRasterMode::SOLID) ? D3D12_FILL_MODE_SOLID : D3D12_FILL_MODE_WIREFRAME;
+		psoDesc.RasterizerState.ConservativeRaster = PipelineState.bConservativeRasterization ? D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON : D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+		psoDesc.RasterizerState.FillMode = (PipelineState.RasterMode == RpgRenderRasterMode::SOLID) ? D3D12_FILL_MODE_SOLID : D3D12_FILL_MODE_WIREFRAME;
 	}
 
 
 	// Render target state
-	psoDesc.NumRenderTargets = MaterialRenderState.RenderTargetCount;
+	psoDesc.NumRenderTargets = PipelineState.RenderTargetCount;
 	psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
-	const RpgMaterialBlendMode blendMode = MaterialRenderState.BlendMode;
+	const RpgRenderColorBlendMode blendMode = PipelineState.BlendMode;
+	const DXGI_FORMAT renderTargetFormat = PipelineState.RenderTargetFormat != DXGI_FORMAT_UNKNOWN ? PipelineState.RenderTargetFormat : k_Render_DefaultFormat_RenderTarget;
 
 	for (UINT r = 0; r < psoDesc.NumRenderTargets; ++r)
 	{
-		psoDesc.RTVFormats[r] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		psoDesc.RTVFormats[r] = renderTargetFormat;
 
 		D3D12_RENDER_TARGET_BLEND_DESC& renderTargetBlendDesc = psoDesc.BlendState.RenderTarget[r];
 		renderTargetBlendDesc.BlendEnable = FALSE;
@@ -168,7 +157,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 		switch (blendMode)
 		{
-			case RpgMaterialBlendMode::OPACITY_MASK:
+			case RpgRenderColorBlendMode::OPACITY_MASK:
 			{
 				renderTargetBlendDesc.BlendEnable = TRUE;
 				renderTargetBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
@@ -181,7 +170,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgMaterialBlendMode::FADE:
+			case RpgRenderColorBlendMode::FADE:
 			{
 				renderTargetBlendDesc.BlendEnable = TRUE;
 				renderTargetBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
@@ -194,7 +183,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgMaterialBlendMode::TRANSPARENCY:
+			case RpgRenderColorBlendMode::TRANSPARENCY:
 			{
 				renderTargetBlendDesc.BlendEnable = TRUE;
 				renderTargetBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
@@ -215,11 +204,18 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 	// Depth stencil state
 	{
-		psoDesc.DSVFormat = MaterialRenderState.bStencilTest ? DXGI_FORMAT_D24_UNORM_S8_UINT : DXGI_FORMAT_D32_FLOAT;
-		psoDesc.DepthStencilState.DepthEnable = MaterialRenderState.bDepthTest;
+		DXGI_FORMAT depthStencilFormat = PipelineState.DepthStencilFormat;
+
+		if (depthStencilFormat == DXGI_FORMAT_UNKNOWN)
+		{
+			depthStencilFormat = PipelineState.bStencilTest ? DXGI_FORMAT_D24_UNORM_S8_UINT : DXGI_FORMAT_D32_FLOAT;
+		}
+
+		psoDesc.DSVFormat = depthStencilFormat;
+		psoDesc.DepthStencilState.DepthEnable = PipelineState.bDepthTest;
 		psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 		psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-		psoDesc.DepthStencilState.StencilEnable = MaterialRenderState.bStencilTest;
+		psoDesc.DepthStencilState.StencilEnable = PipelineState.bStencilTest;
 	}
 
 
@@ -233,5 +229,5 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)));
 	RPG_D3D12_SetDebugName(PSO, "PSO_%s", *MaterialName);
 
-	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Compiled PSO for material: %s", SDL_GetCurrentThreadID(), *MaterialName);
+	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Compiled PSO (PSO_%s)", SDL_GetCurrentThreadID(), *MaterialName);
 }

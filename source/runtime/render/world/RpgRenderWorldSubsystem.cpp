@@ -8,8 +8,8 @@
 RpgRenderWorldSubsystem::RpgRenderWorldSubsystem() noexcept
 {
 	Name = "RenderWorldSubsystem";
-	bDebugDrawMeshBounds = false;
-	bDebugDrawLightBounds = false;
+	bDebugDrawMeshBound = false;
+	bDebugDrawLightBound = false;
 }
 
 
@@ -33,30 +33,47 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
     }
 
 
-	for (auto it = world->Component_CreateIterator<RpgRenderComponent_Camera>(); it; ++it)
+	for (auto it = world->Component_CreateIterator<RpgRenderComponent_Light>(); it; ++it)
 	{
-		RpgRenderComponent_Camera& comp = it.GetValue();
-		if (!comp.bActivated)
+		RpgRenderComponent_Light& comp = it.GetValue();
+		if (comp.Type == RpgRenderLight::TYPE_NONE || !comp.bIsVisible)
 		{
 			continue;
 		}
 
-		RpgSceneViewport* sceneViewport = comp.GetViewport();
-		sceneViewport->RenderTargetDimension = comp.RenderTargetDimension;
-		
-		const RpgTransform worldTransform = world->GameObject_GetWorldTransform(comp.GameObject);
-		sceneViewport->SetViewRotationAndPosition(worldTransform.Rotation, worldTransform.Position);
+		RpgShadowViewport* viewport = comp.ShadowViewport.Get();
 
-		if (comp.ProjectionMode == RpgRenderProjectionMode::PERSPECTIVE)
+		if (viewport == nullptr)
 		{
-			sceneViewport->SetProjectionPerspective(comp.PerspectiveFoVDegree, comp.NearClipZ, comp.FarClipZ);
-		}
-		else
-		{
-			sceneViewport->SetProjectionOrthographic(comp.NearClipZ, comp.FarClipZ);
+			switch (comp.Type)
+			{
+				case RpgRenderLight::TYPE_POINT_LIGHT:
+				{
+					comp.ShadowViewport = RpgPointer::MakeUnique<RpgShadowViewport_PointLight>();
+					viewport = comp.ShadowViewport.Get();
+
+					break;
+				}
+
+				case RpgRenderLight::TYPE_SPOT_LIGHT:
+				{
+					break;
+				}
+
+				case RpgRenderLight::TYPE_DIRECTIONAL_LIGHT:
+				{
+					break;
+				}
+
+				default:
+					break;
+			}
 		}
 
-		sceneViewport->bFrustumCulling = comp.bFrustumCulling;
+		RPG_Check(viewport);
+
+		viewport->GameObject = comp.GameObject;
+		viewport->AttenuationRadius = comp.AttenuationRadius;
 	}
 }
 
@@ -65,20 +82,8 @@ void RpgRenderWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) noex
 {
 	RpgWorld* world = GetWorld();
 
-	for (auto it = world->Component_CreateIterator<RpgRenderComponent_Camera>(); it; ++it)
-	{
-		RpgRenderComponent_Camera& comp = it.GetValue();
-		if (!comp.bActivated)
-		{
-			continue;
-		}
-
-		renderer->AddWorldViewport(frameIndex, world, comp.GetViewport());
-	}
-
-
 #ifndef RPG_BUILD_SHIPPING
-	if (bDebugDrawMeshBounds)
+	if (bDebugDrawMeshBound)
 	{
 		RpgVertexPrimitiveBatchLine* debugLine = renderer->Debug_GetPrimitiveBatchLine(frameIndex, world, false);
 
@@ -94,7 +99,7 @@ void RpgRenderWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) noex
 		}
 	}
 
-	if (bDebugDrawLightBounds)
+	if (bDebugDrawLightBound)
 	{
 
 	}

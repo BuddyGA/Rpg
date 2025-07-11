@@ -48,7 +48,7 @@
     <ClCompile Include="source\runtime\core\RpgVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\RpgTexture2D.cpp">
+    <ClCompile Include="source\runtime\render\RpgTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgModel.cpp">
@@ -84,7 +84,7 @@
     <ClCompile Include="source\runtime\render\RpgSceneViewport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\RpgShadowViewport.cpp">
+    <ClCompile Include="source\runtime\render\RpgShadowViewport_PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_Copy.cpp">
@@ -132,7 +132,7 @@
     <ClCompile Include="source\runtime\gui\RpgGuiWidget_Viewport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\core\RpgMesh.cpp">
+    <ClCompile Include="source\runtime\render\RpgMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgRenderer2D.cpp">
@@ -201,6 +201,24 @@
     <ClCompile Include="source\runtime\input\RpgInputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\runtime\render\RpgShadowViewport_Cascade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\render\RpgShadowViewport_SpotLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Shadow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\camera\async_task\RpgAsyncTask_CaptureMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\camera\world\RpgCameraWorldSubsystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\camera\async_task\RpgAsyncTask_CaptureLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\runtime\core\dsa\RpgAlgorithm.h">
@@ -251,7 +269,7 @@
     <ClInclude Include="source\runtime\core\RpgVertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\RpgTexture2D.h">
+    <ClInclude Include="source\runtime\render\RpgTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\RpgModel.h">
@@ -299,7 +317,7 @@
     <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Copy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\core\RpgMesh.h">
+    <ClInclude Include="source\runtime\render\RpgMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\core\world\RpgGameObject.h">
@@ -423,6 +441,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\camera\async_task\RpgAsyncTask_Capture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\camera\RpgCameraTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\camera\world\RpgCameraWorldSubsystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\camera\world\RpgCameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

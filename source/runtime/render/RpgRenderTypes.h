@@ -1,9 +1,8 @@
 #pragma once
 
+#include "core/RpgString.h"
+#include "core/world/RpgGameObject.h"
 #include "RpgD3D12.h"
-
-
-class RpgWorld;
 
 
 class RpgRenderer;
@@ -16,19 +15,24 @@ class RpgWorldResource;
 
 struct RpgDrawIndexed;
 
-class RpgRenderViewport;
 class RpgSceneViewport;
+
 class RpgShadowViewport;
+class RpgShadowViewport_PointLight;
+class RpgShadowViewport_SpotLight;
+class RpgShadowViewport_Cascade;
 
 class RpgAsyncTask_CompilePSO;
 class RpgAsyncTask_Compute;
 class RpgAsyncTask_Copy;
 class RpgAsyncTask_RenderPass;
 class RpgAsyncTask_RenderPass_Depth;
+class RpgAsyncTask_RenderPass_Shadow;
 class RpgAsyncTask_RenderPass_Forward;
 class RpgAsyncTask_RenderPass_Transparency;
 
-typedef RpgArrayInline<RpgAsyncTask_RenderPass*, 32> RpgAsyncTask_RenderPassArray;
+typedef RpgArrayInline<RpgAsyncTask_RenderPass_Shadow*, 32> RpgAsyncTask_RenderPassShadowArray;
+typedef RpgArrayInline<RpgAsyncTask_RenderPass_Forward*, 32> RpgAsyncTask_RenderPassForwardArray;
 
 
 class RpgAsyncTask_Compute;
@@ -36,10 +40,63 @@ class RpgAsyncTask_Compute;
 
 
 
-enum class RpgRenderProjectionMode : uint8_t
+enum class RpgRenderVertexMode : uint8_t
 {
-	PERSPECTIVE = 0,
-	ORTHOGRAPHIC
+	NONE = 0,
+
+	PRIMITIVE_2D,
+	MESH_2D,
+	PRIMITIVE,
+	MESH,
+	POST_PROCESS,
+
+	MAX_COUNT
+};
+
+
+enum class RpgRenderRasterMode : uint8_t
+{
+	NONE = 0,
+	LINE,
+	SOLID,
+	WIREFRAME,
+	MAX_COUNT
+};
+
+
+enum class RpgRenderColorBlendMode : uint8_t
+{
+	NONE = 0,
+	ADDITIVE,
+	OPACITY_MASK,
+	FADE,
+	TRANSPARENCY,
+	MAX_COUNT
+};
+
+
+struct RpgRenderPipelineState
+{
+	RpgName VertexShaderName;
+	RpgName PixelShaderName;
+	RpgName GeometryShaderName;
+
+	RpgRenderVertexMode VertexMode{ RpgRenderVertexMode::NONE };
+	RpgRenderRasterMode RasterMode{ RpgRenderRasterMode::NONE };
+	RpgRenderColorBlendMode BlendMode{ RpgRenderColorBlendMode::NONE };
+	DXGI_FORMAT RenderTargetFormat{ DXGI_FORMAT_UNKNOWN };
+	int RenderTargetCount{ 1 };
+
+	DXGI_FORMAT DepthStencilFormat{ DXGI_FORMAT_UNKNOWN };
+	int DepthBias{ 0 };
+	float DepthBiasSlope{ 0.0f };
+	float DepthBiasClamp{ 0.0f };
+	bool bDepthTest{ false };
+	bool bDepthWrite{ false };
+	bool bStencilTest{ false };
+
+	bool bTwoSides{ false };
+	bool bConservativeRasterization{ false };
 };
 
 
@@ -55,33 +112,37 @@ namespace RpgRenderLight
 	};
 
 
-	enum EShadowResolutionQuality : uint8_t
+	enum EShadowQuality : uint8_t
 	{
-		SHADOW_RESOLUTION_QUALITY_LOW = 0,
-		SHADOW_RESOLUTION_QUALITY_MEDIUM,
-		SHADOW_RESOLUTION_QUALITY_HIGH,
-		SHADOW_RESOLUTION_QUALITY_MAX_COUNT
+		SHADOW_QUALITY_NONE = 0,
+		SHADOW_QUALITY_LOW,
+		SHADOW_QUALITY_MEDIUM,
+		SHADOW_QUALITY_HIGH,
+		SHADOW_QUALITY_MAX_COUNT
 	};
 
 
-	constexpr uint16_t POINT_SHADOW_RESOLUTIONS[SHADOW_RESOLUTION_QUALITY_MAX_COUNT] =
+	constexpr uint16_t SHADOW_TEXTURE_DIMENSION_POINT_LIGHT[SHADOW_QUALITY_MAX_COUNT] =
 	{
+		0,
 		256,	// LOW
 		512,	// MEDIUM
 		1024	// HIGH
 	};
 
 
-	constexpr uint16_t SPOT_SHADOW_RESOLUTIONS[SHADOW_RESOLUTION_QUALITY_MAX_COUNT] =
+	constexpr uint16_t SHADOW_TEXTURE_DIMENSION_SPOT_LIGHT[SHADOW_QUALITY_MAX_COUNT] =
 	{
+		0,
 		256,	// LOW
 		512,	// MEDIUM
 		1024	// HIGH
 	};
 
 
-	constexpr uint16_t DIRECTIONAL_SHADOW_RESOLUTIONS[SHADOW_RESOLUTION_QUALITY_MAX_COUNT] =
+	constexpr uint16_t SHADOW_TEXTURE_DIMENSION_DIRECTIONAL_LIGHT[SHADOW_QUALITY_MAX_COUNT] =
 	{
+		0,
 		512,	// LOW
 		1024,	// MEDIUM
 		2048	// HIGH
@@ -91,15 +152,41 @@ namespace RpgRenderLight
 
 
 
-class RpgRenderViewport
+namespace RpgRenderAntiAliasing
 {
-	RPG_NOCOPY(RpgRenderViewport)
+	enum EMode : uint8_t
+	{
+		MODE_NONE = 0,
+		MODE_FXAA,
+		MODE_SMAA,
+		MODE_MAX_COUNT
+	};
 
-public:
-	RpgRenderViewport() noexcept = default;
-	virtual ~RpgRenderViewport() noexcept = default;
 
-	virtual void PreRender(int frameIndex, RpgMaterialResource* materialResource, RpgMeshResource* meshResource, RpgMeshSkinnedResource* meshSkinnedResource, RpgWorldResource* worldResource, const RpgWorld* world) noexcept = 0;
-	virtual void SetupRenderPasses(int frameIndex, RpgAsyncTask_RenderPassArray& out_RenderPasses, const RpgMaterialResource* materialResource, const RpgMeshResource* meshResource, const RpgMeshSkinnedResource* meshSkinnedResource, const RpgWorldResource* worldResource) noexcept = 0;
+	constexpr const char* NAMES[MODE_MAX_COUNT] =
+	{
+		"None",
+		"FXAA",
+		"SMAA"
+	};
 
+}
+
+
+
+struct RpgRenderFrameContext
+{
+	int Index{ 0 };
+	float DeltaTime{ 0.0f };
+	RpgMaterialResource* MaterialResource{ nullptr };
+	RpgMeshResource* MeshResource{ nullptr };
+	RpgMeshSkinnedResource* MeshSkinnedResource{ nullptr };
+	RpgRenderLight::EShadowQuality ShadowQuality{ RpgRenderLight::SHADOW_QUALITY_NONE };
+	RpgRenderAntiAliasing::EMode AntiAliasingMode{ RpgRenderAntiAliasing::MODE_NONE };
 };
+
+
+
+constexpr const DXGI_FORMAT k_Render_DefaultFormat_RenderTarget = DXGI_FORMAT_R8G8B8A8_UNORM;
+constexpr const DXGI_FORMAT k_Render_DefaultFormat_DepthStencil = DXGI_FORMAT_D24_UNORM_S8_UINT;
+constexpr const DXGI_FORMAT k_Render_DefaultFormat_ShadowDepth = DXGI_FORMAT_D16_UNORM;

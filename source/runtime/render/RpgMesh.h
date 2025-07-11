@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RpgConfig.h"
-#include "RpgString.h"
-#include "RpgPointer.h"
-#include "RpgVertex.h"
+#include "core/RpgConfig.h"
+#include "core/RpgString.h"
+#include "core/RpgPointer.h"
+#include "core/RpgVertex.h"
 
 
 

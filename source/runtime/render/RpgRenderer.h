@@ -1,9 +1,9 @@
 #pragma once
 
 #include "RpgRenderer2D.h"
-
-
-class RpgWorld;
+#include "RpgRenderResource.h"
+#include "async_task/RpgAsyncTask_Copy.h"
+#include "async_task/RpgAsyncTask_Compute.h"
 
 
 
@@ -67,9 +67,11 @@ private:
 
 	struct FWorldContext
 	{
-		const RpgWorld* World = nullptr;
-		RpgWorldResource* Resource = nullptr;
-		RpgArrayInline<RpgRenderViewport*, 8> Viewports;
+		const RpgWorld* World{ nullptr };
+		RpgUniquePtr<RpgWorldResource> Resource;
+		RpgArrayInline<RpgShadowViewport*, 16> ShadowViewports;
+		RpgArrayInline<RpgSceneViewport*, 8> SceneViewports;
+
 
 		inline bool operator==(const RpgWorld* rhs) const noexcept
 		{
@@ -85,14 +87,14 @@ private:
 		ComPtr<ID3D12Fence> Fence;
 		uint64_t FenceValue;
 
-		RpgAsyncTask_Copy* AsyncTaskCopy;
+		RpgUniquePtr<RpgMaterialResource> MaterialResource;
+		RpgUniquePtr<RpgMeshResource> MeshResource;
+		RpgUniquePtr<RpgMeshSkinnedResource> MeshSkinnedResource;
 
-		RpgMaterialResource* MaterialResource;
-		RpgMeshResource* MeshResource;
-		RpgMeshSkinnedResource* MeshSkinnedResource;
 		FWorldContextArray WorldContexts;
 
-		RpgAsyncTask_Compute* AsyncTaskCompute;
+		RpgUniquePtr<RpgAsyncTask_Copy> AsyncTaskCopy;
+		RpgUniquePtr<RpgAsyncTask_Compute> AsyncTaskCompute;
 
 		ComPtr<ID3D12CommandAllocator> SwapChainCmdAlloc;
 		ComPtr<ID3D12GraphicsCommandList> SwapChainCmdList;
@@ -102,14 +104,8 @@ private:
 
 
 public:
-	enum class EAntiAliasingMode : uint8_t
-	{
-		NONE = 0,
-		FXAA,
-		SMAA
-	};
-
-	EAntiAliasingMode AntiAliasingMode;
+	RpgRenderLight::EShadowQuality ShadowQuality;
+	RpgRenderAntiAliasing::EMode AntiAliasingMode;
 	RpgSharedTexture2D FinalTexture;
 	float Gamma;
 
@@ -133,14 +129,24 @@ public:
 	void UnregisterWorld(const RpgWorld* world) noexcept;
 
 
-	inline void AddWorldViewport(int frameIndex, const RpgWorld* world, RpgRenderViewport* viewport) noexcept
+	inline void AddWorldShadowViewport(int frameIndex, const RpgWorld* world, RpgShadowViewport* viewport) noexcept
 	{
-		GetWorldContext(frameIndex, world).Viewports.AddUnique(viewport);
+		GetWorldContext(frameIndex, world).ShadowViewports.AddUnique(viewport);
+	}
+
+	inline void AddWorldSceneViewport(int frameIndex, const RpgWorld* world, RpgSceneViewport* viewport) noexcept
+	{
+		GetWorldContext(frameIndex, world).SceneViewports.AddUnique(viewport);
+	}
+
+	inline RpgWorldResource* GetWorldResource(int frameIndex, const RpgWorld* world) noexcept
+	{
+		return GetWorldContext(frameIndex, world).Resource.Get();
 	}
 
 
 	void BeginRender(int frameIndex, float deltaTime) noexcept;
-	void EndRender(int frameIndex) noexcept;
+	void EndRender(int frameIndex, float deltaTime) noexcept;
 
 
 	inline RpgRenderer2D& GetRenderer2D() noexcept

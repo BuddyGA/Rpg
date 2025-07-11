@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/RpgVertex.h"
-#include "RpgTexture2D.h"
+#include "RpgTexture.h"
 
 
 

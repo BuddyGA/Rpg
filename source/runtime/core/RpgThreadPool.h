@@ -19,7 +19,10 @@ public:
 	{
 	}
 
-	virtual ~RpgThreadTask() noexcept = default;
+	virtual ~RpgThreadTask() noexcept
+	{
+		RPG_Assert(IsIdle() || IsDone());
+	}
 
 	virtual void Reset() noexcept
 	{
@@ -99,28 +102,6 @@ namespace RpgThreadPool
 	void Shutdown() noexcept;
 
 
-	// Create task
-	// @returns Task
-	template<typename TTask, typename...TConstructorArgs>
-	[[nodiscard]] inline TTask* CreateTask(TConstructorArgs&&... args) noexcept
-	{
-		static_assert(std::is_base_of<RpgThreadTask, TTask>::value, "CreateTask() type of <TTask> must be derived from type <RpgThreadTask>!");
-		return new TTask(std::forward<TConstructorArgs>(args)...);
-	}
-
-
-	// Destroy task
-	// @param task - Task to destroy
-	// @returns None
-	template<typename TTask>
-	inline void DestroyTask(TTask*& task) noexcept
-	{
-		static_assert(std::is_base_of<RpgThreadTask, TTask>::value, "DestroyTask() type of <TTask> must be derived from type <RpgThreadTask>!");
-		RPG_Assert(task && (task->IsIdle() || task->IsDone()));
-		delete task;
-	}
-
-
 	// Submit task. 
 	// @param task - Task to submit
 	// @returns None
@@ -138,6 +119,11 @@ namespace RpgThreadPool
 	template<typename bool bCondition = false>
 	inline void SubmitOrExecuteTasks(RpgThreadTask** tasks, int taskCount) noexcept
 	{
+		if (tasks == nullptr || taskCount == 0)
+		{
+			return;
+		}
+
 		if constexpr (bCondition)
 		{
 			SubmitTasks(tasks, taskCount);

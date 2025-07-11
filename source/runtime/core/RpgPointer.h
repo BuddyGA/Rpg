@@ -5,6 +5,142 @@
 
 
 template<typename T>
+using TUniqueDeleteFunction = void(*)(T*);
+
+template<typename T>
+inline void Rpg_UniquePtrDefaultDelete(T* ref) noexcept
+{
+	if (ref)
+	{
+		delete ref;
+	}
+}
+
+
+template<typename T, TUniqueDeleteFunction<T> DeleteFunction = Rpg_UniquePtrDefaultDelete<T>>
+class RpgUniquePtr
+{
+	RPG_NOCOPY(RpgUniquePtr)
+
+	template<typename U, TUniqueDeleteFunction<U>>
+	friend class RpgUniquePtr;
+
+
+private:
+	T* Ref;
+
+
+public:
+	RpgUniquePtr(T* in_Ref = nullptr) noexcept
+		: Ref(in_Ref)
+	{
+	}
+
+	RpgUniquePtr(RpgUniquePtr&& other) noexcept
+		: Ref(other.Ref)
+	{
+		other.Ref = nullptr;
+	}
+
+	template<typename U>
+	RpgUniquePtr(RpgUniquePtr<U>&& other) noexcept
+		: Ref(other.Ref)
+	{
+		static_assert(std::is_base_of<T, U>::value, "Type of <U> must be derived from type of <T>!");
+		other.Ref = nullptr;
+	}
+
+	~RpgUniquePtr() noexcept
+	{
+		Release();
+	}
+
+
+public:
+	inline RpgUniquePtr& operator=(RpgUniquePtr&& rhs) noexcept
+	{
+		if (this != &rhs)
+		{
+			Release();
+			Ref = rhs.Ref;
+			rhs.Ref = nullptr;
+		}
+
+		return *this;
+	}
+
+	template<typename U>
+	inline RpgUniquePtr& operator=(RpgUniquePtr&& rhs) noexcept
+	{
+		static_assert(std::is_base_of<T, U>::value, "Type of <U> must be derived from type of <T>!");
+
+		Release();
+		Ref = rhs.Ref;
+		rhs.Ref = nullptr;
+
+		return *this;
+	}
+
+
+	inline RpgUniquePtr& operator=(T* rhs) noexcept
+	{
+		if (Ref != rhs)
+		{
+			Release();
+			Ref = rhs;
+		}
+
+		return *this;
+	}
+
+	inline T* operator->() noexcept
+	{
+		return Ref;
+	}
+
+	inline const T* operator->() const noexcept
+	{
+		return Ref;
+	}
+
+	inline bool operator==(const T* rhs) const noexcept
+	{
+		return Ref == rhs;
+	}
+
+	inline operator bool() const noexcept
+	{
+		return Ref != nullptr;
+	}
+
+public:
+	inline bool IsValid() const noexcept
+	{
+		return Ref != nullptr;
+	}
+
+	inline void Release() noexcept
+	{
+		DeleteFunction(Ref);
+		Ref = nullptr;
+	}
+
+	inline T* Get() noexcept
+	{
+		return Ref;
+	}
+
+	inline const T* Get() const noexcept
+	{
+		return Ref;
+	}
+
+};
+
+
+
+
+template<typename T>
 struct RpgRefCount
 {
 	T* Object{ nullptr };
@@ -164,6 +300,29 @@ public:
 	}
 
 
+	template<typename U>
+	friend class RpgSharedPtr;
+
+
+	template<typename U>
+	[[nodiscard]] inline RpgSharedPtr<U> Cast() const noexcept
+	{
+		static_assert(std::is_base_of<U, T>::value, "RpgSharePtr Cast type of <U> must be a parent of type of <T>!");
+		
+		if (Ref)
+		{
+			SDL_AddAtomicInt(&Ref->SharedCount, 1);
+		}
+
+		RpgSharedPtr<U> parent;
+		parent.Ref->Object = Ref->Object;
+		parent.Ref->SharedCount = Ref->SharedCount;
+		parent.Ref->WeakCount = Ref->WeakCount;
+
+		return parent;
+	}
+
+
 	template<typename>
 	friend class RpgWeakPtr;
 
@@ -320,115 +479,6 @@ public:
 	inline bool operator==(const RpgSharedPtr<T>& rhs) const noexcept
 	{
 		return Ref == rhs.Ref;
-	}
-
-};
-
-
-template<typename T>
-using TUniqueDeleteFunction = void(*)(T*);
-
-template<typename T>
-inline void Rpg_UniquePtrDefaultDelete(T* ref) noexcept
-{
-	if (ref)
-	{
-		delete ref;
-	}
-}
-
-
-template<typename T, TUniqueDeleteFunction<T> DeleteFunction = Rpg_UniquePtrDefaultDelete<T>>
-class RpgUniquePtr
-{
-	RPG_NOCOPY(RpgUniquePtr)
-
-private:
-	T* Ref;
-
-
-public:
-	RpgUniquePtr(T* in_Ref = nullptr) noexcept
-		: Ref(in_Ref)
-	{
-	}
-
-	RpgUniquePtr(RpgUniquePtr&& other) noexcept
-		: Ref(other.Ref)
-	{
-		other.Ref = nullptr;
-	}
-
-	~RpgUniquePtr() noexcept
-	{
-		Release();
-	}
-
-
-public:
-	inline RpgUniquePtr& operator=(RpgUniquePtr&& rhs) noexcept
-	{
-		if (this != &rhs)
-		{
-			Release();
-			Ref = rhs.Ref;
-			rhs.Ref = nullptr;
-		}
-
-		return *this;
-	}
-
-	inline RpgUniquePtr& operator=(T* rhs) noexcept
-	{
-		if (Ref != rhs)
-		{
-			Release();
-			Ref = rhs;
-		}
-
-		return *this;
-	}
-
-	inline T* operator->() noexcept
-	{
-		return Ref;
-	}
-
-	inline const T* operator->() const noexcept
-	{
-		return Ref;
-	}
-
-	inline bool operator==(const T* rhs) const noexcept
-	{
-		return Ref == rhs;
-	}
-
-	inline operator bool() const noexcept
-	{
-		return Ref != nullptr;
-	}
-
-public:
-	inline bool IsValid() const noexcept
-	{
-		return Ref != nullptr;
-	}
-
-	inline void Release() noexcept
-	{
-		DeleteFunction(Ref);
-		Ref = nullptr;
-	}
-
-	inline T* Get() noexcept
-	{
-		return Ref;
-	}
-
-	inline const T* Get() const noexcept
-	{
-		return Ref;
 	}
 
 };

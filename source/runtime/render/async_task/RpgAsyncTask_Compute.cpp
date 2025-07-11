@@ -14,8 +14,6 @@ RpgAsyncTask_Compute::RpgAsyncTask_Compute() noexcept
 	FenceSignal = nullptr;
 	WaitFenceCopyValue = 0;
 	FenceSignalValue = 0;
-	MeshResource = nullptr;
-	MeshSkinnedResource = nullptr;
 }
 
 
@@ -26,52 +24,49 @@ void RpgAsyncTask_Compute::Reset() noexcept
 	FenceSignal = nullptr;
 	WaitFenceCopyValue = 0;
 	FenceSignalValue = 0;
-	MeshResource = nullptr;
-	MeshSkinnedResource = nullptr;
 }
 
 
 void RpgAsyncTask_Compute::Execute() noexcept
 {
-	RPG_Assert(MeshResource);
-	RPG_Assert(MeshSkinnedResource);
-
 	ID3D12GraphicsCommandList* cmdList = CmdListCompute.Get();
 	RPG_D3D12_COMMAND_Begin(CmdAllocCompute, CmdListCompute);
+	
+	const RpgArray<RpgShaderConstantSkinnedObjectParameter>& objectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
+
+	if (!objectParams.IsEmpty())
 	{
 		// set compute root-sig
 		cmdList->SetComputeRootSignature(RpgRenderPipeline::GetRootSignatureCompute());
 
 		// set skinning pso
-		cmdList->SetPipelineState(RpgRenderPipeline::GetComputeSkinningPSO());
+		cmdList->SetPipelineState(RpgRenderPipeline::GetComputePSO_Skinning());
 
 		// bind SRV (vertex position)
-		ID3D12Resource* vertexPositionResource = MeshSkinnedResource->GetResourceVertexPosition();
+		ID3D12Resource* vertexPositionResource = FrameContext.MeshSkinnedResource->GetResourceVertexPosition();
 		cmdList->SetComputeRootShaderResourceView(RpgRenderPipeline::CRPI_VERTEX_POSITION, vertexPositionResource->GetGPUVirtualAddress());
 
 		// bind SRV (vertex normal-tangent)
-		ID3D12Resource* vertexNormalTangentResource = MeshSkinnedResource->GetResourceVertexNormalTangent();
+		ID3D12Resource* vertexNormalTangentResource = FrameContext.MeshSkinnedResource->GetResourceVertexNormalTangent();
 		cmdList->SetComputeRootShaderResourceView(RpgRenderPipeline::CRPI_VERTEX_NORMAL_TANGENT, vertexNormalTangentResource->GetGPUVirtualAddress());
 
 		// bind SRV (vertex skin)
-		ID3D12Resource* vertexSkinResource = MeshSkinnedResource->GetResourceVertexSkin();
+		ID3D12Resource* vertexSkinResource = FrameContext.MeshSkinnedResource->GetResourceVertexSkin();
 		cmdList->SetComputeRootShaderResourceView(RpgRenderPipeline::CRPI_VERTEX_SKIN, vertexSkinResource->GetGPUVirtualAddress());
 
 		// bind SRV (skeleton bone)
-		ID3D12Resource* skeletonBoneResource = MeshSkinnedResource->GetResourceSkeletonBoneSkinning();
+		ID3D12Resource* skeletonBoneResource = FrameContext.MeshSkinnedResource->GetResourceSkeletonBoneSkinning();
 		cmdList->SetComputeRootShaderResourceView(RpgRenderPipeline::CRPI_SKELETON_BONE_DATA, skeletonBoneResource->GetGPUVirtualAddress());
 
 		// bind UAV (skinned vertex position)
-		ID3D12Resource* skinnedVertexPositionResource = MeshSkinnedResource->GetResourceSkinnedVertexPosition();
+		ID3D12Resource* skinnedVertexPositionResource = FrameContext.MeshSkinnedResource->GetResourceSkinnedVertexPosition();
 		cmdList->SetComputeRootUnorderedAccessView(RpgRenderPipeline::CRPI_SKINNED_VERTEX_POSITION, skinnedVertexPositionResource->GetGPUVirtualAddress());
 
 		// bind UAV (skinned vertex normal-tangent)
-		ID3D12Resource* skinnedVertexNormalTangentResource = MeshSkinnedResource->GetResourceSkinnedVertexNormalTangent();
+		ID3D12Resource* skinnedVertexNormalTangentResource = FrameContext.MeshSkinnedResource->GetResourceSkinnedVertexNormalTangent();
 		cmdList->SetComputeRootUnorderedAccessView(RpgRenderPipeline::CRPI_SKINNED_VERTEX_NORMAL_TANGENT, skinnedVertexNormalTangentResource->GetGPUVirtualAddress());
 
 		// dispatch calls
-		const RpgArray<RpgShaderConstantSkinnedObjectParameter>& objectParams = MeshSkinnedResource->GetObjectParameters();
-
 		for (int i = 0; i < objectParams.GetCount(); ++i)
 		{
 			const RpgShaderConstantSkinnedObjectParameter param = objectParams[i];
@@ -81,6 +76,7 @@ void RpgAsyncTask_Compute::Execute() noexcept
 			cmdList->Dispatch((param.VertexCount + 63) / 64, 1, 1);
 		}
 	}
+	
 	RPG_D3D12_COMMAND_End(CmdListCompute);
 
 

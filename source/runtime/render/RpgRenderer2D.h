@@ -147,8 +147,8 @@ public:
 	void AddText(const char* text, int length, int x, int y, RpgColorRGBA color, const RpgSharedFont& font = RpgSharedFont(), const RpgSharedMaterial& material = RpgSharedMaterial()) noexcept;
 
 
-	void PreRender(int frameIndex, RpgMaterialResource* materialResource) noexcept;
-	void CommandCopy(int frameIndex, ID3D12GraphicsCommandList* cmdList) noexcept;
-	void CommandDraw(int frameIndex, ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource) noexcept;
+	void PreRender(RpgRenderFrameContext& frameContext) noexcept;
+	void CommandCopy(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept;
+	void CommandDraw(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept;
 
 };

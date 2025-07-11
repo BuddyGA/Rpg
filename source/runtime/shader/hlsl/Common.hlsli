@@ -41,7 +41,7 @@ ConstantBuffer<RpgShaderConstantObjectParameter> ObjectParameter : register(b3, 
 // ================================================================================================================================= //
 // FUNCTIONS
 // ================================================================================================================================= //
-#define RPG_SQR(x) (x) * (x)
+#define RPG_SQR(x) ((x) * (x))
 
 
 inline float4 Rpg_GetMaterialParameterTextureColor(int descriptorIndex, SamplerState samplerState, float2 texCoord)

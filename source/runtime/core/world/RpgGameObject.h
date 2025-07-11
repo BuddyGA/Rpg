@@ -31,6 +31,11 @@ public:
 		Gen = UINT16_MAX;
 	}
 
+	inline bool IsValid() const noexcept
+	{
+		return World && Index != -1 && Gen != UINT16_MAX;
+	}
+
 	inline int GetIndex() const noexcept
 	{
 		return Index;
@@ -44,11 +49,6 @@ public:
 	inline bool operator!=(const RpgGameObjectID& rhs) const noexcept
 	{
 		return !(*this == rhs);
-	}
-
-	inline operator bool() const noexcept
-	{
-		return World && Index != -1 && Gen != UINT16_MAX;
 	}
 
 

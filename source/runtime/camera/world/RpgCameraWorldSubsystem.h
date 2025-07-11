@@ -1,18 +1,18 @@
 #pragma once
 
 #include "core/world/RpgWorld.h"
+#include "../async_task/RpgAsyncTask_Capture.h"
 
 
 
-class RpgRenderWorldSubsystem : public RpgWorldSubsystem
+class RpgCameraWorldSubsystem : public RpgWorldSubsystem
 {
 public:
-	bool bDebugDrawMeshBound;
-	bool bDebugDrawLightBound;
+	bool bDebugDrawFrustum;
 
 
 public:
-	RpgRenderWorldSubsystem() noexcept;
+	RpgCameraWorldSubsystem() noexcept;
 
 protected:
 	virtual void PostTickUpdate() noexcept override;

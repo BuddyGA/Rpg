@@ -1,7 +1,7 @@
 #include "RpgAsyncTask_RenderPass.h"
 #include "../RpgRenderPipeline.h"
 #include "../RpgRenderResource.h"
-#include "../RpgTexture2D.h"
+#include "../RpgTexture.h"
 
 
 
@@ -72,7 +72,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 	RpgD3D12Command::SetAndClearRenderTargets(cmdList, &renderTargetDescriptor, 1, RpgColorLinear(0.0f, 0.0f, 0.0f), &depthStencilDescriptor, 1.0f, 0);
 
 	// Bind shader resource material
-	MaterialResource->CommandBindShaderResources(cmdList);
+	FrameContext.MaterialResource->CommandBindShaderResources(cmdList);
 
 	// Bind shader resource world
 	WorldResource->CommandBindShaderResources(cmdList);
@@ -89,21 +89,21 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 		// Bind vertex buffers
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[3] =
 		{
-			MeshResource->GetVertexBufferView_Position(),
-			MeshResource->GetVertexBufferView_NormalTangent(),
-			MeshResource->GetVertexBufferView_TexCoord()
+			FrameContext.MeshResource->GetVertexBufferView_Position(),
+			FrameContext.MeshResource->GetVertexBufferView_NormalTangent(),
+			FrameContext.MeshResource->GetVertexBufferView_TexCoord()
 		};
 		cmdList->IASetVertexBuffers(0, 3, vertexBufferViews);
 
 		// Bind index buffer
-		const D3D12_INDEX_BUFFER_VIEW indexBufferView = MeshResource->GetIndexBufferView();
+		const D3D12_INDEX_BUFFER_VIEW indexBufferView = FrameContext.MeshResource->GetIndexBufferView();
 		cmdList->IASetIndexBuffer(&indexBufferView);
 
 		// Draw calls
 		for (int d = 0; d < DrawMeshCount; ++d)
 		{
 			const RpgDrawIndexed& draw = DrawMeshData[d];
-			MaterialResource->CommandBindMaterial(cmdList, draw.Material);
+			FrameContext.MaterialResource->CommandBindMaterial(cmdList, draw.Material);
 
 			cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / 4, &draw.ObjectParam, 0);
 			cmdList->DrawIndexedInstanced(draw.IndexCount, 1, draw.IndexStart, draw.IndexVertexOffset, 0);
@@ -119,24 +119,24 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 		// Bind vertex buffers
 		const D3D12_VERTEX_BUFFER_VIEW vertexBufferViews[3] =
 		{
-			MeshSkinnedResource->GetVertexBufferView_SkinnedPosition(),
-			MeshSkinnedResource->GetVertexBufferView_SkinnedNormalTangent(),
-			MeshSkinnedResource->GetVertexBufferView_SkinnedTexCoord()
+			FrameContext.MeshSkinnedResource->GetVertexBufferView_SkinnedPosition(),
+			FrameContext.MeshSkinnedResource->GetVertexBufferView_SkinnedNormalTangent(),
+			FrameContext.MeshSkinnedResource->GetVertexBufferView_SkinnedTexCoord()
 		};
 		cmdList->IASetVertexBuffers(0, 3, vertexBufferViews);
 
 		// Bind index buffer
-		const D3D12_INDEX_BUFFER_VIEW indexBufferView = MeshSkinnedResource->GetIndexBufferView_Skinned();
+		const D3D12_INDEX_BUFFER_VIEW indexBufferView = FrameContext.MeshSkinnedResource->GetIndexBufferView_Skinned();
 		cmdList->IASetIndexBuffer(&indexBufferView);
 
-		const RpgArray<RpgShaderConstantSkinnedObjectParameter>& skinnedObjectParams = MeshSkinnedResource->GetObjectParameters();
+		const RpgArray<RpgShaderConstantSkinnedObjectParameter>& skinnedObjectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
 		RPG_Check(skinnedObjectParams.GetCount() == DrawSkinnedMeshCount);
 
 		// Draw calls
 		for (int d = 0; d < DrawSkinnedMeshCount; ++d)
 		{
 			const RpgDrawIndexed& draw = DrawSkinnedMeshData[d];
-			MaterialResource->CommandBindMaterial(cmdList, draw.Material);
+			FrameContext.MaterialResource->CommandBindMaterial(cmdList, draw.Material);
 
 			const RpgShaderConstantSkinnedObjectParameter& skinnedParam = skinnedObjectParams[d];
 
@@ -148,7 +148,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 	
 // Debug draw
 #ifndef RPG_BUILD_SHIPPING
-	WorldResource->Debug_CommandDrawIndexed_Line(cmdList, MaterialResource, DebugDrawLineMaterialId, DebugDrawLineNoDepthMaterialId, DebugDrawCameraId);
+	WorldResource->Debug_CommandDrawIndexed_Line(cmdList, FrameContext.MaterialResource, DebugDrawLineMaterialId, DebugDrawLineNoDepthMaterialId, DebugDrawCameraId);
 #endif // !RPG_BUILD_SHIPPING
 
 }

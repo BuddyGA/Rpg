@@ -166,6 +166,7 @@ RpgGameObjectID RpgWorld::GameObject_Create(const RpgName& name, const RpgTransf
     RPG_IsMainThread();
 
     RPG_Assert(!name.IsEmpty());
+    RPG_Check(GameObjectNames.GetCount() < RPG_WORLD_MAX_GAMEOBJECT);
 
     RPG_LogDebug(RpgLogWorld, "Create game object (%s)", *name);
 

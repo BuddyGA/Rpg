@@ -1,8 +1,6 @@
 #include "RpgRenderer2D.h"
 #include "RpgRenderPipeline.h"
 #include "RpgRenderResource.h"
-#include "RpgMaterial.h"
-#include "RpgTexture2D.h"
 
 
 
@@ -173,12 +171,12 @@ void RpgRenderer2D::AddText(const char* text, int length, int x, int y, RpgColor
 }
 
 
-void RpgRenderer2D::PreRender(int frameIndex, RpgMaterialResource* materialResource) noexcept
+void RpgRenderer2D::PreRender(RpgRenderFrameContext& frameContext) noexcept
 {
 	auto LocalFunc_UpdateMeshBatchDraw = [&](FFrameData& frame, const FMesh& mesh, FDrawBatchArray& batchDraws)
 	{
 		const RpgSharedMaterial& material = MaterialInstanceTextures[mesh.MaterialInstanceIndex].Material;
-		const int shaderMaterialId = materialResource->AddMaterial(material);
+		const int shaderMaterialId = frameContext.MaterialResource->AddMaterial(material);
 
 		int batchDrawIndex = RPG_INDEX_INVALID;
 		if (batchDraws.AddUnique(FDrawBatch(shaderMaterialId), &batchDrawIndex))
@@ -204,7 +202,7 @@ void RpgRenderer2D::PreRender(int frameIndex, RpgMaterialResource* materialResou
 	};
 
 
-	FFrameData& frame = FrameDatas[frameIndex];
+	FFrameData& frame = FrameDatas[frameContext.Index];
 	auto& batchClipDrawMeshes = frame.BatchDrawClipMeshes;
 
 	for (int c = 0; c < Clips.GetCount(); ++c)
@@ -247,9 +245,9 @@ void RpgRenderer2D::PreRender(int frameIndex, RpgMaterialResource* materialResou
 }
 
 
-void RpgRenderer2D::CommandCopy(int frameIndex, ID3D12GraphicsCommandList* cmdList) noexcept
+void RpgRenderer2D::CommandCopy(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept
 {
-	FFrameData& frame = FrameDatas[frameIndex];
+	FFrameData& frame = FrameDatas[frameContext.Index];
 
 	if (frame.BatchDrawClipMeshes.IsEmpty())
 	{
@@ -280,9 +278,9 @@ void RpgRenderer2D::CommandCopy(int frameIndex, ID3D12GraphicsCommandList* cmdLi
 }
 
 
-void RpgRenderer2D::CommandDraw(int frameIndex, ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource) noexcept
+void RpgRenderer2D::CommandDraw(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept
 {
-	const FFrameData& frame = FrameDatas[frameIndex];
+	const FFrameData& frame = FrameDatas[frameContext.Index];
 
 	if (frame.BatchDrawClipMeshes.IsEmpty())
 	{
@@ -311,6 +309,8 @@ void RpgRenderer2D::CommandDraw(int frameIndex, ID3D12GraphicsCommandList* cmdLi
 	viewportParam.Width = static_cast<float>(ViewportDimension.X);
 	viewportParam.Height = static_cast<float>(ViewportDimension.Y);
 	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_VIEWPORT_PARAM, sizeof(RpgShaderConstantViewportParameter) / 4, &viewportParam, 0);
+
+	const RpgMaterialResource* materialResource = frameContext.MaterialResource;
 
 	for (int i = 0; i < frame.BatchDrawClipMeshes.GetCount(); ++i)
 	{

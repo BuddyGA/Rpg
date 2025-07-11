@@ -10,7 +10,7 @@ class RpgAsyncTask_CompilePSO : public RpgThreadTask
 public:
 	ID3D12RootSignature* RootSignature;
 	RpgName MaterialName;
-	RpgMaterialRenderState MaterialRenderState;
+	RpgRenderPipelineState PipelineState;
 
 private:
 	ComPtr<ID3D12PipelineState> PSO;
@@ -29,7 +29,7 @@ public:
 
 	[[nodiscard]] inline ComPtr<ID3D12PipelineState> GetCompiledPSO() noexcept
 	{
-		return PSO.Detach();
+		return std::move(PSO);
 	}
 
 };

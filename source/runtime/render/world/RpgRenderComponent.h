@@ -2,60 +2,7 @@
 
 #include "core/world/RpgComponent.h"
 #include "../RpgModel.h"
-#include "../RpgSceneViewport.h"
-
-
-
-
-class RpgRenderComponent_Camera
-{
-	RPG_COMPONENT_TYPE("RpgComponent - Camera");
-
-public:
-	RpgPointInt RenderTargetDimension;
-	RpgRenderProjectionMode ProjectionMode;
-	float PerspectiveFoVDegree;
-	float NearClipZ;
-	float FarClipZ;
-	bool bActivated;
-	bool bFrustumCulling;
-
-	RpgGameObjectID SourceCaptureCamera;
-	RpgSceneViewport* Viewport;
-
-private:
-	RpgSceneViewport SelfViewport;
-
-
-public:
-	RpgRenderComponent_Camera() noexcept
-	{
-		RenderTargetDimension = RpgPointInt(1600, 900);
-		ProjectionMode = RpgRenderProjectionMode::PERSPECTIVE;
-		PerspectiveFoVDegree = 90.0f;
-		NearClipZ = 10.0f;
-		FarClipZ = 10000.0f;
-		bActivated = false;
-		bFrustumCulling = false;
-	}
-
-
-	inline void Destroy() noexcept
-	{
-		// Nothing to do
-	}
-
-
-	inline RpgSceneViewport* GetViewport() noexcept
-	{
-		return Viewport ? Viewport : &SelfViewport;
-	}
-
-	
-
-	friend class RpgRenderWorldSubsystem;
-
-};
+#include "../RpgShadowViewport.h"
 
 
 
@@ -119,6 +66,9 @@ public:
 	// TRUE if light cast shadow
 	bool bCastShadow;
 
+private:
+	RpgUniquePtr<RpgShadowViewport> ShadowViewport;
+
 
 public:
 	RpgRenderComponent_Light() noexcept
@@ -137,6 +87,12 @@ public:
 	inline void Destroy() noexcept
 	{
 		// Nothing to do
+	}
+
+
+	inline RpgShadowViewport* GetShadowViewport() noexcept
+	{
+		return ShadowViewport.Get();
 	}
 
 

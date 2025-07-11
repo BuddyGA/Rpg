@@ -18,6 +18,7 @@ public:
 	bool bImportSkeleton;
 	bool bImportAnimation;
 	bool bGenerateTextureMipMaps;
+	bool bIgnoreTextureNormals;
 
 
 private:
@@ -40,17 +41,17 @@ private:
 	void ExtractAnimations(const aiScene* assimpScene) noexcept;
 
 public:
-	[[nodiscard]] inline RpgArray<RpgSharedModel> GetImportedModels() const noexcept
+	[[nodiscard]] inline RpgArray<RpgSharedModel> GetImportedModels() noexcept
 	{
 		return std::move(ImportedModels);
 	}
 
-	[[nodiscard]] inline RpgSharedAnimationSkeleton GetImportedSkeleton() const noexcept
+	[[nodiscard]] inline RpgSharedAnimationSkeleton GetImportedSkeleton() noexcept
 	{
 		return std::move(ImportedSkeleton);
 	}
 
-	[[nodiscard]] inline RpgArray<RpgSharedAnimationClip> GetImportedAnimations() const noexcept
+	[[nodiscard]] inline RpgArray<RpgSharedAnimationClip> GetImportedAnimations() noexcept
 	{
 		return std::move(ImportedAnimations);
 	}

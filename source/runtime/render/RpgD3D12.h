@@ -144,6 +144,7 @@ namespace RpgD3D12
 	[[nodiscard]] extern ComPtr<D3D12MA::Allocation> CreateTexture2D(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height, uint8_t mipLevel) noexcept;
 	[[nodiscard]] extern ComPtr<D3D12MA::Allocation> CreateRenderTarget(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height, RpgColorLinear clearColor) noexcept;
 	[[nodiscard]] extern ComPtr<D3D12MA::Allocation> CreateDepthStencil(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height, float clearDepth, uint8_t clearStencil) noexcept;
+	[[nodiscard]] extern ComPtr<D3D12MA::Allocation> CreateDepthCube(DXGI_FORMAT format, D3D12_RESOURCE_STATES initialState, uint16_t width, uint16_t height) noexcept;
 
 	
 	template<typename TData = void>
@@ -164,11 +165,12 @@ namespace RpgD3D12
 
 	[[nodiscard]] extern FResourceDescriptor AllocateDescriptor_RTV(ID3D12Resource* renderTargetResource) noexcept;
 	[[nodiscard]] extern FResourceDescriptor AllocateDescriptor_DSV(ID3D12Resource* depthStencilResource) noexcept;
-	[[nodiscard]] extern FResourceDescriptor AllocateDescriptor_TDI(ID3D12Resource* textureResource) noexcept;
+	[[nodiscard]] extern FResourceDescriptor AllocateDescriptor_TDI(ID3D12Resource* textureResource, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN) noexcept;
+	[[nodiscard]] extern FResourceDescriptor AllocateDescriptor_TDI_Cube(ID3D12Resource* textureResource, DXGI_FORMAT format) noexcept;
 	[[nodiscard]] extern ID3D12DescriptorHeap* GetDescriptorHeap_TDI() noexcept;
 
 
-	static inline D3D12_RESOURCE_DESC CreateResourceDesc_Texture(DXGI_FORMAT format, uint16_t width, uint16_t height, uint8_t mipLevel) noexcept
+	static inline D3D12_RESOURCE_DESC CreateResourceDesc_Texture(DXGI_FORMAT format, uint16_t width, uint16_t height, uint8_t mipLevel, uint16_t arraySize = 1) noexcept
 	{
 		D3D12_RESOURCE_DESC textureDesc{};
 		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -178,7 +180,7 @@ namespace RpgD3D12
 		textureDesc.Alignment = 0;
 		textureDesc.Width = width;
 		textureDesc.Height = height;
-		textureDesc.DepthOrArraySize = 1;
+		textureDesc.DepthOrArraySize = arraySize;
 		textureDesc.MipLevels = mipLevel;
 		textureDesc.SampleDesc.Count = 1;
 		textureDesc.SampleDesc.Quality = 0;

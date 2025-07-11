@@ -35,6 +35,7 @@ struct RpgAssetImportSetting_Model
 	bool bImportSkeleton{ false };
 	bool bImportAnimation{ false };
 	bool bGenerateTextureMipMaps{ false };
+	bool bIgnoreTextureNormals{ false };
 };
 
 

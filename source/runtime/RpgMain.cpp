@@ -3,7 +3,7 @@
 #include "core/RpgThreadPool.h"
 #include "core/RpgTimer.h"
 #include "render/RpgD3D12.h"
-#include "render/RpgTexture2D.h"
+#include "render/RpgTexture.h"
 #include "render/RpgFont.h"
 #include "render/RpgMaterial.h"
 #include "asset/RpgAssetImporter.h"
@@ -146,13 +146,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 
-		const int frameIndex = FrameCounter % RPG_FRAME_BUFFERING;
 		const uint64_t fpsTickStart = SDL_GetPerformanceCounter();
 
-		RpgD3D12::BeginFrame(frameIndex);
-
 		Timer.Tick();
-		g_Engine->FrameTick(frameIndex, Timer.GetDeltaTimeSeconds());
+		g_Engine->FrameTick(FrameCounter, Timer.GetDeltaTimeSeconds());
 
 		const int fpsLimit = g_Engine->FpsLimit;
 

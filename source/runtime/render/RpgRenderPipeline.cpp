@@ -14,9 +14,11 @@ namespace RpgRenderPipeline
 
     static RpgArray<RpgSharedMaterial> Materials;
     static RpgArray<ComPtr<ID3D12PipelineState>> MaterialPipelineStates;
-    static RpgArray<RpgAsyncTask_CompilePSO*> AsyncTaskCompilePSOs;
+    static RpgArray<RpgAsyncTask_CompilePSO> AsyncTaskCompilePSOs;
 
-    static ComPtr<ID3D12PipelineState> ComputeSkinningPSO;
+    static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowDepth;
+    //static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowDepthCube;
+    static ComPtr<ID3D12PipelineState> ComputePSO_Skinning;
 
 
 
@@ -164,7 +166,7 @@ namespace RpgRenderPipeline
 
         D3D12_ROOT_PARAMETER1& rcObjectParameter = rootParameters[GRPI_OBJECT_PARAM];
         rcObjectParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        rcObjectParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+        rcObjectParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         rcObjectParameter.Constants.Num32BitValues = sizeof(RpgShaderConstantObjectParameter) / 4;
         rcObjectParameter.Constants.ShaderRegister = 3;	// b3
         rcObjectParameter.Constants.RegisterSpace = 0;	// space0
@@ -292,8 +294,63 @@ void RpgRenderPipeline::Initialize() noexcept
     CreateRootSignatureGraphics();
     CreateRootSignatureCompute();
 
-    // Compute skinning PSO
+    AsyncTaskCompilePSOs.Reserve(32);
+
+    // Graphics PSO
     {
+        // ShadowDepth
+        {
+            RpgRenderPipelineState state{};
+            state.VertexShaderName = RPG_SHADER_DEFAULT_VS_DEPTH_NAME;
+            state.VertexMode = RpgRenderVertexMode::MESH;
+            state.RasterMode = RpgRenderRasterMode::SOLID;
+            state.DepthStencilFormat = k_Render_DefaultFormat_ShadowDepth;
+            state.bDepthTest = true;
+            state.bDepthWrite = true;
+            state.DepthBias = 1000;
+            state.DepthBiasSlope = 2.0f;
+            state.DepthBiasClamp = 10.0f;
+
+            RpgAsyncTask_CompilePSO task;
+            task.Reset();
+            task.RootSignature = RootSignatureGraphics.Get();
+            task.MaterialName = "ShadowDepth";
+            task.PipelineState = state;
+            task.Execute();
+
+            GraphicsPSO_ShadowDepth = task.GetCompiledPSO();
+        }
+
+        /*
+        // ShadowDepthCube
+        {
+            RpgMaterialRenderState state{};
+            state.VertexShaderName = RPG_SHADER_DEFAULT_VS_DEPTH_CUBE_NAME;
+            state.VertexMode = RpgMaterialVertexMode::MESH;
+            state.RasterMode = RpgMaterialRasterMode::SOLID;
+            state.RenderTargetCount = 0;
+            state.bDepthTest = true;
+            state.bDepthWrite = true;
+            //state.DepthBias = 1000;
+            //state.DepthBiasSlope = 2.0f;
+            //state.DepthBiasClamp = 10.0f;
+
+            RpgAsyncTask_CompilePSO task;
+            task.Reset();
+            task.RootSignature = RootSignatureGraphics.Get();
+            task.MaterialName = "ShadowDepthCube";
+            task.MaterialRenderState = state;
+            task.Execute();
+
+            GraphicsPSO_ShadowDepthCube = task.GetCompiledPSO();
+        }
+        */
+    }
+
+
+    // Compute PSO
+    {
+        // Skinning
         D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
         psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
         psoDesc.NodeMask = 0;
@@ -305,8 +362,8 @@ void RpgRenderPipeline::Initialize() noexcept
         psoDesc.CS.pShaderBytecode = shaderCodeBlob->GetBufferPointer();
         psoDesc.CS.BytecodeLength = shaderCodeBlob->GetBufferSize();
 
-        RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&ComputeSkinningPSO)));
-        RPG_D3D12_SetDebugName(ComputeSkinningPSO, "PSO_ComputeSkinning");
+        RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&ComputePSO_Skinning)));
+        RPG_D3D12_SetDebugName(ComputePSO_Skinning, "PSO_ComputeSkinning");
 
         RPG_LogDebug(RpgLogD3D12, "Compiled compute PSO for (Skinning)");
     }
@@ -324,15 +381,10 @@ void RpgRenderPipeline::Shutdown() noexcept
 
     Materials.Clear(true);
     MaterialPipelineStates.Clear(true);
-
-    for (int i = 0; i < AsyncTaskCompilePSOs.GetCount(); ++i)
-    {
-        RpgThreadPool::DestroyTask(AsyncTaskCompilePSOs[i]);
-    }
     AsyncTaskCompilePSOs.Clear(true);
-
-    ComputeSkinningPSO.Reset();
-
+    ComputePSO_Skinning.Reset();
+    //GraphicsPSO_ShadowDepthCube.Reset();
+    GraphicsPSO_ShadowDepth.Reset();
     RootSignatureGraphics.Reset();
     RootSignatureCompute.Reset();
 
@@ -373,7 +425,7 @@ void RpgRenderPipeline::AddMaterials(RpgSharedMaterial* materialArray, int mater
 
         Materials.AddValue(mat);
         MaterialPipelineStates.AddValue(nullptr);
-        AsyncTaskCompilePSOs.AddValue(RpgThreadPool::CreateTask<RpgAsyncTask_CompilePSO>());
+        AsyncTaskCompilePSOs.Add();
     }
 }
 
@@ -390,15 +442,15 @@ void RpgRenderPipeline::CompileMaterialPSOs(bool bWaitAll) noexcept
             continue;
         }
 
-        RpgAsyncTask_CompilePSO* compileTask = AsyncTaskCompilePSOs[i];
-        compileTask->Reset();
-        compileTask->RootSignature = RootSignatureGraphics.Get();
-        compileTask->MaterialName = mat->GetName();
-        compileTask->MaterialRenderState = mat->GetRenderState();
+        RpgAsyncTask_CompilePSO& task = AsyncTaskCompilePSOs[i];
+        task.Reset();
+        task.RootSignature = RootSignatureGraphics.Get();
+        task.MaterialName = mat->GetName();
+        task.PipelineState = mat->GetRenderState();
 
         mat->MarkPipelineCompiling();
 
-        taskToSubmits.AddValue(compileTask);
+        taskToSubmits.AddValue(&task);
     }
 
     if (!taskToSubmits.IsEmpty())
@@ -414,19 +466,19 @@ void RpgRenderPipeline::CompileMaterialPSOs(bool bWaitAll) noexcept
             continue;
         }
 
-        RpgAsyncTask_CompilePSO* compileTask = AsyncTaskCompilePSOs[i];
-        bool bCompileFinished = compileTask->IsDone();
+        RpgAsyncTask_CompilePSO& task = AsyncTaskCompilePSOs[i];
+        bool bCompileFinished = task.IsDone();
 
         if (!bCompileFinished && bWaitAll)
         {
-            compileTask->Wait();
+            task.Wait();
             bCompileFinished = true;
         }
 
         if (bCompileFinished)
         {
-            MaterialPipelineStates[i] = compileTask->GetCompiledPSO();
-            compileTask->Reset();
+            MaterialPipelineStates[i] = task.GetCompiledPSO();
+            task.Reset();
             mat->MarkPipelineCompiled();
         }
     }
@@ -443,7 +495,19 @@ ID3D12PipelineState* RpgRenderPipeline::GetMaterialPSO(const RpgSharedMaterial& 
 }
 
 
-ID3D12PipelineState* RpgRenderPipeline::GetComputeSkinningPSO() noexcept
+ID3D12PipelineState* RpgRenderPipeline::GetGraphicsPSO_ShadowDepth() noexcept
 {
-    return ComputeSkinningPSO.Get();
+    return GraphicsPSO_ShadowDepth.Get();
+}
+
+/*
+ID3D12PipelineState* RpgRenderPipeline::GetGraphicsPSO_ShadowDepthCube() noexcept
+{
+    return GraphicsPSO_ShadowDepthCube.Get();
+}
+*/
+
+ID3D12PipelineState* RpgRenderPipeline::GetComputePSO_Skinning() noexcept
+{
+    return ComputePSO_Skinning.Get();
 }

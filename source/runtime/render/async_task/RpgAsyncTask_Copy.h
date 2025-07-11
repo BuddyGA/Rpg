@@ -13,13 +13,10 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> CmdListCopy;
 
 public:
-	int FrameIndex;
 	ID3D12Fence* FenceSignal;
 	uint64_t FenceSignalValue;
+	RpgRenderFrameContext FrameContext;
 	RpgRenderer2D* Renderer2d;
-	RpgMaterialResource* MaterialResource;
-	RpgMeshResource* MeshResource;
-	RpgMeshSkinnedResource* MeshSkinnedResource;
 	RpgArrayInline<RpgWorldResource*, 8> WorldResources;
 
 

@@ -140,6 +140,12 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 		for (int t = 0; t < PHONG_TEXTURE_TYPE_COUNT; ++t)
 		{
 			const aiTextureType assimpTextureType = PHONG_TEXTURE_TYPES[t];
+
+			if (bIgnoreTextureNormals && assimpTextureType == aiTextureType_NORMALS)
+			{
+				continue;
+			}
+
 			const int assimpMaterialTextureCount = assimpMaterial->GetTextureCount(assimpTextureType);
 			RPG_Check(assimpMaterialTextureCount <= 1);
 
@@ -178,7 +184,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 				{
 					importingEmbeddedTextures.AddValue(assimpTextureIndex);
 
-					task = RpgThreadPool::CreateTask<RpgAsyncTask_ImportTexture>();
+					task = new RpgAsyncTask_ImportTexture();
 					task->Reset();
 					task->SourceEmbedded = RpgAssimp::FTextureEmbedded(sourceEmbeddedName, assimpTexture->pcData, assimpTexture->mWidth, assimpTexture->mHeight, assimpTexture->achFormatHint);
 				}
@@ -201,7 +207,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 				{
 					importingExternalTextures.AddValue(absoluteFilePath);
 
-					task = RpgThreadPool::CreateTask<RpgAsyncTask_ImportTexture>();
+					task = new RpgAsyncTask_ImportTexture();
 					task->Reset();
 					task->SourceFilePath = absoluteFilePath;
 				}
@@ -472,6 +478,7 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 			for (int f = 0; f < assimpFaceCount; ++f)
 			{
 				const aiFace& assimpFace = assimpMesh->mFaces[f];
+				RPG_Check(assimpFace.mNumIndices == 3);
 				RpgPlatformMemory::MemCopy(tempIndices.GetData() + idx, assimpFace.mIndices, sizeof(uint32_t) * assimpFace.mNumIndices);
 				idx += assimpFace.mNumIndices;
 			}
@@ -561,6 +568,7 @@ void RpgAsyncTask_ImportModel::Reset() noexcept
 	bImportSkeleton = false;
 	bImportAnimation = false;
 	bGenerateTextureMipMaps = false;
+	bIgnoreTextureNormals = false;
 	IntermediateMaterialPhongs.Clear(true);
 	IntermediateModels.Clear(true);
 	ImportedSkeleton.Release();
@@ -575,6 +583,9 @@ void RpgAsyncTask_ImportModel::Execute() noexcept
 
 	Assimp::Importer assimpImporter;
 	assimpImporter.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, Scale);
+	assimpImporter.SetPropertyBool(AI_CONFIG_PP_FD_REMOVE, true);
+	assimpImporter.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
+	assimpImporter.SetPropertyBool(AI_CONFIG_PP_FD_CHECKAREA, false);
 
 	uint32_t flags =
 		aiProcess_ConvertToLeftHanded |
@@ -583,7 +594,8 @@ void RpgAsyncTask_ImportModel::Execute() noexcept
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_GenNormals |
 		aiProcess_CalcTangentSpace |
-		aiProcess_FindDegenerates |
+		aiProcess_FindDegenerates | aiProcess_SortByPType |
+		//aiProcess_FindInvalidData |
 		aiProcess_ValidateDataStructure;
 
 	if (bImportSkeleton || bImportAnimation)
@@ -673,6 +685,6 @@ void RpgAsyncTask_ImportModel::Execute() noexcept
 	// Cleanup import texture tasks
 	for (int i = 0; i < ImportTextureTasks.GetCount(); ++i)
 	{
-		RpgThreadPool::DestroyTask(ImportTextureTasks[i]);
+		delete ImportTextureTasks[i];
 	}
 }

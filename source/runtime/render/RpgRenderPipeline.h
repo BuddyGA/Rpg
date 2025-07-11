@@ -46,7 +46,11 @@ namespace RpgRenderPipeline
     extern ID3D12PipelineState* GetMaterialPSO(const RpgSharedMaterial& material) noexcept;
 
 
+    // Graphics
+    extern ID3D12PipelineState* GetGraphicsPSO_ShadowDepth() noexcept;
+    //extern ID3D12PipelineState* GetGraphicsPSO_ShadowDepthCube() noexcept;
+
     // Compute
-    extern ID3D12PipelineState* GetComputeSkinningPSO() noexcept;
+    extern ID3D12PipelineState* GetComputePSO_Skinning() noexcept;
 
 };

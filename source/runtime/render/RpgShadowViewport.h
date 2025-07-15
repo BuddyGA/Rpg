@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RpgRenderResource.h"
-#include "async_task/RpgAsyncTask_RenderPass.h"
+#include "task/RpgRenderTask_RenderPass.h"
 
 
 
@@ -24,7 +24,7 @@ public:
 	RpgShadowViewport() noexcept = default;
 	virtual ~RpgShadowViewport() noexcept = default;
 	virtual void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept = 0;
-	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgAsyncTask_RenderPassShadowArray& out_ShadowPasses) noexcept = 0;
+	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept = 0;
 	virtual RpgSharedTexture2D GetDepthTexture(int frameIndex) noexcept = 0;
 
 };
@@ -49,7 +49,7 @@ private:
 		RpgSharedTextureCubeDepth DepthTextureCube;
 		RpgArray<RpgDrawIndexedDepth> DrawMeshes;
 		RpgArray<RpgDrawIndexedDepth> DrawSkinnedMeshes;
-		RpgAsyncTask_RenderPass_Shadow AsyncTaskRenderPassShadow;
+		RpgRenderTask_RenderPassShadow TaskRenderPassShadow;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
@@ -59,7 +59,7 @@ public:
 	~RpgShadowViewport_PointLight() noexcept;
 
 	virtual void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept override;
-	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgAsyncTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
+	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
 	
 	
 	virtual RpgSharedTexture2D GetDepthTexture(int frameIndex) noexcept override
@@ -82,7 +82,7 @@ private:
 		RpgSharedTexture2D DepthTexture;
 		RpgArray<RpgDrawIndexedDepth> DrawMeshes;
 		RpgArray<RpgDrawIndexedDepth> DrawSkinnedMeshes;
-		RpgAsyncTask_RenderPass_Shadow AsyncTaskRenderPassShadow;
+		RpgRenderTask_RenderPassShadow TaskRenderPassShadow;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
@@ -91,7 +91,7 @@ public:
 	RpgShadowViewport_SpotLight() noexcept;
 
 	virtual void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept override;
-	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgAsyncTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
+	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
 
 
 	virtual RpgSharedTexture2D GetDepthTexture(int frameIndex) noexcept override

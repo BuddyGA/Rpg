@@ -1,7 +1,7 @@
 #include "RpgRenderer.h"
 #include "RpgShadowViewport.h"
 #include "RpgSceneViewport.h"
-#include "async_task/RpgAsyncTask_RenderPass.h"
+#include "task/RpgRenderTask_RenderPass.h"
 
 
 RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogRenderer, VERBOSITY_DEBUG)
@@ -35,8 +35,8 @@ RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 		frame.MaterialResource = RpgPointer::MakeUnique<RpgMaterialResource>();
 		frame.MeshResource = RpgPointer::MakeUnique<RpgMeshResource>();
 		frame.MeshSkinnedResource = RpgPointer::MakeUnique<RpgMeshSkinnedResource>();
-		frame.AsyncTaskCopy = RpgPointer::MakeUnique<RpgAsyncTask_Copy>();
-		frame.AsyncTaskCompute = RpgPointer::MakeUnique<RpgAsyncTask_Compute>();
+		frame.TaskCopy = RpgPointer::MakeUnique<RpgRenderTask_Copy>();
+		frame.TaskCompute = RpgPointer::MakeUnique<RpgRenderTask_Compute>();
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&frame.SwapChainCmdAlloc)));
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&frame.SwapChainCmdList)));
 
@@ -322,41 +322,41 @@ void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 	}
 
 	// async copy
-	RpgAsyncTask_Copy* asyncCopy = frame.AsyncTaskCopy.Get();
+	RpgRenderTask_Copy* taskCopy = frame.TaskCopy.Get();
 	{
-		asyncCopy->Reset();
-		asyncCopy->FenceSignal = frame.Fence.Get();
-		asyncCopy->FenceSignalValue = ++frame.FenceValue;
-		asyncCopy->FrameContext = frameContext;
-		asyncCopy->Renderer2d = &Renderer2d;
+		taskCopy->Reset();
+		taskCopy->FenceSignal = frame.Fence.Get();
+		taskCopy->FenceSignalValue = ++frame.FenceValue;
+		taskCopy->FrameContext = frameContext;
+		taskCopy->Renderer2d = &Renderer2d;
 
 		for (int w = 0; w < worldContexts.GetCount(); ++w)
 		{
-			asyncCopy->WorldResources.AddValue(worldContexts[w].Resource.Get());
+			taskCopy->WorldResources.AddValue(worldContexts[w].Resource.Get());
 		}
 
-		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&asyncCopy, 1);
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&taskCopy, 1);
 	}
 
 
 	// async compute
-	RpgAsyncTask_Compute* asyncCompute = frame.AsyncTaskCompute.Get();
+	RpgRenderTask_Compute* taskCompute = frame.TaskCompute.Get();
 	{
-		asyncCompute->Reset();
-		asyncCompute->FenceSignal = frame.Fence.Get();
-		asyncCompute->WaitFenceCopyValue = frame.FenceValue;
-		asyncCompute->FenceSignalValue = ++frame.FenceValue;
-		asyncCompute->FrameContext = frameContext;
+		taskCompute->Reset();
+		taskCompute->FenceSignal = frame.Fence.Get();
+		taskCompute->WaitFenceCopyValue = frame.FenceValue;
+		taskCompute->FenceSignalValue = ++frame.FenceValue;
+		taskCompute->FrameContext = frameContext;
 
-		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&asyncCompute, 1);
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)&taskCompute, 1);
 	}
 
 
 	// async task shadow pass
-	RpgAsyncTask_RenderPassShadowArray asyncShadowPasses;
+	RpgRenderTask_RenderPassShadowArray taskShadowPasses;
 
 	// async task forward pass
-	RpgAsyncTask_RenderPassForwardArray asyncForwardPasses;
+	RpgRenderTask_RenderPassForwardArray taskForwardPasses;
 	{
 		for (int w = 0; w < worldContexts.GetCount(); ++w)
 		{
@@ -366,12 +366,12 @@ void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 
 			for (int v = 0; v < context.SceneViewports.GetCount(); ++v)
 			{
-				context.SceneViewports[v]->SetupRenderPasses(frameContext, worldResource, world, asyncShadowPasses, asyncForwardPasses);
+				context.SceneViewports[v]->SetupRenderPasses(frameContext, worldResource, world, taskShadowPasses, taskForwardPasses);
 			}
 		}
 
-		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)asyncShadowPasses.GetData(), asyncShadowPasses.GetCount());
-		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>((RpgThreadTask**)asyncForwardPasses.GetData(), asyncForwardPasses.GetCount());
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>(reinterpret_cast<RpgThreadTask**>(taskShadowPasses.GetData()), taskShadowPasses.GetCount());
+		RpgThreadPool::SubmitOrExecuteTasks<RPG_RENDER_ASYNC_TASK>(reinterpret_cast<RpgThreadTask**>(taskForwardPasses.GetData()), taskForwardPasses.GetCount());
 	}
 
 	
@@ -432,12 +432,12 @@ void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 
 
 	// Wait all shadow pass tasks
-	RPG_THREAD_TASK_WaitAll(asyncShadowPasses.GetData(), asyncShadowPasses.GetCount());
+	RPG_THREAD_TASK_WaitAll(taskShadowPasses.GetData(), taskShadowPasses.GetCount());
 	{
 		RpgArrayInline<ID3D12CommandList*, 32> directCommandLists;
-		for (int i = 0; i < asyncShadowPasses.GetCount(); ++i)
+		for (int i = 0; i < taskShadowPasses.GetCount(); ++i)
 		{
-			directCommandLists.AddValue(asyncShadowPasses[i]->GetCommandList());
+			directCommandLists.AddValue(taskShadowPasses[i]->GetCommandList());
 		}
 
 		if (!directCommandLists.IsEmpty())
@@ -450,12 +450,12 @@ void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 
 
 	// Wait all forward pass tasks
-	RPG_THREAD_TASK_WaitAll(asyncForwardPasses.GetData(), asyncForwardPasses.GetCount());
+	RPG_THREAD_TASK_WaitAll(taskForwardPasses.GetData(), taskForwardPasses.GetCount());
 
 	RpgArrayInline<ID3D12CommandList*, 8> directCommandLists;
-	for (int i = 0; i < asyncForwardPasses.GetCount(); ++i)
+	for (int i = 0; i < taskForwardPasses.GetCount(); ++i)
 	{
-		directCommandLists.AddValue(asyncForwardPasses[i]->GetCommandList());
+		directCommandLists.AddValue(taskForwardPasses[i]->GetCommandList());
 	}
 
 	directCommandLists.AddValue(cmdList);
@@ -499,8 +499,8 @@ void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 	}
 
 
-	asyncCopy->Wait();
-	asyncCompute->Wait();
+	taskCopy->Wait();
+	taskCompute->Wait();
 }
 
 

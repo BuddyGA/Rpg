@@ -1,4 +1,4 @@
-#include "RpgAsyncTask_ImportTexture.h"
+#include "RpgAssetTask_ImportTexture.h"
 #include "core/RpgMath.h"
 #include "../RpgAssetImporter.h"
 #include "thirdparty/stb/stb_image.h"
@@ -284,14 +284,14 @@ namespace RpgCompressonator
 };
 
 
-RpgAsyncTask_ImportTexture::RpgAsyncTask_ImportTexture() noexcept
+RpgAssetTask_ImportTexture::RpgAssetTask_ImportTexture() noexcept
 {
 	Format = RpgTextureFormat::TEX_2D_RGBA;
 	bGenerateMipMaps = false;
 }
 
 
-void RpgAsyncTask_ImportTexture::Reset() noexcept
+void RpgAssetTask_ImportTexture::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -303,7 +303,7 @@ void RpgAsyncTask_ImportTexture::Reset() noexcept
 }
 
 
-void RpgAsyncTask_ImportTexture::Execute() noexcept
+void RpgAssetTask_ImportTexture::Execute() noexcept
 {
 	RPG_Check(SourceFilePath.IsFilePath() || SourceEmbedded.Data);
 

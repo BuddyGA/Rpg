@@ -1,10 +1,10 @@
-#include "RpgAsyncTask_Copy.h"
+#include "RpgRenderTask_Copy.h"
 #include "../RpgRenderResource.h"
 #include "../RpgRenderer2D.h"
 
 
 
-RpgAsyncTask_Copy::RpgAsyncTask_Copy() noexcept
+RpgRenderTask_Copy::RpgRenderTask_Copy() noexcept
 {
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COPY, IID_PPV_ARGS(&CmdAllocCopy)));
 	RPG_D3D12_SetDebugName(CmdAllocCopy, "CmdAllocCopy_AsyncTaskCopy");
@@ -18,7 +18,7 @@ RpgAsyncTask_Copy::RpgAsyncTask_Copy() noexcept
 }
 
 
-void RpgAsyncTask_Copy::Reset() noexcept
+void RpgRenderTask_Copy::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -29,7 +29,7 @@ void RpgAsyncTask_Copy::Reset() noexcept
 }
 
 
-void RpgAsyncTask_Copy::Execute() noexcept
+void RpgRenderTask_Copy::Execute() noexcept
 {
 	RPG_Assert(FenceSignal);
 

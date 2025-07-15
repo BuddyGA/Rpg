@@ -2,8 +2,6 @@
 #include "RpgAnimationComponent.h"
 #include "render/RpgRenderer.h"
 #include "render/RpgRenderer2D.h"
-#include "../async_task/RpgAsyncTask_TickPose.h"
-
 
 
 RPG_LOG_DEFINE_CATEGORY(RpgLogAnimation, VERBOSITY_DEBUG)
@@ -14,23 +12,9 @@ RpgAnimationWorldSubsystem::RpgAnimationWorldSubsystem() noexcept
 {
 	Name = "AnimationWorldSubsystem";
 
-	for (int i = 0; i < TASK_COUNT; ++i)
-	{
-		TickPoseTasks[i] = new RpgAsyncTask_TickPose();
-	}
-
 	bTickAnimationPose = false;
 	GlobalPlayRate = 1.0f;
 	bDebugDrawSkeletonBones = false;
-}
-
-
-RpgAnimationWorldSubsystem::~RpgAnimationWorldSubsystem() noexcept
-{
-	for (int i = 0; i < TASK_COUNT; ++i)
-	{
-		delete TickPoseTasks[i];
-	}
 }
 
 
@@ -55,14 +39,18 @@ void RpgAnimationWorldSubsystem::TickUpdate(float deltaTime) noexcept
 
 	RpgWorld* world = GetWorld();
 
+	RpgThreadTask* submitTasks[TASK_COUNT];
+
 	// Reset tasks
 	for (int i = 0; i < TASK_COUNT; ++i)
 	{
-		RpgAsyncTask_TickPose* task = TickPoseTasks[i];
-		task->Reset();
-		task->World = world;
-		task->DeltaTime = deltaTime;
-		task->GlobalPlayRate = GlobalPlayRate;
+		RpgAnimationTask_TickPose& task = TaskTickPoses[i];
+		task.Reset();
+		task.World = world;
+		task.DeltaTime = deltaTime;
+		task.GlobalPlayRate = GlobalPlayRate;
+
+		submitTasks[i] = &task;
 	}
 
 	// Distribute tasks
@@ -70,19 +58,25 @@ void RpgAnimationWorldSubsystem::TickUpdate(float deltaTime) noexcept
 
 	for (auto it = world->Component_CreateIterator<RpgAnimationComponent>(); it; ++it)
 	{
-		RpgAsyncTask_TickPose* task = TickPoseTasks[taskIndex];
-		task->AnimationComponents.AddValue(&it.GetValue());
+		RpgAnimationTask_TickPose& task = TaskTickPoses[taskIndex];
+		task.AnimationComponents.AddValue(&it.GetValue());
 		taskIndex = (taskIndex + 1) % TASK_COUNT;
 	}
 
-	RpgThreadPool::SubmitTasks(reinterpret_cast<RpgThreadTask**>(TickPoseTasks), TASK_COUNT);
+	RpgThreadPool::SubmitTasks(submitTasks, TASK_COUNT);
 }
 
 
 void RpgAnimationWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) noexcept
 {
-	// wait tick pose tasks
-	RPG_THREAD_TASK_WaitAll(TickPoseTasks, TASK_COUNT);
+	RpgThreadTask* waitTasks[TASK_COUNT];
+	for (int i = 0; i < TASK_COUNT; ++i)
+	{
+		waitTasks[i] = &TaskTickPoses[i];
+	}
+
+	// wait all task tick pose finished
+	RPG_THREAD_TASK_WaitAll(waitTasks, TASK_COUNT);
 
 
 #ifndef RPG_BUILD_SHIPPING

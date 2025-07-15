@@ -2,8 +2,8 @@
 
 #include "RpgRenderer2D.h"
 #include "RpgRenderResource.h"
-#include "async_task/RpgAsyncTask_Copy.h"
-#include "async_task/RpgAsyncTask_Compute.h"
+#include "task/RpgRenderTask_Copy.h"
+#include "task/RpgRenderTask_Compute.h"
 
 
 
@@ -93,8 +93,8 @@ private:
 
 		FWorldContextArray WorldContexts;
 
-		RpgUniquePtr<RpgAsyncTask_Copy> AsyncTaskCopy;
-		RpgUniquePtr<RpgAsyncTask_Compute> AsyncTaskCompute;
+		RpgUniquePtr<RpgRenderTask_Copy> TaskCopy;
+		RpgUniquePtr<RpgRenderTask_Compute> TaskCompute;
 
 		ComPtr<ID3D12CommandAllocator> SwapChainCmdAlloc;
 		ComPtr<ID3D12GraphicsCommandList> SwapChainCmdList;

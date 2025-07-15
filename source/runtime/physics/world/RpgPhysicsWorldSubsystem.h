@@ -1,14 +1,21 @@
 #pragma once
 
 #include "core/world/RpgWorld.h"
-#include "../RpgPhysicsTypes.h"
+#include "../task/RpgPhysicsTask_UpdateBound.h"
+#include "../task/RpgPhysicsTask_UpdateShape.h"
 
 
 
 class RpgPhysicsWorldSubsystem : public RpgWorldSubsystem
 {
 private:
+	RpgPhysicsTask_UpdateBound TaskUpdateBound;
+	RpgPhysicsTask_UpdateShape TaskUpdateShape;
+	RpgArray<RpgPhysicsCollision::FPairOverlapTest> BroadphaseCollisionPairs;
+	RpgArray<RpgPhysicsCollision::FPairOverlapTest> NarrowphaseCollisionPairs;
 	bool bTickUpdateCollision;
+	bool bDebugDrawCollisionBound;
+	bool bDebugDrawCollisionShape;
 
 
 public:
@@ -18,11 +25,6 @@ protected:
 	virtual void StartPlay() noexcept override;
 	virtual void StopPlay() noexcept override;
 	virtual void TickUpdate(float deltaTime) noexcept override;
-
-private:
-	bool TestOverlapSphereSphere(RpgBoundingSphere first, RpgBoundingSphere second, RpgPhysicsContactResult* out_Result) noexcept;
-	bool TestOverlapSphereBox(RpgBoundingSphere sphere, RpgBoundingBox box, RpgPhysicsContactResult* out_Result) noexcept;
-	bool TestOverlapBoxBox(RpgBoundingBox first, RpgBoundingBox second, RpgPhysicsContactResult* out_Result) noexcept;
-	bool TestOverlapBoxSphere(RpgBoundingBox box, RpgBoundingSphere sphere, RpgPhysicsContactResult* out_Result) noexcept;
+	virtual void Render(int frameIndex, RpgRenderer* renderer) noexcept override;
 
 };

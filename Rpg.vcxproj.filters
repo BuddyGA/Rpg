@@ -69,7 +69,7 @@
     <ClCompile Include="source\runtime\thirdparty\stb\__stb__build.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CompilePSO.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_CompilePSO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\shader\RpgShaderManager.cpp">
@@ -87,16 +87,16 @@
     <ClCompile Include="source\runtime\render\RpgShadowViewport_PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_Copy.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_Copy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Depth.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_RenderPassDepth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Forward.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_RenderPassForward.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Transparency.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_RenderPassTransparency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgRenderResource_Material.cpp">
@@ -111,7 +111,7 @@
     <ClCompile Include="source\runtime\engine\RpgEngine_TestLevel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_RenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgFont.cpp">
@@ -147,13 +147,13 @@
     <ClCompile Include="source\runtime\asset\RpgAssetManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_Compute.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_Compute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\asset\async_task\RpgAsyncTask_ImportTexture.cpp">
+    <ClCompile Include="source\runtime\asset\task\RpgAssetTask_ImportTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\asset\async_task\RpgAsyncTask_ImportModel.cpp">
+    <ClCompile Include="source\runtime\asset\task\RpgAssetTask_ImportModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\thirdparty\D3D12MA\__D3D12MA__build.cpp">
@@ -189,7 +189,7 @@
     <ClCompile Include="source\runtime\animation\RpgAnimationPose.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\animation\async_task\RpgAsyncTask_TickPose.cpp">
+    <ClCompile Include="source\runtime\animation\task\RpgAnimationTask_TickPose.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\render\RpgRenderResource_MeshSkinned.cpp">
@@ -207,13 +207,25 @@
     <ClCompile Include="source\runtime\render\RpgShadowViewport_SpotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Shadow.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_RenderPassShadow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CaptureMesh.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_CaptureMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CaptureLight.cpp">
+    <ClCompile Include="source\runtime\render\task\RpgRenderTask_CaptureLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\physics\RpgPhysicsTrace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\physics\RpgPhysicsCollision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\physics\task\RpgPhysicsTask_UpdateBound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\physics\task\RpgPhysicsTask_UpdateShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -287,7 +299,7 @@
     <ClInclude Include="source\runtime\core\RpgConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_CompilePSO.h">
+    <ClInclude Include="source\runtime\render\task\RpgRenderTask_CompilePSO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\shader\RpgShaderManager.h">
@@ -308,7 +320,7 @@
     <ClInclude Include="source\editor\RpgEditorAssetImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Copy.h">
+    <ClInclude Include="source\runtime\render\task\RpgRenderTask_Copy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\RpgMesh.h">
@@ -317,10 +329,10 @@
     <ClInclude Include="source\runtime\core\world\RpgGameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass.h">
+    <ClInclude Include="source\runtime\render\task\RpgRenderTask_RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Compute.h">
+    <ClInclude Include="source\runtime\render\task\RpgRenderTask_Compute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\RpgFont.h">
@@ -365,10 +377,10 @@
     <ClInclude Include="source\runtime\core\RpgStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\asset\async_task\RpgAsyncTask_ImportTexture.h">
+    <ClInclude Include="source\runtime\asset\task\RpgAssetTask_ImportTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\asset\async_task\RpgAsyncTask_ImportModel.h">
+    <ClInclude Include="source\runtime\asset\task\RpgAssetTask_ImportModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\core\dsa\RpgArray.h">
@@ -413,10 +425,10 @@
     <ClInclude Include="source\runtime\core\RpgAssetFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\animation\async_task\RpgAsyncTask_TickPose.h">
+    <ClInclude Include="source\runtime\animation\task\RpgAnimationTask_TickPose.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\asset\async_task\RpgAssimpTypes.h">
+    <ClInclude Include="source\runtime\asset\task\RpgAssimpTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\engine\script\RpgScriptDebugCamera.h">
@@ -437,10 +449,16 @@
     <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Capture.h">
+    <ClInclude Include="source\runtime\render\task\RpgRenderTask_Capture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\shader\RpgShaderTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\physics\task\RpgPhysicsTask_UpdateBound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\physics\task\RpgPhysicsTask_UpdateShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

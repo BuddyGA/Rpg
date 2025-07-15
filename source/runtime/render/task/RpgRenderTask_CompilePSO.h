@@ -5,7 +5,7 @@
 
 
 
-class RpgAsyncTask_CompilePSO : public RpgThreadTask
+class RpgRenderTask_CompilePSO : public RpgThreadTask
 {
 public:
 	ID3D12RootSignature* RootSignature;
@@ -17,13 +17,13 @@ private:
 
 
 public:
-	RpgAsyncTask_CompilePSO() noexcept;
+	RpgRenderTask_CompilePSO() noexcept;
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
 
 	virtual const char* GetTaskName() const noexcept override
 	{
-		return "RpgAsyncTask_CompilePSO";
+		return "RpgRenderTask_CompilePSO";
 	}
 
 

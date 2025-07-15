@@ -1,16 +1,16 @@
-#include "RpgAsyncTask_CompilePSO.h"
+#include "RpgRenderTask_CompilePSO.h"
 #include "../RpgRenderPipeline.h"
 #include "shader/RpgShaderManager.h"
 
 
 
-RpgAsyncTask_CompilePSO::RpgAsyncTask_CompilePSO() noexcept
+RpgRenderTask_CompilePSO::RpgRenderTask_CompilePSO() noexcept
 {
 	RootSignature = nullptr;
 }
 
 
-void RpgAsyncTask_CompilePSO::Reset() noexcept
+void RpgRenderTask_CompilePSO::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -20,7 +20,7 @@ void RpgAsyncTask_CompilePSO::Reset() noexcept
 }
 
 
-void RpgAsyncTask_CompilePSO::Execute() noexcept
+void RpgRenderTask_CompilePSO::Execute() noexcept
 {
 	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute task compile PSO for (%s)", SDL_GetCurrentThreadID(), *Name);
 

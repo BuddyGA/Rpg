@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/world/RpgWorld.h"
-#include "../RpgAnimationTypes.h"
+#include "../task/RpgAnimationTask_TickPose.h"
 
 
 
@@ -9,7 +9,7 @@ class RpgAnimationWorldSubsystem : public RpgWorldSubsystem
 {
 private:
 	static constexpr int TASK_COUNT = 4;
-	RpgAsyncTask_TickPose* TickPoseTasks[TASK_COUNT];
+	RpgAnimationTask_TickPose TaskTickPoses[TASK_COUNT];
 	bool bTickAnimationPose;
 
 public:
@@ -19,7 +19,6 @@ public:
 
 public:
 	RpgAnimationWorldSubsystem() noexcept;
-	~RpgAnimationWorldSubsystem() noexcept;
 
 protected:
 	virtual void StartPlay() noexcept override;

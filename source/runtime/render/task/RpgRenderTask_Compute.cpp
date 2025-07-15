@@ -1,9 +1,9 @@
-#include "RpgAsyncTask_Compute.h"
+#include "RpgRenderTask_Compute.h"
 #include "../RpgRenderPipeline.h"
 
 
 
-RpgAsyncTask_Compute::RpgAsyncTask_Compute() noexcept
+RpgRenderTask_Compute::RpgRenderTask_Compute() noexcept
 {
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE, IID_PPV_ARGS(&CmdAllocCompute)));
 	RPG_D3D12_SetDebugName(CmdAllocCompute, "CmdAllocCompute_AsyncTaskCompute");
@@ -17,7 +17,7 @@ RpgAsyncTask_Compute::RpgAsyncTask_Compute() noexcept
 }
 
 
-void RpgAsyncTask_Compute::Reset() noexcept
+void RpgRenderTask_Compute::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -27,7 +27,7 @@ void RpgAsyncTask_Compute::Reset() noexcept
 }
 
 
-void RpgAsyncTask_Compute::Execute() noexcept
+void RpgRenderTask_Compute::Execute() noexcept
 {
 	ID3D12GraphicsCommandList* cmdList = CmdListCompute.Get();
 	RPG_D3D12_COMMAND_Begin(CmdAllocCompute, CmdListCompute);

@@ -1,5 +1,5 @@
 #include "RpgAssetImporter.h"
-#include "async_task/RpgAsyncTask_ImportModel.h"
+#include "task/RpgAssetTask_ImportModel.h"
 #include <compressonator.h>
 
 
@@ -43,7 +43,7 @@ void RpgAssetImporter::ImportModel(RpgArray<RpgSharedModel>& out_Models, RpgShar
 
 	ImportingType = RpgAssetImportType::MODEL;
 
-	RpgAsyncTask_ImportModel task;
+	RpgAssetTask_ImportModel task;
 	task.Reset();
 	task.SourceFilePath = setting.SourceFilePath;
 	task.Scale = setting.Scale;

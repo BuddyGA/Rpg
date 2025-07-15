@@ -13,7 +13,7 @@ class RpgAnimationSkeleton;
 class RpgAnimationPose;
 class RpgAnimationClip;
 class RpgAnimationWorldSubsystem;
-class RpgAsyncTask_TickPose;
+class RpgAnimationTask_TickPose;
 
 
 

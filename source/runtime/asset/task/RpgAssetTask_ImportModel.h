@@ -9,7 +9,7 @@
 
 
 
-class RpgAsyncTask_ImportModel : public RpgThreadTask
+class RpgAssetTask_ImportModel : public RpgThreadTask
 {
 public:
 	RpgFilePath SourceFilePath;
@@ -22,7 +22,7 @@ public:
 
 
 private:
-	RpgArray<class RpgAsyncTask_ImportTexture*> ImportTextureTasks;
+	RpgArray<class RpgAssetTask_ImportTexture*> ImportTextureTasks;
 	RpgArray<RpgAssimp::FMaterialPhong> IntermediateMaterialPhongs;
 	RpgArray<RpgAssimp::FModel> IntermediateModels;
 
@@ -32,7 +32,7 @@ private:
 
 
 public:
-	RpgAsyncTask_ImportModel() noexcept;
+	RpgAssetTask_ImportModel() noexcept;
 
 private:
 	void ExtractMaterialTextures(const aiScene* assimpScene);

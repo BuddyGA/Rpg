@@ -1,7 +1,7 @@
 #include "RpgRenderWorldSubsystem.h"
 #include "RpgRenderComponent.h"
 #include "../RpgRenderer.h"
-#include "../async_task/RpgAsyncTask_Capture.h"
+#include "../task/RpgRenderTask_Capture.h"
 
 
 
@@ -107,12 +107,12 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
 
 		sceneViewport->UpdateViewProjection();
 
-		RpgAsyncTask_CaptureMesh taskCaptureMesh;
+		RpgRenderTask_CaptureMesh taskCaptureMesh;
 		taskCaptureMesh.World = world;
 		taskCaptureMesh.Camera = &comp;
 		taskCaptureMesh.Execute();
 
-		RpgAsyncTask_CaptureLight taskCaptureLight;
+		RpgRenderTask_CaptureLight taskCaptureLight;
 		taskCaptureLight.World = world;
 		taskCaptureLight.Camera = &comp;
 		taskCaptureLight.Execute();

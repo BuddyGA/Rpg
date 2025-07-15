@@ -8,7 +8,7 @@ class RpgTexture2D;
 
 
 
-class RpgAsyncTask_RenderPass : public RpgThreadTask
+class RpgRenderTask_RenderPass : public RpgThreadTask
 {
 private:
 	ComPtr<ID3D12CommandAllocator> CmdAllocDirect;
@@ -20,7 +20,7 @@ public:
 	
 
 public:
-	RpgAsyncTask_RenderPass() noexcept;
+	RpgRenderTask_RenderPass() noexcept;
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
 
@@ -37,7 +37,7 @@ public:
 
 
 
-class RpgAsyncTask_RenderPass_Shadow : public RpgAsyncTask_RenderPass
+class RpgRenderTask_RenderPassShadow : public RpgRenderTask_RenderPass
 {
 public:
 	RpgTexture2D* DepthTexture;
@@ -53,12 +53,12 @@ public:
 
 
 public:
-	RpgAsyncTask_RenderPass_Shadow() noexcept;
+	RpgRenderTask_RenderPassShadow() noexcept;
 	virtual void Reset() noexcept override;
 
 	virtual const char* GetTaskName() const noexcept override
 	{
-		return "RpgAsyncTask_RenderPass_Shadow";
+		return "RpgRenderTask_RenderPassShadow";
 	}
 
 
@@ -69,7 +69,7 @@ protected:
 
 
 
-class RpgAsyncTask_RenderPass_Forward : public RpgAsyncTask_RenderPass
+class RpgRenderTask_RenderPassForward : public RpgRenderTask_RenderPass
 {
 public:
 	RpgTexture2D* RenderTargetTexture;
@@ -83,12 +83,12 @@ public:
 
 
 public:
-	RpgAsyncTask_RenderPass_Forward() noexcept;
+	RpgRenderTask_RenderPassForward() noexcept;
 	virtual void Reset() noexcept override;
 
 	virtual const char* GetTaskName() const noexcept override
 	{
-		return "RpgAsyncRenderPass_Forward";
+		return "RpgRenderTask_RenderPassForward";
 	}
 
 

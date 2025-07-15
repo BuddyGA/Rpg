@@ -15,13 +15,6 @@ RpgSceneViewport::RpgSceneViewport() noexcept
 	bDirtyProjection = true;
 	RenderTargetDimension = RpgPointInt(1600, 900);
 
-	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
-	{
-		FFrameData& frame = FrameDatas[f];
-		//frame.AsyncTaskRenderPassForward = RpgPointer::MakeUnique<RpgAsyncTask_RenderPass_Forward>();
-	}
-
-
 #ifndef RPG_BUILD_SHIPPING
 	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
@@ -172,7 +165,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 }
 
 
-void RpgSceneViewport::SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgAsyncTask_RenderPassShadowArray& out_ShadowPasses, RpgAsyncTask_RenderPassForwardArray& out_ForwardPasses) noexcept
+void RpgSceneViewport::SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses, RpgRenderTask_RenderPassForwardArray& out_ForwardPasses) noexcept
 {
 	FFrameData& frame = FrameDatas[frameContext.Index];
 
@@ -186,7 +179,7 @@ void RpgSceneViewport::SetupRenderPasses(const RpgRenderFrameContext& frameConte
 	}
 
 	// forward pass
-	RpgAsyncTask_RenderPass_Forward* forwardPass = &frame.AsyncTaskRenderPassForward;
+	RpgRenderTask_RenderPassForward* forwardPass = &frame.TaskRenderPassForward;
 	forwardPass->Reset();
 	forwardPass->FrameContext = frameContext;
 	forwardPass->WorldResource = worldResource;

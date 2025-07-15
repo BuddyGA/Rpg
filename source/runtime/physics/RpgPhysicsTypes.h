@@ -2,6 +2,18 @@
 
 #include "core/RpgMath.h"
 #include "core/dsa/RpgArray.h"
+#include "core/world/RpgGameObject.h"
+
+
+
+#define RPG_PHYSICS_COLLISION_MAX_CONTACT_RESULT	8
+#define RPG_PHYSICS_TRACE_MAX_HIT_RESULT			10
+
+
+class RpgPhysicsComponent_Collision;
+class RpgPhysicsWorldSubsystem;
+class RpgPhysicsTask_UpdateBound;
+class RpgPhysicsTask_UpdateShape;
 
 
 
@@ -49,56 +61,94 @@ namespace RpgPhysicsCollision
 		RESPONSE_BLOCK
 	};
 
+
+	struct FPairOverlapTest
+	{
+		RpgPhysicsComponent_Collision* FirstCollision{ nullptr };
+		RpgPhysicsComponent_Collision* SecondCollision{ nullptr };
+	};
+
+
+	struct FContactResult
+	{
+		RpgVector3 ContactPoint;
+		RpgVector3 SeparationDirection;
+		float PenetrationDepth{ 0.0f };
+	};
+
+
+	struct FContactManifold
+	{
+		RpgPhysicsComponent_Collision* FirstCollision{ nullptr };
+		RpgPhysicsComponent_Collision* SecondCollision{ nullptr };
+		FContactResult ContactResults[RPG_PHYSICS_COLLISION_MAX_CONTACT_RESULT];
+		int ContactCount{ 0 };
+	};
+
+
+	typedef RpgArrayInline<RpgPhysicsCollision::EResponse, RpgPhysicsCollision::CHANNEL_MAX_COUNT> FResponseChannels;
+
+	// Default collision response channels to ignore all
+	extern const FResponseChannels DEFAULT_COLLISION_RESPONSE_CHANNELS_IgnoreAll;
+
+	// Default collision response channels for blocker (floor, wall, pillar, etc)
+	extern const FResponseChannels DEFAULT_COLLISION_RESPONSE_CHANNELS_Blocker;
+
+	// Default collision response channels for character
+	extern const FResponseChannels DEFAULT_COLLISION_RESPONSE_CHANNELS_Character;
+
+
+	
+	namespace Filter
+	{
+		extern void GeneratePairs(RpgArray<FPairOverlapTest>& out_Pairs, RpgWorld* world) noexcept;
+	};
+
+
+	namespace Broadphase
+	{
+		extern void GeneratePairs(RpgArray<FPairOverlapTest>& out_Pairs, const RpgArray<FPairOverlapTest>& filterPairs) noexcept;
+	};
+
+
+	namespace Narrowphase
+	{
+		extern bool TestOverlapSphereSphere(RpgBoundingSphere first, RpgBoundingSphere second, FContactResult* optOut_Result = nullptr) noexcept;
+		extern bool TestOverlapSphereBox(RpgBoundingSphere sphere, RpgBoundingBox box, FContactResult* optOut_Result = nullptr) noexcept;
+		extern bool TestOverlapBoxBox(RpgBoundingBox first, RpgBoundingBox second, FContactResult* optOut_Result = nullptr) noexcept;
+		extern bool TestOverlapBoxSphere(RpgBoundingBox box, RpgBoundingSphere sphere, FContactResult* optOut_Result = nullptr) noexcept;
+	};
+
 };
 
-typedef RpgArrayInline<RpgPhysicsCollision::EResponse, RpgPhysicsCollision::CHANNEL_MAX_COUNT> RpgPhysicsCollisionResponseChannels;
 
 
 
-// Default collision response channels to ignore all
-const RpgPhysicsCollisionResponseChannels RPG_PHYSICS_DefaultCollisionResponseChannels_IgnoreAll =
+namespace RpgPhysicsTrace
 {
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// NONE
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// BLOCKER
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// TRIGGER
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// CHARACTER
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// INTERACTABLE
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// ABILITY
-	RpgPhysicsCollision::RESPONSE_IGNORE,		// MOUSE_SELECT
-};
+	struct FOption
+	{
+		RpgArray<RpgGameObjectID> IgnoredGameObjects;
+		RpgPhysicsCollision::EChannel Channel{ RpgPhysicsCollision::CHANNEL_NONE };
+	};
 
 
-// Default collision response channels for blocker (floor, wall, pillar, etc)
-const RpgPhysicsCollisionResponseChannels RPG_PHYSICS_DefaultCollisionResponseChannels_Blocker =
-{
-	RpgPhysicsCollision::RESPONSE_IGNORE,	// NONE
-	RpgPhysicsCollision::RESPONSE_IGNORE,	// BLOCKER
-	RpgPhysicsCollision::RESPONSE_IGNORE,	// TRIGGER
-	RpgPhysicsCollision::RESPONSE_BLOCK,	// CHARACTER
-	RpgPhysicsCollision::RESPONSE_IGNORE,	// INTERACTABLE
-	RpgPhysicsCollision::RESPONSE_BLOCK,	// ABILITY
-	RpgPhysicsCollision::RESPONSE_BLOCK,	// MOUSE_SELECT
-};
+	struct FResult
+	{
+		RpgVector3 HitLocation;
+		RpgVector3 ContactLocation;
+		RpgVector3 ContactNormal;
+		RpgPhysicsComponent_Collision* Component{ nullptr };
+	};
 
-
-// Default collision response channels for character
-const RpgPhysicsCollisionResponseChannels RPG_PHYSICS_DefaultCollisionResponseChannels_Character =
-{
-	RpgPhysicsCollision::RESPONSE_IGNORE,	// NONE
-	RpgPhysicsCollision::RESPONSE_BLOCK,	// BLOCKER
-	RpgPhysicsCollision::RESPONSE_OVERLAP,	// TRIGGER
-	RpgPhysicsCollision::RESPONSE_BLOCK,	// CHARACTER
-	RpgPhysicsCollision::RESPONSE_IGNORE,	// INTERACTABLE
-	RpgPhysicsCollision::RESPONSE_OVERLAP,	// ABILITY
-	RpgPhysicsCollision::RESPONSE_BLOCK,	// MOUSE_SELECT
-};
+	typedef RpgArrayInline<FResult, RPG_PHYSICS_TRACE_MAX_HIT_RESULT> FResultArray;
 
 
 
+	extern FResult LineOne(const RpgWorld* world, RpgVector3 start, RpgVector3 end, const FOption& option) noexcept;
+	extern FResultArray LineMany(const RpgWorld* world, RpgVector3 start, RpgVector3 end, const FOption& option) noexcept;
+		   
+	extern FResult SphereOne(const RpgWorld* world, RpgVector3 center, float radius, const FOption& option) noexcept;
+	extern FResultArray SphereMany(const RpgWorld* world, RpgVector3 center, float radius, const FOption& option) noexcept;
 
-struct RpgPhysicsContactResult
-{
-	RpgVector3 SeparationDirection;
-	RpgVector3 ContactPoint;
-	float PenetrationDepth{ 0.0f };
 };

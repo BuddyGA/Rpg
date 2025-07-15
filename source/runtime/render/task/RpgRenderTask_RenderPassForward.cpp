@@ -1,11 +1,11 @@
-#include "RpgAsyncTask_RenderPass.h"
+#include "RpgRenderTask_RenderPass.h"
 #include "../RpgRenderPipeline.h"
 #include "../RpgRenderResource.h"
 #include "../RpgTexture.h"
 
 
 
-RpgAsyncTask_RenderPass_Forward::RpgAsyncTask_RenderPass_Forward() noexcept
+RpgRenderTask_RenderPassForward::RpgRenderTask_RenderPassForward() noexcept
 {
 	RenderTargetTexture = nullptr;
 	DepthStencilTexture = nullptr;
@@ -22,9 +22,9 @@ RpgAsyncTask_RenderPass_Forward::RpgAsyncTask_RenderPass_Forward() noexcept
 }
 
 
-void RpgAsyncTask_RenderPass_Forward::Reset() noexcept
+void RpgRenderTask_RenderPassForward::Reset() noexcept
 {
-	RpgAsyncTask_RenderPass::Reset();
+	RpgRenderTask_RenderPass::Reset();
 
 	RenderTargetTexture = nullptr;
 	DepthStencilTexture = nullptr;
@@ -41,7 +41,7 @@ void RpgAsyncTask_RenderPass_Forward::Reset() noexcept
 }
 
 
-void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
+void RpgRenderTask_RenderPassForward::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
 {
 	RPG_Assert(RenderTargetTexture);
 	RPG_Assert(DepthStencilTexture);

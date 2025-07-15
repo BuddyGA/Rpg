@@ -7,8 +7,8 @@
 
 
 class RpgRenderWorldSubsystem;
-class RpgAsyncTask_CaptureMesh;
-class RpgAsyncTask_CaptureLight;
+class RpgRenderTask_CaptureMesh;
+class RpgRenderTask_CaptureLight;
 
 
 
@@ -165,7 +165,7 @@ public:
 
 
 	friend RpgRenderWorldSubsystem;
-	friend RpgAsyncTask_CaptureMesh;
-	friend RpgAsyncTask_CaptureLight;
+	friend RpgRenderTask_CaptureMesh;
+	friend RpgRenderTask_CaptureLight;
 
 };

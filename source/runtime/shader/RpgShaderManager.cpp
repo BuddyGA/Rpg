@@ -35,7 +35,7 @@ static const wchar_t* RPG_DXC_TARGET_PROFILES[RpgShader::TYPE_MAX_COUNT] =
 
 
 
-class RpgAsyncTask_CompileShader : public RpgThreadTask
+class RpgShaderTask_CompileHLSL : public RpgThreadTask
 {
 private:
 	struct FDefine
@@ -54,7 +54,7 @@ public:
 
 
 public:
-	RpgAsyncTask_CompileShader() noexcept
+	RpgShaderTask_CompileHLSL() noexcept
 	{
 		Type = RpgShader::TYPE_NONE;
 	}
@@ -231,7 +231,7 @@ namespace RpgShaderManager
 
 	static RpgArray<RpgName> ShaderNames;
 	static RpgArray<FShaderData> ShaderDatas;
-	static RpgArray<RpgAsyncTask_CompileShader> AsyncTaskCompileShaders;
+	static RpgArray<RpgShaderTask_CompileHLSL> TaskCompileShaders;
 
 };
 
@@ -246,7 +246,7 @@ void RpgShaderManager::Initialize() noexcept
 
 	RPG_Log(RpgLogShader, "Initialize shader manager");
 
-	AsyncTaskCompileShaders.Reserve(64);
+	TaskCompileShaders.Reserve(64);
 
 #ifndef RPG_BUILD_SHIPPING
 	const RpgString hlslDirPath = RpgFileSystem::GetSourceDirPath() + "runtime/shader/hlsl/";
@@ -310,7 +310,7 @@ void RpgShaderManager::AddShader(const RpgName& in_Name, const RpgString& in_Hls
 	ShaderNames.AddValue(in_Name);
 	ShaderDatas.AddValue({ nullptr, FShaderData::COMPILE_STATE_PENDING });
 	
-	RpgAsyncTask_CompileShader& task = AsyncTaskCompileShaders.Add();
+	RpgShaderTask_CompileHLSL& task = TaskCompileShaders.Add();
 	task.Name = in_Name;
 	task.FilePath = in_HlslFilePath;
 	task.Type = in_Type;
@@ -329,7 +329,7 @@ void RpgShaderManager::CompileShaders(bool bWaitAll) noexcept
 		if (data.State == FShaderData::COMPILE_STATE_PENDING)
 		{
 			data.State = FShaderData::COMPILE_STATE_COMPILING;
-			taskToSubmits.AddValue(&AsyncTaskCompileShaders[i]);
+			taskToSubmits.AddValue(&TaskCompileShaders[i]);
 		}
 	}
 
@@ -346,7 +346,7 @@ void RpgShaderManager::CompileShaders(bool bWaitAll) noexcept
 			continue;
 		}
 
-		RpgAsyncTask_CompileShader& task = AsyncTaskCompileShaders[i];
+		RpgShaderTask_CompileHLSL& task = TaskCompileShaders[i];
 		bool bCompileDone = task.IsDone();
 
 		if (!bCompileDone && bWaitAll)

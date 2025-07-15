@@ -1,17 +1,17 @@
-#include "RpgAsyncTask_Capture.h"
+#include "RpgRenderTask_Capture.h"
 #include "core/world/RpgWorld.h"
 #include "../world/RpgRenderComponent.h"
 
 
 
-RpgAsyncTask_CaptureMesh::RpgAsyncTask_CaptureMesh() noexcept
+RpgRenderTask_CaptureMesh::RpgRenderTask_CaptureMesh() noexcept
 {
 	World = nullptr;
 	Camera = nullptr;
 }
 
 
-void RpgAsyncTask_CaptureMesh::Reset() noexcept
+void RpgRenderTask_CaptureMesh::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -20,7 +20,7 @@ void RpgAsyncTask_CaptureMesh::Reset() noexcept
 }
 
 
-void RpgAsyncTask_CaptureMesh::Execute() noexcept
+void RpgRenderTask_CaptureMesh::Execute() noexcept
 {
 	RPG_Assert(World);
 	RPG_Assert(Camera);

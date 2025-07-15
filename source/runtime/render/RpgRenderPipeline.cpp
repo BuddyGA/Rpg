@@ -1,5 +1,5 @@
 #include "RpgRenderPipeline.h"
-#include "async_task/RpgAsyncTask_CompilePSO.h"
+#include "task/RpgRenderTask_CompilePSO.h"
 #include "shader/RpgShaderManager.h"
 #include "core/dsa/RpgArray.h"
 
@@ -13,7 +13,7 @@ namespace RpgRenderPipeline
 
     static RpgArray<RpgSharedMaterial> Materials;
     static RpgArray<ComPtr<ID3D12PipelineState>> MaterialPipelineStates;
-    static RpgArray<RpgAsyncTask_CompilePSO> AsyncTaskCompilePSOs;
+    static RpgArray<RpgRenderTask_CompilePSO> TaskCompilePSOs;
 
     static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowMapDirectional;
     static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowMapCube;
@@ -293,7 +293,7 @@ void RpgRenderPipeline::Initialize() noexcept
     CreateRootSignatureGraphics();
     CreateRootSignatureCompute();
 
-    AsyncTaskCompilePSOs.Reserve(32);
+    TaskCompilePSOs.Reserve(32);
 
     // Graphics PSO
     {
@@ -311,7 +311,7 @@ void RpgRenderPipeline::Initialize() noexcept
             state.DepthBiasSlope = 0.0f;
             state.DepthBiasClamp = 0.0f;
 
-            RpgAsyncTask_CompilePSO task;
+            RpgRenderTask_CompilePSO task;
             task.Reset();
             task.RootSignature = RootSignatureGraphics.Get();
             task.Name = "ShadowMapDirectional";
@@ -338,7 +338,7 @@ void RpgRenderPipeline::Initialize() noexcept
             state.DepthBiasSlope = 2.0f;
             //state.DepthBiasClamp = 4.0f;
 
-            RpgAsyncTask_CompilePSO task;
+            RpgRenderTask_CompilePSO task;
             task.Reset();
             task.RootSignature = RootSignatureGraphics.Get();
             task.Name = "ShadowMapCube";
@@ -383,7 +383,7 @@ void RpgRenderPipeline::Shutdown() noexcept
 
     Materials.Clear(true);
     MaterialPipelineStates.Clear(true);
-    AsyncTaskCompilePSOs.Clear(true);
+    TaskCompilePSOs.Clear(true);
     ComputePSO_Skinning.Reset();
     GraphicsPSO_ShadowMapDirectional.Reset();
     GraphicsPSO_ShadowMapCube.Reset();
@@ -427,7 +427,7 @@ void RpgRenderPipeline::AddMaterials(RpgSharedMaterial* materialArray, int mater
 
         Materials.AddValue(mat);
         MaterialPipelineStates.AddValue(nullptr);
-        AsyncTaskCompilePSOs.Add();
+        TaskCompilePSOs.Add();
     }
 }
 
@@ -444,7 +444,7 @@ void RpgRenderPipeline::CompileMaterialPSOs(bool bWaitAll) noexcept
             continue;
         }
 
-        RpgAsyncTask_CompilePSO& task = AsyncTaskCompilePSOs[i];
+        RpgRenderTask_CompilePSO& task = TaskCompilePSOs[i];
         task.Reset();
         task.RootSignature = RootSignatureGraphics.Get();
         task.Name = mat->GetName();
@@ -468,7 +468,7 @@ void RpgRenderPipeline::CompileMaterialPSOs(bool bWaitAll) noexcept
             continue;
         }
 
-        RpgAsyncTask_CompilePSO& task = AsyncTaskCompilePSOs[i];
+        RpgRenderTask_CompilePSO& task = TaskCompilePSOs[i];
         bool bCompileFinished = task.IsDone();
 
         if (!bCompileFinished && bWaitAll)

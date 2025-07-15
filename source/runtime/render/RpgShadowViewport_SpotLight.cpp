@@ -75,11 +75,11 @@ void RpgShadowViewport_SpotLight::PreRender(RpgRenderFrameContext& frameContext,
 }
 
 
-void RpgShadowViewport_SpotLight::SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgAsyncTask_RenderPassShadowArray& out_ShadowPasses) noexcept
+void RpgShadowViewport_SpotLight::SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept
 {
 	FFrameData& frame = FrameDatas[frameContext.Index];
 
-	RpgAsyncTask_RenderPass_Shadow* shadowPass = &frame.AsyncTaskRenderPassShadow;
+	RpgRenderTask_RenderPassShadow* shadowPass = &frame.TaskRenderPassShadow;
 	shadowPass->Reset();
 	shadowPass->FrameContext = frameContext;
 	shadowPass->WorldResource = worldResource;

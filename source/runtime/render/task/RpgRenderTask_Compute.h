@@ -5,7 +5,7 @@
 
 
 
-class RpgAsyncTask_Compute : public RpgThreadTask
+class RpgRenderTask_Compute : public RpgThreadTask
 {
 private:
 	ComPtr<ID3D12CommandAllocator> CmdAllocCompute;
@@ -19,14 +19,14 @@ public:
 
 
 public:
-	RpgAsyncTask_Compute() noexcept;
+	RpgRenderTask_Compute() noexcept;
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
 
 
 	virtual const char* GetTaskName() const noexcept override
 	{
-		return "RpgAsyncTask_Compute";
+		return "RpgRenderTask_Compute";
 	}
 
 

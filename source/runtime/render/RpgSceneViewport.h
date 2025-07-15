@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RpgRenderResource.h"
-#include "async_task/RpgAsyncTask_RenderPass.h"
+#include "task/RpgRenderTask_RenderPass.h"
 
 
 
@@ -30,7 +30,7 @@ private:
 
 		RpgArray<RpgDrawIndexed> DrawTransparencies;
 
-		RpgAsyncTask_RenderPass_Forward AsyncTaskRenderPassForward;
+		RpgRenderTask_RenderPassForward TaskRenderPassForward;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
@@ -45,7 +45,7 @@ public:
 	RpgSceneViewport() noexcept;
 
 	void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world) noexcept;
-	void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgAsyncTask_RenderPassShadowArray& out_ShadowPasses, RpgAsyncTask_RenderPassForwardArray& out_ForwardPasses) noexcept;
+	void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses, RpgRenderTask_RenderPassForwardArray& out_ForwardPasses) noexcept;
 
 
 	inline void SetViewRotationAndPosition(const RpgQuaternion& in_Rotation, const RpgVector3& in_Position) noexcept

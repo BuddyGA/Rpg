@@ -1,8 +1,8 @@
-#include "RpgAsyncTask_RenderPass.h"
+#include "RpgRenderTask_RenderPass.h"
 
 
 
-RpgAsyncTask_RenderPass::RpgAsyncTask_RenderPass() noexcept
+RpgRenderTask_RenderPass::RpgRenderTask_RenderPass() noexcept
 {
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&CmdAllocDirect)));
 	RPG_D3D12_SetDebugName(CmdAllocDirect, "CmdAllocDirect_AsyncTaskRenderPass");
@@ -14,7 +14,7 @@ RpgAsyncTask_RenderPass::RpgAsyncTask_RenderPass() noexcept
 }
 
 
-void RpgAsyncTask_RenderPass::Reset() noexcept
+void RpgRenderTask_RenderPass::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -22,7 +22,7 @@ void RpgAsyncTask_RenderPass::Reset() noexcept
 }
 
 
-void RpgAsyncTask_RenderPass::Execute() noexcept
+void RpgRenderTask_RenderPass::Execute() noexcept
 {
 	RPG_Assert(WorldResource);
 

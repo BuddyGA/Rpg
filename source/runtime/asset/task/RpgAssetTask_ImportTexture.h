@@ -7,7 +7,7 @@
 
 
 
-class RpgAsyncTask_ImportTexture : public RpgThreadTask
+class RpgAssetTask_ImportTexture : public RpgThreadTask
 {
 public:
 	RpgFilePath SourceFilePath;
@@ -20,7 +20,7 @@ private:
 
 
 public:
-	RpgAsyncTask_ImportTexture() noexcept;
+	RpgAssetTask_ImportTexture() noexcept;
 
 
 	[[nodiscard]] inline RpgSharedTexture2D GetResult() noexcept

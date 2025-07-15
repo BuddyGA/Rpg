@@ -8,7 +8,7 @@ class RpgRenderComponent_Camera;
 
 
 
-class RpgAsyncTask_CaptureMesh : public RpgThreadTask
+class RpgRenderTask_CaptureMesh : public RpgThreadTask
 {
 public:
 	RpgWorld* World;
@@ -16,21 +16,21 @@ public:
 
 
 public:
-	RpgAsyncTask_CaptureMesh() noexcept;
+	RpgRenderTask_CaptureMesh() noexcept;
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
 
 
 	virtual const char* GetTaskName() const noexcept override
 	{
-		return "RpgAsyncTask_CaptureMesh";
+		return "RpgRenderTask_CaptureMesh";
 	}
 
 };
 
 
 
-class RpgAsyncTask_CaptureLight : public RpgThreadTask
+class RpgRenderTask_CaptureLight : public RpgThreadTask
 {
 public:
 	RpgWorld* World;
@@ -38,14 +38,14 @@ public:
 
 
 public:
-	RpgAsyncTask_CaptureLight() noexcept;
+	RpgRenderTask_CaptureLight() noexcept;
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
 
 
 	virtual const char* GetTaskName() const noexcept override
 	{
-		return "RpgAsyncTask_CaptureLight";
+		return "RpgRenderTask_CaptureLight";
 	}
 
 };

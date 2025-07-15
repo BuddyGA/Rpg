@@ -75,6 +75,6 @@ public:
 
 
 	friend RpgAnimationWorldSubsystem;
-	friend RpgAsyncTask_TickPose;
+	friend RpgAnimationTask_TickPose;
 
 };

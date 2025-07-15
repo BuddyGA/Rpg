@@ -5,13 +5,42 @@
 
 
 
+class RpgPhysicsComponent_Filter
+{
+	RPG_COMPONENT_TYPE("RpgComponent - Physics Filter");
+
+public:
+	// Object collision channel
+	RpgPhysicsCollision::EChannel ObjectChannel;
+
+	// Object response againts other channels
+	RpgPhysicsCollision::FResponseChannels ResponseChannels;
+
+
+public:
+	RpgPhysicsComponent_Filter() noexcept
+	{
+		ObjectChannel = RpgPhysicsCollision::CHANNEL_NONE;
+		ResponseChannels = RpgPhysicsCollision::DEFAULT_COLLISION_RESPONSE_CHANNELS_IgnoreAll;
+	}
+
+
+	inline void Destroy() noexcept
+	{
+		// Nothing to do
+	}
+
+};
+
+
+
 class RpgPhysicsComponent_Collision
 {
-	RPG_COMPONENT_TYPE("RpgComponent - Collision");
+	RPG_COMPONENT_TYPE("RpgComponent - Physics Collision");
 
 private:
 	// Internal bounding AABB for broadphase
-	RpgBoundingAABB Bounding;
+	RpgBoundingAABB Bound;
 
 	// - Sphere (X = Radius, Y = Radius, Z = Radius, W = Radius)
 	// - Box (XYZ = Half Extents, W = 0.0f)
@@ -21,18 +50,28 @@ private:
 	// Collision shape
 	RpgPhysicsCollision::EShape Shape;
 
+	// Linear velocity, rate of position change over time
+	RpgVector3 Velocity;
+
+	// Angular velocity, rate of orientation change over time
+	RpgVector3 AngularVelocity;
+
 	// Set true to update internal bounding AABB
 	bool bUpdateBounding;
 
+
 public:
+	// Set true to simulate physics
+	bool bSimulate;
+
 	// Set true to enable collision
 	bool bCollisionEnabled;
 
 	// Object collision channel
 	RpgPhysicsCollision::EChannel ObjectChannel;
 
-	// Object response againts other channel
-	RpgPhysicsCollisionResponseChannels ResponseChannels;
+	// Object response againts other channels
+	RpgPhysicsCollision::FResponseChannels ResponseChannels;
 
 
 public:
@@ -40,15 +79,16 @@ public:
 	{
 		Shape = RpgPhysicsCollision::SHAPE_NONE;
 		bUpdateBounding = false;
+		bSimulate = false;
 		bCollisionEnabled = false;
 		ObjectChannel = RpgPhysicsCollision::CHANNEL_NONE;
-		ResponseChannels = RPG_PHYSICS_DefaultCollisionResponseChannels_IgnoreAll;
+		ResponseChannels = RpgPhysicsCollision::DEFAULT_COLLISION_RESPONSE_CHANNELS_IgnoreAll;
 	}
 
 
 	inline void Destroy() noexcept
 	{
-		// No heap allocation, nothing to do
+		// Nothing to do
 	}
 
 
@@ -76,6 +116,14 @@ public:
 	}
 
 
-	friend class RpgPhysicsWorldSubsystem;
+	inline float GetSpeed() const noexcept
+	{
+		return Velocity.GetMagnitude();
+	}
+
+
+	friend RpgPhysicsWorldSubsystem;
+	friend RpgPhysicsTask_UpdateBound;
+	friend RpgPhysicsTask_UpdateShape;
 
 };

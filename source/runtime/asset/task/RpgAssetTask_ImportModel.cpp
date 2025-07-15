@@ -1,5 +1,5 @@
-#include "RpgAsyncTask_ImportModel.h"
-#include "RpgAsyncTask_ImportTexture.h"
+#include "RpgAssetTask_ImportModel.h"
+#include "RpgAssetTask_ImportTexture.h"
 #include "../RpgAssetImporter.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -76,7 +76,7 @@ namespace RpgAssimp
 
 
 
-RpgAsyncTask_ImportModel::RpgAsyncTask_ImportModel() noexcept
+RpgAssetTask_ImportModel::RpgAssetTask_ImportModel() noexcept
 {
 	Scale = 1.0f;
 	bImportMaterialTexture = false;
@@ -86,7 +86,7 @@ RpgAsyncTask_ImportModel::RpgAsyncTask_ImportModel() noexcept
 }
 
 
-void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScene)
+void RpgAssetTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScene)
 {
 	if (!bImportMaterialTexture)
 	{
@@ -159,7 +159,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 			}
 
 			int textureIndex = ImportTextureTasks.GetCount();
-			RpgAsyncTask_ImportTexture* task = nullptr;
+			RpgAssetTask_ImportTexture* task = nullptr;
 			RpgFilePath absoluteFilePath;
 
 			// embedded texture
@@ -182,7 +182,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 				{
 					importingEmbeddedTextures.AddValue(assimpTextureIndex);
 
-					task = new RpgAsyncTask_ImportTexture();
+					task = new RpgAssetTask_ImportTexture();
 					task->Reset();
 					task->SourceEmbedded = RpgAssimp::FTextureEmbedded(sourceEmbeddedName, assimpTexture->pcData, assimpTexture->mWidth, assimpTexture->mHeight, assimpTexture->achFormatHint);
 				}
@@ -205,7 +205,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 				{
 					importingExternalTextures.AddValue(absoluteFilePath);
 
-					task = new RpgAsyncTask_ImportTexture();
+					task = new RpgAssetTask_ImportTexture();
 					task->Reset();
 					task->SourceFilePath = absoluteFilePath;
 				}
@@ -250,7 +250,7 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 }
 
 
-void RpgAsyncTask_ImportModel::ExtractSkeleton(const aiMesh* assimpMesh) noexcept
+void RpgAssetTask_ImportModel::ExtractSkeleton(const aiMesh* assimpMesh) noexcept
 {
 	const int assimpBoneCount = static_cast<int>(assimpMesh->mNumBones);
 	if (assimpBoneCount == 0)
@@ -315,7 +315,7 @@ void RpgAsyncTask_ImportModel::ExtractSkeleton(const aiMesh* assimpMesh) noexcep
 }
 
 
-void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene, const aiNode* assimpNode) noexcept
+void RpgAssetTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene, const aiNode* assimpNode) noexcept
 {
 	if (!ImportedSkeleton)
 	{
@@ -495,7 +495,7 @@ void RpgAsyncTask_ImportModel::ExtractMeshesFromNode(const aiScene* assimpScene,
 }
 
 
-void RpgAsyncTask_ImportModel::ExtractAnimations(const aiScene* assimpScene) noexcept
+void RpgAssetTask_ImportModel::ExtractAnimations(const aiScene* assimpScene) noexcept
 {
 	if (!bImportAnimation)
 	{
@@ -556,7 +556,7 @@ void RpgAsyncTask_ImportModel::ExtractAnimations(const aiScene* assimpScene) noe
 }
 
 
-void RpgAsyncTask_ImportModel::Reset() noexcept
+void RpgAssetTask_ImportModel::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -575,7 +575,7 @@ void RpgAsyncTask_ImportModel::Reset() noexcept
 }
 
 
-void RpgAsyncTask_ImportModel::Execute() noexcept
+void RpgAssetTask_ImportModel::Execute() noexcept
 {
 	RPG_Check(SourceFilePath.IsFilePath());
 

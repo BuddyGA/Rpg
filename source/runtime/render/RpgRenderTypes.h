@@ -22,20 +22,20 @@ class RpgShadowViewport_PointLight;
 class RpgShadowViewport_SpotLight;
 class RpgShadowViewport_Cascade;
 
-class RpgAsyncTask_CompilePSO;
-class RpgAsyncTask_Compute;
-class RpgAsyncTask_Copy;
-class RpgAsyncTask_RenderPass;
+class RpgRenderTask_CompilePSO;
+class RpgRenderTask_Compute;
+class RpgRenderTask_Copy;
+class RpgRenderTask_RenderPass;
 class RpgAsyncTask_RenderPass_Depth;
-class RpgAsyncTask_RenderPass_Shadow;
-class RpgAsyncTask_RenderPass_Forward;
+class RpgRenderTask_RenderPassShadow;
+class RpgRenderTask_RenderPassForward;
 class RpgAsyncTask_RenderPass_Transparency;
 
-typedef RpgArrayInline<RpgAsyncTask_RenderPass_Shadow*, 32> RpgAsyncTask_RenderPassShadowArray;
-typedef RpgArrayInline<RpgAsyncTask_RenderPass_Forward*, 32> RpgAsyncTask_RenderPassForwardArray;
+typedef RpgArrayInline<RpgRenderTask_RenderPassShadow*, 32> RpgRenderTask_RenderPassShadowArray;
+typedef RpgArrayInline<RpgRenderTask_RenderPassForward*, 32> RpgRenderTask_RenderPassForwardArray;
 
 
-class RpgAsyncTask_Compute;
+class RpgRenderTask_Compute;
 
 
 

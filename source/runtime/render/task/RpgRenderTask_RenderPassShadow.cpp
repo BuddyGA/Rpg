@@ -1,9 +1,9 @@
-#include "RpgAsyncTask_RenderPass.h"
+#include "RpgRenderTask_RenderPass.h"
 #include "../RpgRenderPipeline.h"
 
 
 
-RpgAsyncTask_RenderPass_Shadow::RpgAsyncTask_RenderPass_Shadow() noexcept
+RpgRenderTask_RenderPassShadow::RpgRenderTask_RenderPassShadow() noexcept
 {
 	DrawMeshData = nullptr;
 	DrawMeshCount = 0;
@@ -13,9 +13,9 @@ RpgAsyncTask_RenderPass_Shadow::RpgAsyncTask_RenderPass_Shadow() noexcept
 }
 
 
-void RpgAsyncTask_RenderPass_Shadow::Reset() noexcept
+void RpgRenderTask_RenderPassShadow::Reset() noexcept
 {
-	RpgAsyncTask_RenderPass::Reset();
+	RpgRenderTask_RenderPass::Reset();
 
 	DepthTexture = nullptr;
 	ViewId = RPG_INDEX_INVALID;
@@ -27,7 +27,7 @@ void RpgAsyncTask_RenderPass_Shadow::Reset() noexcept
 }
 
 
-void RpgAsyncTask_RenderPass_Shadow::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
+void RpgRenderTask_RenderPassShadow::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
 {
 	const RpgPointInt dimension = DepthTexture->GetDimension();
 

@@ -1,10 +1,10 @@
-#include "RpgAsyncTask_TickPose.h"
+#include "RpgAnimationTask_TickPose.h"
 #include "core/world/RpgWorld.h"
 #include "../world/RpgAnimationComponent.h"
 
 
 
-RpgAsyncTask_TickPose::RpgAsyncTask_TickPose() noexcept
+RpgAnimationTask_TickPose::RpgAnimationTask_TickPose() noexcept
 {
 	World = nullptr;
 	DeltaTime = 0.0f;
@@ -12,7 +12,7 @@ RpgAsyncTask_TickPose::RpgAsyncTask_TickPose() noexcept
 }
 
 
-void RpgAsyncTask_TickPose::Reset() noexcept
+void RpgAnimationTask_TickPose::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
@@ -23,7 +23,7 @@ void RpgAsyncTask_TickPose::Reset() noexcept
 }
 
 
-void RpgAsyncTask_TickPose::Execute() noexcept
+void RpgAnimationTask_TickPose::Execute() noexcept
 {
 	for (int i = 0; i < AnimationComponents.GetCount(); ++i)
 	{

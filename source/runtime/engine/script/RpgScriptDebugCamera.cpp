@@ -7,7 +7,7 @@
 
 RpgScriptDebugCamera::RpgScriptDebugCamera() noexcept
 {
-	PitchValue = 70.0f;
+	PitchValue = 0.0f;
 	YawValue = 0.0f;
 	bInitTransform = false;
 
@@ -25,8 +25,8 @@ void RpgScriptDebugCamera::AttachedToGameObject() noexcept
 		bInitTransform = true;
 
 		RpgTransform transform = World->GameObject_GetWorldTransform(GameObject);
-		transform.Position = RpgVector3(0.0f, 300.0f, -300.0f);
-		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(70.0f, 0.0f, 0.0f);
+		transform.Position = RpgVector3(0.0f, 500.0f, 0.0f);
+		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(0.0f, 0.0f, 0.0f);
 
 		World->GameObject_SetWorldTransform(GameObject, transform);
 	}

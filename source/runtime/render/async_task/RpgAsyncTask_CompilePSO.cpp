@@ -14,6 +14,7 @@ void RpgAsyncTask_CompilePSO::Reset() noexcept
 {
 	RpgThreadTask::Reset();
 
+	Name = "";
 	RootSignature = nullptr;
 	PSO.Reset();
 }
@@ -21,7 +22,7 @@ void RpgAsyncTask_CompilePSO::Reset() noexcept
 
 void RpgAsyncTask_CompilePSO::Execute() noexcept
 {
-	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute task compile PSO for (%s)", SDL_GetCurrentThreadID(), *MaterialName);
+	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Execute task compile PSO for (%s)", SDL_GetCurrentThreadID(), *Name);
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.NodeMask = 0;
@@ -129,10 +130,10 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	{
 		psoDesc.RasterizerState.CullMode = PipelineState.bTwoSides ? D3D12_CULL_MODE_NONE : D3D12_CULL_MODE_BACK;
 		psoDesc.RasterizerState.FrontCounterClockwise = FALSE;
-		psoDesc.RasterizerState.DepthBias = static_cast<INT>(PipelineState.DepthBias);
+		psoDesc.RasterizerState.DepthBias = PipelineState.DepthBias;
 		psoDesc.RasterizerState.SlopeScaledDepthBias = PipelineState.DepthBiasSlope;
 		psoDesc.RasterizerState.DepthBiasClamp = PipelineState.DepthBiasClamp;
-		psoDesc.RasterizerState.DepthClipEnable = PipelineState.bDepthWrite;
+		psoDesc.RasterizerState.DepthClipEnable = PipelineState.bDepthTest;
 		psoDesc.RasterizerState.AntialiasedLineEnable = PipelineState.RasterMode == RpgRenderRasterMode::LINE;
 		psoDesc.RasterizerState.MultisampleEnable = FALSE;
 		psoDesc.RasterizerState.ForcedSampleCount = 0;
@@ -213,7 +214,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 		psoDesc.DSVFormat = depthStencilFormat;
 		psoDesc.DepthStencilState.DepthEnable = PipelineState.bDepthTest;
-		psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		psoDesc.DepthStencilState.DepthWriteMask = PipelineState.bDepthWrite ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
 		psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		psoDesc.DepthStencilState.StencilEnable = PipelineState.bStencilTest;
 	}
@@ -227,7 +228,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	}
 
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&PSO)));
-	RPG_D3D12_SetDebugName(PSO, "PSO_%s", *MaterialName);
+	RPG_D3D12_SetDebugName(PSO, "PSO_%s", *Name);
 
-	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Compiled PSO (PSO_%s)", SDL_GetCurrentThreadID(), *MaterialName);
+	RPG_LogDebug(RpgLogD3D12, "[ThreadId-%u] Compiled PSO (PSO_%s)", SDL_GetCurrentThreadID(), *Name);
 }

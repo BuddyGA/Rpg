@@ -210,8 +210,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClCompile Include="source\runtime\animation\async_task\RpgAsyncTask_TickPose.cpp" />
     <ClCompile Include="source\runtime\animation\RpgAnimationPose.cpp" />
     <ClCompile Include="source\runtime\animation\world\RpgAnimationWorldSubsystem.cpp" />
-    <ClCompile Include="source\runtime\camera\async_task\RpgAsyncTask_CaptureLight.cpp" />
-    <ClCompile Include="source\runtime\camera\world\RpgCameraWorldSubsystem.cpp" />
+    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CaptureLight.cpp" />
     <ClCompile Include="source\runtime\physics\world\RpgPhysicsWorldSubsystem.cpp" />
     <ClCompile Include="source\runtime\animation\RpgAnimationClip.cpp" />
     <ClCompile Include="source\runtime\animation\RpgAnimationSkeleton.cpp" />
@@ -225,7 +224,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClCompile Include="source\runtime\core\RpgFilePath.cpp" />
     <ClCompile Include="source\runtime\engine\script\RpgScriptDebugCamera.cpp" />
     <ClCompile Include="source\runtime\input\RpgInputManager.cpp" />
-    <ClCompile Include="source\runtime\camera\async_task\RpgAsyncTask_CaptureMesh.cpp" />
+    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CaptureMesh.cpp" />
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Shadow.cpp" />
     <ClCompile Include="source\runtime\render\RpgMaterial.cpp" />
     <ClCompile Include="source\runtime\core\RpgMath.cpp" />
@@ -250,7 +249,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_Copy.cpp" />
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass.cpp" />
     <ClCompile Include="source\runtime\render\RpgRenderer.cpp" />
-    <ClCompile Include="source\runtime\render\RpgD3D12.cpp" />
+    <ClCompile Include="source\runtime\core\RpgD3D12.cpp" />
     <ClCompile Include="source\runtime\render\RpgRenderer2D.cpp" />
     <ClCompile Include="source\runtime\render\RpgRenderPipeline.cpp" />
     <ClCompile Include="source\runtime\render\RpgRenderResource_Material.cpp" />
@@ -284,9 +283,6 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\animation\world\RpgAnimationWorldSubsystem.h" />
     <ClInclude Include="source\runtime\animation\RpgAnimationTypes.h" />
     <ClInclude Include="source\runtime\asset\async_task\RpgAssimpTypes.h" />
-    <ClInclude Include="source\runtime\camera\RpgCameraTypes.h" />
-    <ClInclude Include="source\runtime\camera\world\RpgCameraComponent.h" />
-    <ClInclude Include="source\runtime\camera\world\RpgCameraWorldSubsystem.h" />
     <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h" />
     <ClInclude Include="source\runtime\physics\world\RpgPhysicsComponent.h" />
     <ClInclude Include="source\runtime\physics\world\RpgPhysicsWorldSubsystem.h" />
@@ -312,7 +308,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\game\world\RpgAttributeWorldSubsystem.h" />
     <ClInclude Include="source\runtime\input\RpgInputManager.h" />
     <ClInclude Include="source\runtime\input\RpgInputTypes.h" />
-    <ClInclude Include="source\runtime\camera\async_task\RpgAsyncTask_Capture.h" />
+    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Capture.h" />
     <ClInclude Include="source\runtime\render\RpgMaterial.h" />
     <ClInclude Include="source\runtime\core\RpgMath.h" />
     <ClInclude Include="source\runtime\render\RpgMesh.h" />
@@ -341,7 +337,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Copy.h" />
     <ClInclude Include="source\runtime\render\world\RpgRenderComponent.h" />
     <ClInclude Include="source\runtime\render\RpgRenderer.h" />
-    <ClInclude Include="source\runtime\render\RpgD3D12.h" />
+    <ClInclude Include="source\runtime\core\RpgD3D12.h" />
     <ClInclude Include="source\runtime\render\RpgRenderer2D.h" />
     <ClInclude Include="source\runtime\render\RpgRenderPipeline.h" />
     <ClInclude Include="source\runtime\render\RpgRenderResource.h" />
@@ -352,6 +348,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\render\RpgSceneViewport.h" />
     <ClInclude Include="source\runtime\render\RpgShadowViewport.h" />
     <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_CompilePSO.h" />
+    <ClInclude Include="source\runtime\shader\RpgShaderTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

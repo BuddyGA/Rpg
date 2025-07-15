@@ -47,8 +47,8 @@ namespace RpgRenderPipeline
 
 
     // Graphics
-    extern ID3D12PipelineState* GetGraphicsPSO_ShadowDepth() noexcept;
-    //extern ID3D12PipelineState* GetGraphicsPSO_ShadowDepthCube() noexcept;
+    extern ID3D12PipelineState* GetGraphicsPSO_ShadowMapDirectional() noexcept;
+    extern ID3D12PipelineState* GetGraphicsPSO_ShadowMapCube() noexcept;
 
     // Compute
     extern ID3D12PipelineState* GetComputePSO_Skinning() noexcept;

@@ -2,7 +2,7 @@
 #include "core/RpgFilePath.h"
 #include "core/RpgThreadPool.h"
 #include "core/RpgTimer.h"
-#include "render/RpgD3D12.h"
+#include "core/RpgD3D12.h"
 #include "render/RpgTexture.h"
 #include "render/RpgFont.h"
 #include "render/RpgMaterial.h"

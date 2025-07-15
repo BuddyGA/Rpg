@@ -7,6 +7,8 @@ using namespace Microsoft::WRL;
 
 #include <dxcapi.h>
 
+#include "RpgShaderTypes.h"
+
 
 
 namespace RpgShader

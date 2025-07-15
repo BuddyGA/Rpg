@@ -5,31 +5,6 @@
 
 
 
-struct RpgSceneMesh
-{
-	RpgGameObjectID GameObject;
-	RpgMatrixTransform WorldTransformMatrix;
-	RpgSharedMaterial Material;
-	RpgSharedMesh Mesh;
-	int Lod{ 0 };
-};
-
-
-struct RpgSceneLight
-{
-	RpgGameObjectID GameObject;
-	RpgTransform WorldTransform;
-	RpgRenderLight::EType Type{ RpgRenderLight::TYPE_NONE };
-	RpgColorLinear ColorIntensity;
-	float AttenuationRadius{ 0.0f };
-	float AttenuationFallOffExp{ 0.0f };
-	float SpotInnerConeDegree{ 0.0f };
-	float SpotOuterConeDegree{ 0.0f };
-	RpgShadowViewport* ShadowViewport{ nullptr };
-};
-
-
-
 class RpgSceneViewport
 {
 private:
@@ -55,7 +30,7 @@ private:
 
 		RpgArray<RpgDrawIndexed> DrawTransparencies;
 
-		RpgUniquePtr<RpgAsyncTask_RenderPass_Forward> AsyncTaskRenderPassForward;
+		RpgAsyncTask_RenderPass_Forward AsyncTaskRenderPassForward;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 

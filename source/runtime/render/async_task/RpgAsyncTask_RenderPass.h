@@ -40,8 +40,8 @@ public:
 class RpgAsyncTask_RenderPass_Shadow : public RpgAsyncTask_RenderPass
 {
 public:
-	RpgArrayInline<RpgTexture2D*, 6> DepthTextures;
-	RpgArrayInline<RpgWorldResource::FCameraID, 6> CameraIds;
+	RpgTexture2D* DepthTexture;
+	RpgWorldResource::FCameraID CameraId;
 
 	const RpgDrawIndexedDepth* DrawMeshData;
 	int DrawMeshCount;

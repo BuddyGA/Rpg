@@ -1,7 +1,7 @@
 #include "RpgSceneViewport.h"
 #include "core/world/RpgWorld.h"
-#include "world/RpgRenderComponent.h"
 #include "animation/world/RpgAnimationComponent.h"
+#include "RpgShadowViewport.h"
 
 
 
@@ -18,7 +18,7 @@ RpgSceneViewport::RpgSceneViewport() noexcept
 	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		FFrameData& frame = FrameDatas[f];
-		frame.AsyncTaskRenderPassForward = RpgPointer::MakeUnique<RpgAsyncTask_RenderPass_Forward>();
+		//frame.AsyncTaskRenderPassForward = RpgPointer::MakeUnique<RpgAsyncTask_RenderPass_Forward>();
 	}
 
 
@@ -46,7 +46,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 	{
 		if (!frame.RenderTargetTexture)
 		{
-			frame.RenderTargetTexture = RpgTexture2D::s_CreateSharedRenderTarget("TEXRT_SceneViewport", RpgTextureFormat::TEX_RT_RGBA, RenderTargetDimension.X, RenderTargetDimension.Y);
+			frame.RenderTargetTexture = RpgTexture2D::s_CreateSharedRenderTarget("TEXRT_ScnVprt", RpgTextureFormat::TEX_RT_RGBA, RenderTargetDimension.X, RenderTargetDimension.Y);
 		}
 
 		frame.RenderTargetTexture->Resize(RenderTargetDimension.X, RenderTargetDimension.Y);
@@ -56,7 +56,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 		// Resize depth-stencil
 		if (!frame.DepthStencilTexture)
 		{
-			frame.DepthStencilTexture = RpgTexture2D::s_CreateSharedDepthStencil("TEXDS_SceneViewport", RpgTextureFormat::TEX_DS_32, RenderTargetDimension.X, RenderTargetDimension.Y);
+			frame.DepthStencilTexture = RpgTexture2D::s_CreateSharedDepthStencil("TEXDS_ScnVprt", RpgTextureFormat::TEX_DS_32, RenderTargetDimension.X, RenderTargetDimension.Y);
 		}
 
 		frame.DepthStencilTexture->Resize(RenderTargetDimension.X, RenderTargetDimension.Y);
@@ -140,16 +140,16 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 	for (int l = 0; l < Lights.GetCount(); ++l)
 	{
 		const RpgSceneLight& data = Lights[l];
-		RpgArrayInline<RpgWorldResource::FLightID, 6> lightIds;
+		RpgWorldResource::FLightID lightId = RPG_INDEX_INVALID;
 
 		if (data.Type == RpgRenderLight::TYPE_POINT_LIGHT)
 		{
-			const int gameObjectIndex = data.GameObject.GetIndex();
-
-			for (int i = 0; i < 6; ++i)
-			{
-				lightIds.AddValue(worldResource->AddLight_Point(gameObjectIndex + i, data.WorldTransform.Position, data.ColorIntensity, data.AttenuationRadius, data.AttenuationFallOffExp));
-			}
+			lightId = worldResource->AddLight_Point(data.GameObject.GetIndex(), data.WorldTransform.Position, data.ColorIntensity, data.AttenuationRadius, data.AttenuationFallOffExp);
+		}
+		else if (data.Type == RpgRenderLight::TYPE_SPOT_LIGHT)
+		{
+			lightId = worldResource->AddLight_Spot(data.GameObject.GetIndex(), data.WorldTransform.Position, data.WorldTransform.GetAxisForward(), 
+				data.ColorIntensity, data.AttenuationRadius, data.AttenuationFallOffExp, data.SpotInnerConeDegree, data.SpotOuterConeDegree);
 		}
 		else
 		{
@@ -158,7 +158,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 
 		if (data.ShadowViewport)
 		{
-			data.ShadowViewport->PreRender(frameContext, worldResource, world, lightIds.GetData(), lightIds.GetCount());
+			data.ShadowViewport->PreRender(frameContext, worldResource, world, lightId);
 		}
 	}
 
@@ -186,7 +186,7 @@ void RpgSceneViewport::SetupRenderPasses(const RpgRenderFrameContext& frameConte
 	}
 
 	// forward pass
-	RpgAsyncTask_RenderPass_Forward* forwardPass = frame.AsyncTaskRenderPassForward.Get();
+	RpgAsyncTask_RenderPass_Forward* forwardPass = &frame.AsyncTaskRenderPassForward;
 	forwardPass->Reset();
 	forwardPass->FrameContext = frameContext;
 	forwardPass->WorldResource = worldResource;

@@ -50,7 +50,6 @@ namespace RpgAssimp
 		RpgName Name;
 		RpgVector4 ParamVectorBaseColor;
 		RpgVector4 ParamVectorSpecularColor;
-		float ParamScalarSpecularIntensity{ 0.0f };
 		float ParamScalarShininess{ 0.0f };
 		float ParamScalarOpacity{ 0.0f };
 		int TextureIndexBaseColor{ RPG_INDEX_INVALID };

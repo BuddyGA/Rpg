@@ -8,9 +8,8 @@
 #define RPG_MATERIAL_PARAM_VECTOR_INDEX_base_color              0
 #define RPG_MATERIAL_PARAM_VECTOR_INDEX_specular_color          1
 
-#define RPG_MATERIAL_PARAM_SCALAR_INDEX_specular_intensity      0
-#define RPG_MATERIAL_PARAM_SCALAR_INDEX_shininess               1
-#define RPG_MATERIAL_PARAM_SCALAR_INDEX_opacity                 2
+#define RPG_MATERIAL_PARAM_SCALAR_INDEX_shininess               0
+#define RPG_MATERIAL_PARAM_SCALAR_INDEX_opacity                 1
 
 
 
@@ -34,43 +33,25 @@ struct PS_Input
 // FUNCTIONS
 // =============================================================================================== //
 
-float Rpg_PhongLightShadowFactor_Directional(float3 worldPosition, float4x4 shadowCameraViewProjectionMatrix, int shadowTextureDescriptorIndex)
+float Rpg_PhongLightShadowFactor_Directional(float3 worldPosition, RpgShaderConstantLight light, RpgShaderConstantCamera shadowCamera)
 {
-    const float4 shadowProjPosition = mul(shadowCameraViewProjectionMatrix, float4(worldPosition, 1.0f));
+    const float4 lsFragPosition = mul(float4(worldPosition, 1.0f), shadowCamera.ViewProjectionMatrix);
 
-    float3 shadowProjCoords = (shadowProjPosition.xyz / shadowProjPosition.w);
+    float3 shadowProjCoords = (lsFragPosition.xyz / lsFragPosition.w);
     shadowProjCoords.x = 0.5f + shadowProjCoords.x * 0.5f;
-    shadowProjCoords.y = 0.5f - shadowProjCoords.y * 0.5f;
+    shadowProjCoords.y = 0.5f + shadowProjCoords.y * 0.5f;
     
-    return DynamicIndexingTexture2Ds[shadowTextureDescriptorIndex].SampleCmpLevelZero(SamplerShadow, shadowProjCoords.xy, shadowProjCoords.z).r;
+    return DynamicIndexingTexture2Ds[light.ShadowTextureDescriptorIndex].SampleCmpLevelZero(SamplerShadow, shadowProjCoords.xy, lsFragPosition.z);
 }
 
 
-
-//float Rpg_PhongLightShadowFactor_OmniDirectional(float3 fragWorldPosition, float3 lightWorldPosition, float shadowCameraFarClipZ, int shadowTextureDescriptorIndex)
-float Rpg_PhongLightShadowFactor_OmniDirectional(float3 worldPosition, float4x4 shadowCameraViewProjectionMatrix, int shadowTextureDescriptorIndex)
+float Rpg_PhongLightShadowFactor_OmniDirectional(float3 worldPosition, RpgShaderConstantLight light, RpgShaderConstantCamera shadowCamera)
 {
-    /*
-    const float3 shadowProjCoords = fragWorldPosition - lightWorldPosition;
-    const float shadowDepthValue = length(shadowProjCoords / shadowCameraFarClipZ);
-    
-    return DynamicIndexingTextureCubes[shadowTextureDescriptorIndex].SampleCmpLevelZero(SamplerShadow, shadowProjCoords, shadowDepthValue).r;
-    */
-    
-    const float4 shadowProjPosition = mul(float4(worldPosition, 1.0f), shadowCameraViewProjectionMatrix);
-
-    float3 shadowProjCoords = (shadowProjPosition.xyz / shadowProjPosition.w);
-    shadowProjCoords.x = 0.5f + shadowProjCoords.x * 0.5f;
-    shadowProjCoords.y = 0.5f - shadowProjCoords.y * 0.5f;
-    //shadowProjCoords.z = 0.5f + shadowProjCoords.z * 0.5f;
-    
-    return DynamicIndexingTexture2Ds[shadowTextureDescriptorIndex].SampleCmpLevelZero(SamplerShadow, shadowProjCoords.xy, shadowProjCoords.z).r;
-    
-    //float2 uv = shadowProjCoords.xy * 0.5f + 0.5f;
-    //float depth = shadowProjCoords.z * 0.5f + 0.5f;
-    //return DynamicIndexingTexture2Ds[shadowTextureDescriptorIndex].SampleCmpLevelZero(SamplerShadow, uv, depth).r;
+    const float3 shadowProjCoords = worldPosition - light.Position.xyz;
+    const float depthValue = length(shadowProjCoords) / shadowCamera.FarClipZ;
+   
+    return DynamicIndexingTextureCubes[light.ShadowTextureDescriptorIndex].SampleCmpLevelZero(SamplerShadow, shadowProjCoords, depthValue);
 }
-
 
 
 float Rpg_PhongLightDistanceAttenuation(float3 lightVector, float lightRadius, float lightFallOffExponent)
@@ -134,7 +115,7 @@ float4 PS_Main(PS_Input input) : SV_TARGET
     }
     else
     {
-        const float2 scaledUV = input.TexCoord * 16.0f;
+        const float2 scaledUV = input.TexCoord;
         const float2 checker = floor(scaledUV) % 2.0f; //fmod(floor(scaledUV), 2.0f);
         diffuseColor = (checker.x + checker.y) % 2.0f < 1.0f ? 0.5f : 0.25f; // fmod(checker.x + checker.y, 2.0f) < 1.0f ? 0.5f : 0.25f;
     }
@@ -188,13 +169,12 @@ float4 PS_Main(PS_Input input) : SV_TARGET
             if (pointLight.ShadowCameraIndex != -1 && pointLight.ShadowTextureDescriptorIndex != -1)
             {
                 const RpgShaderConstantCamera shadowCamera = WorldData.Cameras[pointLight.ShadowCameraIndex];
-                //shadowFactor = Rpg_PhongLightShadowFactor_OmniDirectional(worldPosition, lightPosition, shadowCamera.FarClipZ, pointLight.ShadowTextureDescriptorIndex);
-                shadowFactor = Rpg_PhongLightShadowFactor_OmniDirectional(worldPosition, shadowCamera.ViewProjectionMatrix, pointLight.ShadowTextureDescriptorIndex);
+                shadowFactor = Rpg_PhongLightShadowFactor_OmniDirectional(worldPosition, pointLight, shadowCamera);
             }
             
             // final point light attenuation factor
-            const float attenuationFactor = Rpg_PhongLightDistanceAttenuation(lightVector, pointLight.AttenuationRadius, pointLight.AttenuationFallOffExp);
-            
+            float attenuationFactor = Rpg_PhongLightDistanceAttenuation(lightVector, pointLight.AttenuationRadius, pointLight.AttenuationFallOffExp);
+            //attenuationFactor = 1.0f / (0.0f + 0.0f * (distanceToLight / 100.0f) + 0.06f * RPG_SQR(distanceToLight / 100.0f));
             lightContribColor += Rpg_PhongLightContributionColor(worldNormal, toViewDir, normalize(lightVector), pointLight.ColorIntensity, attenuationFactor, diffuseColor, specularColor, shininess) * shadowFactor;
         }
     }
@@ -221,7 +201,7 @@ float4 PS_Main(PS_Input input) : SV_TARGET
                 if (spotLight.ShadowCameraIndex != -1 && spotLight.ShadowTextureDescriptorIndex != -1)
                 {
                     const RpgShaderConstantCamera shadowCamera = WorldData.Cameras[spotLight.ShadowCameraIndex];
-                    shadowFactor = Rpg_PhongLightShadowFactor_Directional(worldPosition, shadowCamera.ViewProjectionMatrix, spotLight.ShadowTextureDescriptorIndex);
+                    shadowFactor = Rpg_PhongLightShadowFactor_Directional(worldPosition, spotLight, shadowCamera);
                 }
                 
                 // distance attenuation

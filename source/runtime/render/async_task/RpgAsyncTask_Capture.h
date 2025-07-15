@@ -4,7 +4,7 @@
 
 
 class RpgWorld;
-class RpgCameraComponent;
+class RpgRenderComponent_Camera;
 
 
 
@@ -12,7 +12,7 @@ class RpgAsyncTask_CaptureMesh : public RpgThreadTask
 {
 public:
 	RpgWorld* World;
-	RpgCameraComponent* Camera;
+	RpgRenderComponent_Camera* Camera;
 
 
 public:
@@ -34,7 +34,7 @@ class RpgAsyncTask_CaptureLight : public RpgThreadTask
 {
 public:
 	RpgWorld* World;
-	RpgCameraComponent* Camera;
+	RpgRenderComponent_Camera* Camera;
 
 
 public:

@@ -6,8 +6,6 @@
 #include "render/world/RpgRenderWorldSubsystem.h"
 #include "animation/world/RpgAnimationComponent.h"
 #include "animation/world/RpgAnimationWorldSubsystem.h"
-#include "camera/world/RpgCameraComponent.h"
-#include "camera/world/RpgCameraWorldSubsystem.h"
 
 
 
@@ -49,14 +47,13 @@ RpgEngine::RpgEngine(const char* windowTitle) noexcept
 		MainWorld->Subsystem_Add<RpgPhysicsWorldSubsystem>(0);
 		MainWorld->Subsystem_Add<RpgAnimationWorldSubsystem>(1);
 		MainWorld->Subsystem_Add<RpgRenderWorldSubsystem>(2);
-		MainWorld->Subsystem_Add<RpgCameraWorldSubsystem>(3);
 
 		// Components
 		MainWorld->Component_Register<RpgPhysicsComponent_Collision>();
 		MainWorld->Component_Register<RpgRenderComponent_Mesh>();
 		MainWorld->Component_Register<RpgRenderComponent_Light>();
+		MainWorld->Component_Register<RpgRenderComponent_Camera>();
 		MainWorld->Component_Register<RpgAnimationComponent>();
-		MainWorld->Component_Register<RpgCameraComponent>();
 	}
 
 
@@ -121,7 +118,7 @@ void RpgEngine::KeyboardButton(const SDL_KeyboardEvent& e) noexcept
 		}
 		else if (e.scancode == SDL_SCANCODE_0)
 		{
-			RpgCameraComponent* cameraComp = MainWorld->GameObject_GetComponent<RpgCameraComponent>(MainCameraObject);
+			RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_GetComponent<RpgRenderComponent_Camera>(MainCameraObject);
 			cameraComp->bFrustumCulling = !cameraComp->bFrustumCulling;
 		}
 		else if (e.scancode == SDL_SCANCODE_9)
@@ -174,7 +171,7 @@ void RpgEngine::FrameTick(uint64_t frameCounter, float deltaTime) noexcept
 	}
 
 
-	RpgCameraComponent* mainCameraComp = MainCameraObject.IsValid() ? MainWorld->GameObject_GetComponent<RpgCameraComponent>(MainCameraObject) : nullptr;
+	RpgRenderComponent_Camera* mainCameraComp = MainCameraObject.IsValid() ? MainWorld->GameObject_GetComponent<RpgRenderComponent_Camera>(MainCameraObject) : nullptr;
 	if (mainCameraComp)
 	{
 		mainCameraComp->RenderTargetDimension = windowDimension;
@@ -323,7 +320,7 @@ void RpgEngine::SetMainCamera(RpgGameObjectID cameraObject) noexcept
 
 	MainCameraObject = cameraObject;
 
-	RpgCameraComponent* cameraComp = MainWorld->GameObject_AddComponent<RpgCameraComponent>(MainCameraObject);
+	RpgRenderComponent_Camera* cameraComp = MainWorld->GameObject_AddComponent<RpgRenderComponent_Camera>(MainCameraObject);
 	cameraComp->Viewport = &SceneViewport;
 	cameraComp->bActivated = true;
 }

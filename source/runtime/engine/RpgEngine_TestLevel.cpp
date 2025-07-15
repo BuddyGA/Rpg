@@ -19,7 +19,7 @@ static void TestLevel_AddBlocker(RpgWorld* world, RpgVector3 center, RpgVector3 
 		RpgVertexMeshNormalTangentArray vertexNormalTangents;
 		RpgVertexMeshTexCoordArray vertexTexCoords;
 		RpgVertexIndexArray indices;
-		RpgVertexGeometryFactory::CreateMeshBox(vertexPositions, vertexNormalTangents, vertexTexCoords, indices, -halfExtents, halfExtents, 2.0f);
+		RpgVertexGeometryFactory::CreateMeshBox(vertexPositions, vertexNormalTangents, vertexTexCoords, indices, -halfExtents, halfExtents, 8.0f);
 
 		RpgSharedMesh& mesh = model->GetMeshLod(0, 0);
 		mesh->UpdateVertexData(vertexPositions.GetCount(), vertexPositions.GetData(), vertexNormalTangents.GetData(), vertexTexCoords.GetData(), nullptr, indices.GetCount(), indices.GetData());
@@ -53,7 +53,7 @@ static void TestLevel_AddBox(RpgWorld* world, const RpgTransform& transform) noe
 		RpgVertexMeshNormalTangentArray vertexNormalTangents;
 		RpgVertexMeshTexCoordArray vertexTexCoords;
 		RpgVertexIndexArray indices;
-		RpgVertexGeometryFactory::CreateMeshBox(vertexPositions, vertexNormalTangents, vertexTexCoords, indices, RpgVector3(-64.0f), RpgVector3(64.0f));
+		RpgVertexGeometryFactory::CreateMeshBox(vertexPositions, vertexNormalTangents, vertexTexCoords, indices, RpgVector3(-64.0f), RpgVector3(64.0f), 2.0f);
 
 		RpgSharedMesh& mesh = BoxModel->GetMeshLod(0, 0);
 		mesh->UpdateVertexData(vertexPositions.GetCount(), vertexPositions.GetData(), vertexNormalTangents.GetData(), vertexTexCoords.GetData(), nullptr, indices.GetCount(), indices.GetData());
@@ -138,11 +138,15 @@ static void TestLevel_Sponza(RpgWorld* world) noexcept
 	TestLevel_OBJ(world, RpgFileSystem::GetAssetRawDirPath() + "model/sponza_phong/sponza.obj", 1.0f, false, true);
 
 	RpgTransform transform;
-	transform.Position = RpgVector3(650.0f, 200.0f, 0.0f);
 
-	TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 0.25f), 800.0f, true);
-	//LocalFunc_AddPointLight("point_light_1", RpgVector3(0.0f, 200.0f, 0.0f));
-	//LocalFunc_AddPointLight("point_light_2", RpgVector3(-650.0f, 200.0f, 0.0f));
+	transform.Position = RpgVector3(650.0f, 200.0f, 0.0f);
+	TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 0.33f), 800.0f, true);
+
+	transform.Position = RpgVector3(0.0f, 200.0f, 0.0f);
+	TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 0.33f), 800.0f, true);
+
+	transform.Position = RpgVector3(-650.0f, 200.0f, 0.0f);
+	TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 0.33f), 800.0f, true);
 }
 
 
@@ -155,7 +159,7 @@ static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 	// test point light
 	{
 		transform.Position = RpgVector3(0.0f, 500.0f, 0.0f);
-		TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 0.2f), 800.0f, true);
+		TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 1.0f), 800.0f, true);
 
 		// +X
 		transform.Position = RpgVector3(300.0f, 500.0f, 0.0f);
@@ -166,12 +170,12 @@ static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 		transform.Position = RpgVector3(-300.0f, 500.0f, 0.0f);
 		TestLevel_AddBox(world, transform);
 		TestLevel_AddBlocker(world, RpgVector3(-500.0f, 500.0f, 0.0f), RpgVector3(16, 200.0f, 200.0f));
-
+		
 		// +Y
 		transform.Position = RpgVector3(0.0f, 800.0f, 0.0f);
 		TestLevel_AddBox(world, transform);
 		TestLevel_AddBlocker(world, RpgVector3(0.0f, 1000.0f, 0.0f), RpgVector3(200.0f, 16.0f, 200.0f));
-
+		
 		// -Y
 		transform.Position = RpgVector3(0.0f, 280.0f, 0.0f);
 		TestLevel_AddBox(world, transform);
@@ -180,7 +184,7 @@ static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 		transform.Position = RpgVector3(0.0f, 500.0f, 300.0f);
 		TestLevel_AddBox(world, transform);
 		TestLevel_AddBlocker(world, RpgVector3(0.0f, 500.0f, 500.0f), RpgVector3(200.0f, 200.0f, 16.0f));
-
+		
 		// -Z
 		transform.Position = RpgVector3(0.0f, 500.0f, -300.0f);
 		TestLevel_AddBox(world, transform);
@@ -259,7 +263,7 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 
 void RpgEngine::CreateTestLevel() noexcept
 {
-	//TestLevel_Sponza(MainWorld);
+	TestLevel_Sponza(MainWorld);
 
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/lost_empire/lost_empire.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/bunny/bunny.obj", 100.0f);
@@ -268,5 +272,5 @@ void RpgEngine::CreateTestLevel() noexcept
 
 	//TestLevel_Animations(MainWorld);
 
-	TestLevel_PrimitiveShapes(MainWorld);
+	//TestLevel_PrimitiveShapes(MainWorld);
 }

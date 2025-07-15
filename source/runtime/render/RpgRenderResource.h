@@ -495,6 +495,18 @@ public:
 	// @returns Light id in this world resource
 	FLightID AddLight_Point(int uniqueTagId, RpgVector3 worldPosition, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp) noexcept;
 	
+	// Add spot light
+	// @param uniqueTagId - Unique tag identifier. Normally the value is game object id but could be anything as long as it is to prevent adding the same light object multiple times
+	// @param worldPosition - World position
+	// @param worldDirection - World direction 
+	// @param colorIntensity - Light color (RGB), and light intensity (A)
+	// @param attRadius - Attenuation radius factor
+	// @param attFallOffExp - Attenuation falloff exponential factor
+	// @param innerConeDegree - Inner cone (umbra) in degree
+	// @param outerConeDegree - Outer cone (penumbra) in degree
+	// @returns Light id in this world resource
+	FLightID AddLight_Spot(int uniqueTagId, RpgVector3 worldPosition, RpgVector3 worldDirection, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp, float innerConeDegree, float outerConeDegree) noexcept;
+
 
 	inline void SetLightShadow(FLightID lightId, FCameraID shadowCameraId, int shadowTextureDescriptorIndex) noexcept
 	{
@@ -521,6 +533,31 @@ public:
 
 #endif // !RPG_BUILD_SHIPPING
 
+};
+
+
+
+struct RpgSceneMesh
+{
+	RpgGameObjectID GameObject;
+	RpgMatrixTransform WorldTransformMatrix;
+	RpgSharedMaterial Material;
+	RpgSharedMesh Mesh;
+	int Lod{ 0 };
+};
+
+
+struct RpgSceneLight
+{
+	RpgGameObjectID GameObject;
+	RpgTransform WorldTransform;
+	RpgRenderLight::EType Type{ RpgRenderLight::TYPE_NONE };
+	RpgColorLinear ColorIntensity;
+	float AttenuationRadius{ 0.0f };
+	float AttenuationFallOffExp{ 0.0f };
+	float SpotInnerConeDegree{ 0.0f };
+	float SpotOuterConeDegree{ 0.0f };
+	RpgShadowViewport* ShadowViewport{ nullptr };
 };
 
 

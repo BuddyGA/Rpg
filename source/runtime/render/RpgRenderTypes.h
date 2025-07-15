@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/RpgString.h"
+#include "core/RpgD3D12.h"
 #include "core/world/RpgGameObject.h"
-#include "RpgD3D12.h"
 
 
 class RpgRenderer;
@@ -39,6 +39,13 @@ class RpgAsyncTask_Compute;
 
 
 
+enum class RpgRenderProjectionMode : uint8_t
+{
+	PERSPECTIVE = 0,
+	ORTHOGRAPHIC
+};
+
+
 
 enum class RpgRenderVertexMode : uint8_t
 {
@@ -73,6 +80,7 @@ enum class RpgRenderColorBlendMode : uint8_t
 	TRANSPARENCY,
 	MAX_COUNT
 };
+
 
 
 struct RpgRenderPipelineState

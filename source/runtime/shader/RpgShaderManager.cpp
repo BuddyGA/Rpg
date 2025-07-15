@@ -257,9 +257,7 @@ void RpgShaderManager::Initialize() noexcept
 	AddShader(RPG_SHADER_DEFAULT_VS_MESH_2D_NAME, hlslDirPath + "VS_Mesh2D.hlsl", RpgShader::TYPE_VERTEX);
 	AddShader(RPG_SHADER_DEFAULT_VS_FULLSCREEN_NAME, hlslDirPath + "VS_Fullscreen.hlsl", RpgShader::TYPE_VERTEX);
 	AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX);
-	//AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_CUBE_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX, { "CUBE" });
-
-	//AddShader(RPG_SHADER_DEFAULT_GS_SHADOW_DEPTH_CUBE_NAME, hlslDirPath + "GS_ShadowDepthCube.hlsl", RpgShader::TYPE_GEOMETRY);
+	AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_CUBE_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX, { "CUBE" });
 
 	AddShader(RPG_SHADER_DEFAULT_PS_COLOR_NAME, hlslDirPath + "PS_Color.hlsl", RpgShader::TYPE_PIXEL);
 	AddShader(RPG_SHADER_DEFAULT_PS_TEXTURE_COLOR_NAME, hlslDirPath + "PS_TextureColor.hlsl", RpgShader::TYPE_PIXEL);
@@ -268,6 +266,14 @@ void RpgShaderManager::Initialize() noexcept
 	AddShader(RPG_SHADER_DEFAULT_PS_FULLSCREEN_GAMMA_NAME, hlslDirPath + "PS_FullscreenGamma.hlsl", RpgShader::TYPE_PIXEL);
 
 	AddShader(RPG_SHADER_DEFAULT_CS_SKINNING_NAME, hlslDirPath + "CS_Skinning.hlsl", RpgShader::TYPE_COMPUTE);
+
+
+	AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapDirectional_VS, hlslDirPath + "ShadowMapDirectional.hlsl", RpgShader::TYPE_VERTEX);
+
+	AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapCube_VS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapCube_GS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_GEOMETRY);
+	//AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapCube_PS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_PIXEL);
+
 
 	CompileShaders(true);
 
@@ -314,7 +320,7 @@ void RpgShaderManager::AddShader(const RpgName& in_Name, const RpgString& in_Hls
 
 void RpgShaderManager::CompileShaders(bool bWaitAll) noexcept
 {
-	RpgArrayInline<RpgThreadTask*, 16> taskToSubmits;
+	RpgArrayInline<RpgThreadTask*, 32> taskToSubmits;
 
 	for (int i = 0; i < ShaderDatas.GetCount(); ++i)
 	{

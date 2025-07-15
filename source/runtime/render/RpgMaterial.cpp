@@ -1,4 +1,5 @@
 #include "RpgMaterial.h"
+#include "shader/RpgShaderTypes.h"
 
 
 RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogMaterial, VERBOSITY_DEBUG)
@@ -100,8 +101,7 @@ void RpgMaterial::s_CreateDefaults() noexcept
 		RpgMaterialParameterLayout paramLayout{};
 		paramLayout.AddVector("base_color", RpgVector4(1.0f));
 		paramLayout.AddVector("specular_color", RpgVector4(1.0f));
-		paramLayout.AddScalar("specular_intensity", 0.0f);
-		paramLayout.AddScalar("shininess", 0.0f);
+		paramLayout.AddScalar("shininess", 32.0f);
 		paramLayout.AddScalar("opacity", 1.0f);
 
 		DefaultMaterials[RpgMaterialDefault::MESH_PHONG] = s_CreateShared("MAT_DEF_MeshPhong", renderState, paramLayout);

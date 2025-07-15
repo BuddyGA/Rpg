@@ -3,9 +3,10 @@
 #include "world/RpgRenderComponent.h"
 
 
+
 RpgShadowViewport_PointLight::RpgShadowViewport_PointLight() noexcept
 {
-	AttenuationRadius = 800.0f;
+	AttenuationRadius = 0.0f;
 }
 
 
@@ -15,32 +16,22 @@ RpgShadowViewport_PointLight::~RpgShadowViewport_PointLight() noexcept
 }
 
 
-void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, const RpgWorldResource::FLightID* lightIds, int lightCount) noexcept
+void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept
 {
-	RPG_Assert(lightIds);
-	RPG_Assert(lightCount == 6);
-
 	FFrameData& frame = FrameDatas[frameContext.Index];
 	frame.DrawMeshes.Clear();
 	frame.DrawSkinnedMeshes.Clear();
 
-	constexpr const char* postfixName[6] = { "+X", "-X", "+Y", "-Y", "+Z", "-Z", };
-
 	const uint16_t shadowTextureDimension = RpgRenderLight::SHADOW_TEXTURE_DIMENSION_POINT_LIGHT[frameContext.ShadowQuality];
+	RpgSharedTextureCubeDepth& depthTexture = frame.DepthTextureCube;
 
-	for (int i = 0; i < 6; ++i)
+	if (!depthTexture)
 	{
-		RpgSharedTexture2D& depthTexture = frame.DepthTextures[i];
-
-		if (!depthTexture)
-		{
-			const RpgName name = RpgName::Format("TEXD_ShdwVprt_PL_%s", postfixName[i]);
-			depthTexture = RpgTexture2D::s_CreateSharedDepthStencil(name, RpgTextureFormat::TEX_DS_16, shadowTextureDimension, shadowTextureDimension);
-		}
-
-		depthTexture->Resize(shadowTextureDimension, shadowTextureDimension);
-		depthTexture->GPU_UpdateResource();
+		depthTexture = RpgTextureCubeDepth::s_CreateShared(RpgName::Format("TEXDC_SdwVprtPL_%i", lightId), RpgTextureFormat::TEX_DS_16, shadowTextureDimension, shadowTextureDimension);
 	}
+
+	depthTexture->Resize(shadowTextureDimension, shadowTextureDimension);
+	depthTexture->GPU_UpdateResource();
 
 	RpgTransform transform = world->GameObject_GetWorldTransform(GameObject);
 	const float fovDegree = 91.0f;
@@ -48,17 +39,13 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 	const float farClipZ = AttenuationRadius * 1.05f;
 	const RpgMatrixProjection projMatrix = RpgMatrixProjection::CreatePerspective(1.0f, fovDegree, nearClipZ, farClipZ);
 
-
-	// setup shadow camera for each face
 	// +X
 	{
 		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(0.0f, 90.0f, 0.0f);
 
 		FViewInfo& view = FaceViews[0];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.ProjectionMatrix = projMatrix;
-		view.FarClipZ = farClipZ;
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, view.ProjectionMatrix, transform.Position, nearClipZ, farClipZ);
+		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// -X
 	{
@@ -66,9 +53,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[1];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.ProjectionMatrix = RpgMatrixProjection::CreatePerspective(1.0f, fovDegree, nearClipZ, farClipZ);
-		view.FarClipZ = farClipZ;
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, view.ProjectionMatrix, transform.Position, nearClipZ, farClipZ);
+		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// +Y
 	{
@@ -76,9 +61,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[2];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.ProjectionMatrix = RpgMatrixProjection::CreatePerspective(1.0f, fovDegree, nearClipZ, farClipZ);
-		view.FarClipZ = farClipZ;
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, view.ProjectionMatrix, transform.Position, nearClipZ, farClipZ);
+		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// -Y
 	{
@@ -86,9 +69,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[3];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.ProjectionMatrix = RpgMatrixProjection::CreatePerspective(1.0f, fovDegree, nearClipZ, farClipZ);
-		view.FarClipZ = farClipZ;
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, view.ProjectionMatrix, transform.Position, nearClipZ, farClipZ);
+		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// +Z
 	{
@@ -96,9 +77,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[4];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.ProjectionMatrix = RpgMatrixProjection::CreatePerspective(1.0f, fovDegree, nearClipZ, farClipZ);
-		view.FarClipZ = farClipZ;
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, view.ProjectionMatrix, transform.Position, nearClipZ, farClipZ);
+		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// -Z
 	{
@@ -106,18 +85,11 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[5];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.ProjectionMatrix = RpgMatrixProjection::CreatePerspective(1.0f, fovDegree, nearClipZ, farClipZ);
-		view.FarClipZ = farClipZ;
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, view.ProjectionMatrix, transform.Position, nearClipZ, farClipZ);
+		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 
-
-	for (int i = 0; i < 6; ++i)
-	{
-		const RpgD3D12::FResourceDescriptor shadowDepthDescriptor = RpgD3D12::AllocateDescriptor_TDI(frame.DepthTextures[i]->GPU_GetResource(), DXGI_FORMAT_R16_UNORM);
-		FaceViews[i].ShadowTextureDescriptorIndex = shadowDepthDescriptor.Index;
-		worldResource->SetLightShadow(lightIds[i], FaceViews[i].CameraId, shadowDepthDescriptor.Index);
-	}
+	const RpgD3D12::FResourceDescriptor shadowDepthDescriptor = RpgD3D12::AllocateDescriptor_TDI_Cube(depthTexture->GPU_GetResource(), DXGI_FORMAT_R16_UNORM);
+	worldResource->SetLightShadow(lightId, FaceViews[0].CameraId, shadowDepthDescriptor.Index);
 
 
 	// build draw calls
@@ -162,13 +134,8 @@ void RpgShadowViewport_PointLight::SetupRenderPasses(const RpgRenderFrameContext
 	shadowPass->Reset();
 	shadowPass->FrameContext = frameContext;
 	shadowPass->WorldResource = worldResource;
-
-	for (int i = 0; i < 6; ++i)
-	{
-		shadowPass->DepthTextures.AddValue(frame.DepthTextures[i].Get());
-		shadowPass->CameraIds.AddValue(FaceViews[i].CameraId);
-	}
-
+	shadowPass->DepthTexture = frame.DepthTextureCube.Get();
+	shadowPass->CameraId = FaceViews[0].CameraId;
 	shadowPass->DrawMeshData = frame.DrawMeshes.GetData();
 	shadowPass->DrawMeshCount = frame.DrawMeshes.GetCount();
 	shadowPass->DrawSkinnedMeshData = frame.DrawSkinnedMeshes.GetData();

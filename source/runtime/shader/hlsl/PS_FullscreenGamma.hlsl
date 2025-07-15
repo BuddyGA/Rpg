@@ -25,4 +25,5 @@ float4 PS_Main(PS_Input input) : SV_TARGET
     float gamma = Rpg_GetMaterialParameterScalarValue(MATERIAL_PARAM_SCALAR_INDEX_gamma);
     
     return float4(pow(linearColor.rgb, 1.0f / gamma), linearColor.a);
+    //return linearColor;
 }

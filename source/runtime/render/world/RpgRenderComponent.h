@@ -2,7 +2,13 @@
 
 #include "core/world/RpgComponent.h"
 #include "../RpgModel.h"
+#include "../RpgSceneViewport.h"
 #include "../RpgShadowViewport.h"
+
+
+class RpgRenderWorldSubsystem;
+class RpgAsyncTask_CaptureMesh;
+class RpgAsyncTask_CaptureLight;
 
 
 
@@ -30,7 +36,7 @@ public:
 	}
 
 
-	friend class RpgRenderWorldSubsystem;
+	friend RpgRenderWorldSubsystem;
 
 };
 
@@ -97,5 +103,68 @@ public:
 
 
 	friend class RpgRenderWorldSubsystem;
+
+};
+
+
+
+class RpgRenderComponent_Camera
+{
+	RPG_COMPONENT_TYPE("RpgComponent - Camera");
+
+public:
+	RpgPointInt RenderTargetDimension;
+	RpgRenderProjectionMode ProjectionMode;
+	float PerspectiveFoVDegree;
+	float NearClipZ;
+	float FarClipZ;
+	bool bActivated;
+	bool bFrustumCulling;
+
+	RpgSceneViewport* Viewport;
+
+private:
+	RpgUniquePtr<RpgSceneViewport> SelfViewport;
+
+
+public:
+	RpgRenderComponent_Camera() noexcept
+	{
+		RenderTargetDimension = RpgPointInt(1600, 900);
+		ProjectionMode = RpgRenderProjectionMode::PERSPECTIVE;
+		PerspectiveFoVDegree = 90.0f;
+		NearClipZ = 10.0f;
+		FarClipZ = 10000.0f;
+		bActivated = false;
+		bFrustumCulling = false;
+		Viewport = nullptr;
+	}
+
+
+	inline void Destroy() noexcept
+	{
+		// Nothing to do
+	}
+
+
+	inline RpgSceneViewport* GetSceneViewport() noexcept
+	{
+		if (Viewport)
+		{
+			return Viewport;
+		}
+
+		if (!SelfViewport)
+		{
+			SelfViewport = RpgPointer::MakeUnique<RpgSceneViewport>();
+		}
+
+		return SelfViewport.Get();
+	}
+
+
+	friend RpgRenderWorldSubsystem;
+	friend RpgAsyncTask_CaptureMesh;
+	friend RpgAsyncTask_CaptureLight;
 
 };

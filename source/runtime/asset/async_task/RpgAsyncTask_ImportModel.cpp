@@ -127,8 +127,6 @@ void RpgAsyncTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScen
 		aiVector3D colorSpecular;
 		ret = assimpMaterial->Get(AI_MATKEY_COLOR_SPECULAR, colorSpecular);
 		mat.ParamVectorSpecularColor = RpgVector4(colorSpecular.x, colorSpecular.y, colorSpecular.z, 0.0f);
-
-		ret = assimpMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, mat.ParamScalarSpecularIntensity);
 		ret = assimpMaterial->Get(AI_MATKEY_SHININESS, mat.ParamScalarShininess);
 		ret = assimpMaterial->Get(AI_MATKEY_OPACITY, mat.ParamScalarOpacity);
 
@@ -656,7 +654,6 @@ void RpgAsyncTask_ImportModel::Execute() noexcept
 			RpgSharedMaterial material = RpgMaterial::s_CreateSharedInstance(intMat.Name, defaultMaterialMeshPhong);
 			material->SetParameterVectorValue("base_color", intMat.ParamVectorBaseColor);
 			material->SetParameterVectorValue("specular_color", intMat.ParamVectorSpecularColor);
-			material->SetParameterScalarValue("specular_intensity", intMat.ParamScalarSpecularIntensity);
 			material->SetParameterScalarValue("shininess", intMat.ParamScalarShininess);
 			material->SetParameterScalarValue("opacity", intMat.ParamScalarOpacity);
 

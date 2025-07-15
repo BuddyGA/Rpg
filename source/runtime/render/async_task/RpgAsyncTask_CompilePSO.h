@@ -9,7 +9,7 @@ class RpgAsyncTask_CompilePSO : public RpgThreadTask
 {
 public:
 	ID3D12RootSignature* RootSignature;
-	RpgName MaterialName;
+	RpgName Name;
 	RpgRenderPipelineState PipelineState;
 
 private:

@@ -16,8 +16,8 @@ namespace RpgRenderPipeline
     static RpgArray<ComPtr<ID3D12PipelineState>> MaterialPipelineStates;
     static RpgArray<RpgAsyncTask_CompilePSO> AsyncTaskCompilePSOs;
 
-    static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowDepth;
-    //static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowDepthCube;
+    static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowMapDirectional;
+    static ComPtr<ID3D12PipelineState> GraphicsPSO_ShadowMapCube;
     static ComPtr<ID3D12PipelineState> ComputePSO_Skinning;
 
 
@@ -91,8 +91,8 @@ namespace RpgRenderPipeline
             samplerShadow.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
             samplerShadow.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
             samplerShadow.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-            samplerShadow.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-            samplerShadow.MaxAnisotropy = 0;
+            samplerShadow.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+            samplerShadow.MaxAnisotropy = 1;
             samplerShadow.MinLOD = 0.0f;
             samplerShadow.MaxLOD = 0.0f;
             samplerShadow.MipLODBias = 0.0f;
@@ -301,50 +301,53 @@ void RpgRenderPipeline::Initialize() noexcept
         // ShadowDepth
         {
             RpgRenderPipelineState state{};
-            state.VertexShaderName = RPG_SHADER_DEFAULT_VS_DEPTH_NAME;
+            state.VertexShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapDirectional_VS;
             state.VertexMode = RpgRenderVertexMode::MESH;
             state.RasterMode = RpgRenderRasterMode::SOLID;
+            state.BlendMode = RpgRenderColorBlendMode::NONE;
             state.DepthStencilFormat = k_Render_DefaultFormat_ShadowDepth;
             state.bDepthTest = true;
             state.bDepthWrite = true;
-            state.DepthBias = 1000;
-            state.DepthBiasSlope = 2.0f;
-            state.DepthBiasClamp = 10.0f;
-
-            RpgAsyncTask_CompilePSO task;
-            task.Reset();
-            task.RootSignature = RootSignatureGraphics.Get();
-            task.MaterialName = "ShadowDepth";
-            task.PipelineState = state;
-            task.Execute();
-
-            GraphicsPSO_ShadowDepth = task.GetCompiledPSO();
-        }
-
-        /*
-        // ShadowDepthCube
-        {
-            RpgMaterialRenderState state{};
-            state.VertexShaderName = RPG_SHADER_DEFAULT_VS_DEPTH_CUBE_NAME;
-            state.VertexMode = RpgMaterialVertexMode::MESH;
-            state.RasterMode = RpgMaterialRasterMode::SOLID;
-            state.RenderTargetCount = 0;
-            state.bDepthTest = true;
-            state.bDepthWrite = true;
-            //state.DepthBias = 1000;
+            //state.DepthBias = 2;
             //state.DepthBiasSlope = 2.0f;
             //state.DepthBiasClamp = 10.0f;
 
             RpgAsyncTask_CompilePSO task;
             task.Reset();
             task.RootSignature = RootSignatureGraphics.Get();
-            task.MaterialName = "ShadowDepthCube";
-            task.MaterialRenderState = state;
+            task.Name = "ShadowMapDirectional";
+            task.PipelineState = state;
             task.Execute();
 
-            GraphicsPSO_ShadowDepthCube = task.GetCompiledPSO();
+            GraphicsPSO_ShadowMapDirectional = task.GetCompiledPSO();
         }
-        */
+
+        // ShadowDepthCube
+        {
+            RpgRenderPipelineState state{};
+            state.VertexShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapCube_VS;
+            state.GeometryShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapCube_GS;
+            //state.PixelShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapCube_PS;
+            state.VertexMode = RpgRenderVertexMode::MESH;
+            state.RasterMode = RpgRenderRasterMode::SOLID;
+            state.BlendMode = RpgRenderColorBlendMode::NONE;
+            state.DepthStencilFormat = k_Render_DefaultFormat_ShadowDepth;
+            state.RenderTargetCount = 0;
+            state.bDepthTest = true;
+            state.bDepthWrite = true;
+            state.DepthBias = 1000;
+            state.DepthBiasSlope = 2.0f;
+            //state.DepthBiasClamp = 4.0f;
+
+            RpgAsyncTask_CompilePSO task;
+            task.Reset();
+            task.RootSignature = RootSignatureGraphics.Get();
+            task.Name = "ShadowMapCube";
+            task.PipelineState = state;
+            task.Execute();
+
+            GraphicsPSO_ShadowMapCube = task.GetCompiledPSO();
+        }
     }
 
 
@@ -383,8 +386,8 @@ void RpgRenderPipeline::Shutdown() noexcept
     MaterialPipelineStates.Clear(true);
     AsyncTaskCompilePSOs.Clear(true);
     ComputePSO_Skinning.Reset();
-    //GraphicsPSO_ShadowDepthCube.Reset();
-    GraphicsPSO_ShadowDepth.Reset();
+    GraphicsPSO_ShadowMapDirectional.Reset();
+    GraphicsPSO_ShadowMapCube.Reset();
     RootSignatureGraphics.Reset();
     RootSignatureCompute.Reset();
 
@@ -445,7 +448,7 @@ void RpgRenderPipeline::CompileMaterialPSOs(bool bWaitAll) noexcept
         RpgAsyncTask_CompilePSO& task = AsyncTaskCompilePSOs[i];
         task.Reset();
         task.RootSignature = RootSignatureGraphics.Get();
-        task.MaterialName = mat->GetName();
+        task.Name = mat->GetName();
         task.PipelineState = mat->GetRenderState();
 
         mat->MarkPipelineCompiling();
@@ -495,17 +498,17 @@ ID3D12PipelineState* RpgRenderPipeline::GetMaterialPSO(const RpgSharedMaterial& 
 }
 
 
-ID3D12PipelineState* RpgRenderPipeline::GetGraphicsPSO_ShadowDepth() noexcept
+ID3D12PipelineState* RpgRenderPipeline::GetGraphicsPSO_ShadowMapDirectional() noexcept
 {
-    return GraphicsPSO_ShadowDepth.Get();
+    return GraphicsPSO_ShadowMapDirectional.Get();
 }
 
-/*
-ID3D12PipelineState* RpgRenderPipeline::GetGraphicsPSO_ShadowDepthCube() noexcept
+
+ID3D12PipelineState* RpgRenderPipeline::GetGraphicsPSO_ShadowMapCube() noexcept
 {
-    return GraphicsPSO_ShadowDepthCube.Get();
+    return GraphicsPSO_ShadowMapCube.Get();
 }
-*/
+
 
 ID3D12PipelineState* RpgRenderPipeline::GetComputePSO_Skinning() noexcept
 {

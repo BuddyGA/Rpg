@@ -60,7 +60,7 @@
     <ClCompile Include="source\runtime\render\RpgRenderPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\render\RpgD3D12.cpp">
+    <ClCompile Include="source\runtime\core\RpgD3D12.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\thirdparty\libccd\__libccd__build.cpp">
@@ -210,13 +210,10 @@
     <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_RenderPass_Shadow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\camera\async_task\RpgAsyncTask_CaptureMesh.cpp">
+    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CaptureMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\camera\world\RpgCameraWorldSubsystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\runtime\camera\async_task\RpgAsyncTask_CaptureLight.cpp">
+    <ClCompile Include="source\runtime\render\async_task\RpgAsyncTask_CaptureLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -284,7 +281,7 @@
     <ClInclude Include="source\runtime\render\RpgRenderResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\render\RpgD3D12.h">
+    <ClInclude Include="source\runtime\core\RpgD3D12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\shader\RpgShaderConstant.h">
@@ -443,16 +440,10 @@
     <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\camera\async_task\RpgAsyncTask_Capture.h">
+    <ClInclude Include="source\runtime\render\async_task\RpgAsyncTask_Capture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\camera\RpgCameraTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\runtime\camera\world\RpgCameraWorldSubsystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\runtime\camera\world\RpgCameraComponent.h">
+    <ClInclude Include="source\runtime\shader\RpgShaderTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

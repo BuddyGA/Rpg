@@ -1,7 +1,6 @@
 #include "RpgAsyncTask_Capture.h"
 #include "core/world/RpgWorld.h"
-#include "render/world/RpgRenderComponent.h"
-#include "../world/RpgCameraComponent.h"
+#include "../world/RpgRenderComponent.h"
 
 
 

@@ -116,6 +116,34 @@ RpgWorldResource::FLightID RpgWorldResource::AddLight_Point(int uniqueTagId, Rpg
 }
 
 
+RpgWorldResource::FLightID RpgWorldResource::AddLight_Spot(int uniqueTagId, RpgVector3 worldPosition, RpgVector3 worldDirection, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp, float innerConeDegree, float outerConeDegree) noexcept
+{
+	const int tagIndex = CachedTagLights.FindIndexByCompare(uniqueTagId);
+	if (tagIndex != RPG_INDEX_INVALID)
+	{
+		return CachedTagLights[tagIndex].LightId;
+	}
+
+	FTagLightID tag;
+	tag.TagId = uniqueTagId;
+	tag.LightId = RPG_RENDER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
+	CachedTagLights.AddValue(tag);
+
+	RpgShaderConstantLight& data = WorldData.Lights[tag.LightId];
+	data.Position = worldPosition.Xmm;
+	data.Direction = worldDirection.Xmm;
+	data.ColorIntensity = DirectX::XMVectorSet(colorIntensity.R, colorIntensity.G, colorIntensity.B, colorIntensity.A);
+	data.AttenuationRadius = attRadius;
+	data.AttenuationFallOffExp = attFallOffExp;
+	data.SpotLightInnerConeRadian = RpgMath::DegToRad(innerConeDegree);
+	data.SpotLightOuterConeRadian = RpgMath::DegToRad(outerConeDegree);
+	data.ShadowCameraIndex = RPG_INDEX_INVALID;
+	data.ShadowTextureDescriptorIndex = RPG_INDEX_INVALID;
+
+	return tag.LightId;
+}
+
+
 void RpgWorldResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept
 {
 	const size_t worldDataSizeBytes = sizeof(RpgShaderConstantWorldData);

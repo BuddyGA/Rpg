@@ -251,29 +251,29 @@ void RpgShaderManager::Initialize() noexcept
 #ifndef RPG_BUILD_SHIPPING
 	const RpgString hlslDirPath = RpgFileSystem::GetSourceDirPath() + "runtime/shader/hlsl/";
 
-	AddShader(RPG_SHADER_DEFAULT_VS_PRIMITIVE_NAME, hlslDirPath + "VS_Primitive.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_VS_MESH_NAME, hlslDirPath + "VS_Mesh.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_VS_PRIMITIVE_2D_NAME, hlslDirPath + "VS_Primitive2D.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_VS_MESH_2D_NAME, hlslDirPath + "VS_Mesh2D.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_VS_FULLSCREEN_NAME, hlslDirPath + "VS_Fullscreen.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_VS_DEPTH_CUBE_NAME, hlslDirPath + "VS_Depth.hlsl", RpgShader::TYPE_VERTEX, { "CUBE" });
+	AddShader(RPG_SHADER_NAME_ComputeSkinning, hlslDirPath + "ComputeSkinning.hlsl", RpgShader::TYPE_COMPUTE);
 
-	AddShader(RPG_SHADER_DEFAULT_PS_COLOR_NAME, hlslDirPath + "PS_Color.hlsl", RpgShader::TYPE_PIXEL);
-	AddShader(RPG_SHADER_DEFAULT_PS_TEXTURE_COLOR_NAME, hlslDirPath + "PS_TextureColor.hlsl", RpgShader::TYPE_PIXEL);
-	AddShader(RPG_SHADER_DEFAULT_PS_TEXTURE_FONT_NAME, hlslDirPath + "PS_TextureColor.hlsl", RpgShader::TYPE_PIXEL, { "FONT" });
-	AddShader(RPG_SHADER_DEFAULT_PS_PHONG_NAME, hlslDirPath + "PS_ForwardPhong.hlsl", RpgShader::TYPE_PIXEL);
-	AddShader(RPG_SHADER_DEFAULT_PS_FULLSCREEN_GAMMA_NAME, hlslDirPath + "PS_FullscreenGamma.hlsl", RpgShader::TYPE_PIXEL);
+	AddShader(RPG_SHADER_NAME_ShadowMapDirectional, hlslDirPath + "ShadowMapDirectional.hlsl", RpgShader::TYPE_VERTEX);
 
-	AddShader(RPG_SHADER_DEFAULT_CS_SKINNING_NAME, hlslDirPath + "CS_Skinning.hlsl", RpgShader::TYPE_COMPUTE);
+	AddShader(RPG_SHADER_NAME_ShadowMapCube_VS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_ShadowMapCube_GS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_GEOMETRY);
 
+	AddShader(RPG_SHADER_NAME_Primitive_VS, hlslDirPath + "Primitive.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_Primitive_PS, hlslDirPath + "Primitive.hlsl", RpgShader::TYPE_PIXEL);
 
-	AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapDirectional_VS, hlslDirPath + "ShadowMapDirectional.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_VertexMesh, hlslDirPath + "VertexMesh.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_PixelForwardPhong, hlslDirPath + "PixelForwardPhong.hlsl", RpgShader::TYPE_PIXEL);
+	AddShader(RPG_SHADER_NAME_PixelForwardPhong_Mask, hlslDirPath + "PixelForwardPhong.hlsl", RpgShader::TYPE_PIXEL, { "MASK" });
 
-	AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapCube_VS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_VERTEX);
-	AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapCube_GS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_GEOMETRY);
-	//AddShader(RPG_SHADER_DEFAULT_NAME_ShadowMapCube_PS, hlslDirPath + "ShadowMapCube.hlsl", RpgShader::TYPE_PIXEL);
+	AddShader(RPG_SHADER_NAME_PostProcessFullscreen_VS, hlslDirPath + "PostProcessFullscreen.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_PostProcessFullscreen_PS, hlslDirPath + "PostProcessFullscreen.hlsl", RpgShader::TYPE_PIXEL);
 
+	AddShader(RPG_SHADER_NAME_Primitive2D_VS, hlslDirPath + "Primitive2D.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_Primitive2D_PS, hlslDirPath + "Primitive2D.hlsl", RpgShader::TYPE_PIXEL);
+
+	AddShader(RPG_SHADER_NAME_GUI_VS, hlslDirPath + "GUI.hlsl", RpgShader::TYPE_VERTEX);
+	AddShader(RPG_SHADER_NAME_GUI_PS, hlslDirPath + "GUI.hlsl", RpgShader::TYPE_PIXEL);
+	AddShader(RPG_SHADER_NAME_GUI_Font_PS, hlslDirPath + "GUI.hlsl", RpgShader::TYPE_PIXEL, { "FONT" });
 
 	CompileShaders(true);
 

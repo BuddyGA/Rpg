@@ -66,11 +66,12 @@ public:
 	// For spotlight only, outer cone (penumbra) in degree
 	float SpotOuterConeDegree;
 
-	// TRUE if light visible
-	bool bIsVisible;
-
 	// TRUE if light cast shadow
 	bool bCastShadow;
+
+	// TRUE if light visible
+	bool bIsVisible;
+	
 
 private:
 	RpgUniquePtr<RpgShadowViewport> ShadowViewport;
@@ -85,8 +86,8 @@ public:
 		AttenuationFallOffExp = 8.0f;
 		SpotInnerConeDegree = 20.0f;
 		SpotOuterConeDegree = 40.0f;
-		bIsVisible = false;
 		bCastShadow = false;
+		bIsVisible = false;
 	}
 
 

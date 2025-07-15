@@ -57,6 +57,9 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
 
 				case RpgRenderLight::TYPE_SPOT_LIGHT:
 				{
+					comp.ShadowViewport = RpgPointer::MakeUnique<RpgShadowViewport_SpotLight>();
+					viewport = comp.ShadowViewport.Get();
+
 					break;
 				}
 
@@ -74,6 +77,8 @@ void RpgRenderWorldSubsystem::PostTickUpdate() noexcept
 
 		viewport->GameObject = comp.GameObject;
 		viewport->AttenuationRadius = comp.AttenuationRadius;
+		viewport->SpotInnerConeDegree = comp.SpotInnerConeDegree;
+		viewport->SpotInnerConeDegree = comp.SpotOuterConeDegree;
 	}
 
 

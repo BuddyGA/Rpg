@@ -73,7 +73,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 	RpgMeshResource* meshResource = frameContext.MeshResource;
 	RpgMeshSkinnedResource* meshSkinnedResource = frameContext.MeshSkinnedResource;
 
-	const RpgWorldResource::FCameraID cameraId = worldResource->AddCamera(ViewMatrix, ProjectionMatrix, ViewPosition, NearClipZ, FarClipZ);
+	const RpgWorldResource::FViewID cameraId = worldResource->AddView(ViewMatrix, ProjectionMatrix, ViewPosition, NearClipZ, FarClipZ);
 
 	RpgArray<RpgMatrixTransform> tempBoneSkinningTransforms;
 
@@ -86,7 +86,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 
 		RpgDrawIndexed draw;
 		draw.Material = data.Material ? materialResource->AddMaterial(data.Material) : materialResource->AddMaterial(RpgMaterial::s_GetDefault(RpgMaterialDefault::MESH_PHONG));
-		draw.ObjectParam.CameraIndex = cameraId;
+		draw.ObjectParam.ViewIndex = cameraId;
 		draw.ObjectParam.TransformIndex = worldResource->AddTransform(data.GameObject.GetIndex(), data.WorldTransformMatrix);
 
 		if (bHasSkin)
@@ -149,7 +149,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 		else if (data.Type == RpgRenderLight::TYPE_SPOT_LIGHT)
 		{
 			lightId = worldResource->AddLight_Spot(data.GameObject.GetIndex(), data.WorldTransform.Position, data.WorldTransform.GetAxisForward(), 
-				data.ColorIntensity, data.AttenuationRadius, data.AttenuationFallOffExp, data.SpotInnerConeDegree, data.SpotOuterConeDegree);
+				data.ColorIntensity, data.AttenuationRadius, 16, data.SpotInnerConeDegree, data.SpotOuterConeDegree);
 		}
 		else
 		{

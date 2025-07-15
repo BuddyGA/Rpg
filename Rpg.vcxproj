@@ -343,7 +343,6 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\render\RpgRenderResource.h" />
     <ClInclude Include="source\runtime\render\RpgRenderTypes.h" />
     <ClInclude Include="source\runtime\render\world\RpgRenderWorldSubsystem.h" />
-    <ClInclude Include="source\runtime\shader\RpgShaderConstant.h" />
     <ClInclude Include="source\runtime\shader\RpgShaderManager.h" />
     <ClInclude Include="source\runtime\render\RpgSceneViewport.h" />
     <ClInclude Include="source\runtime\render\RpgShadowViewport.h" />

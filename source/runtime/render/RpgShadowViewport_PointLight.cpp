@@ -27,7 +27,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 	if (!depthTexture)
 	{
-		depthTexture = RpgTextureCubeDepth::s_CreateShared(RpgName::Format("TEXDC_SdwVprtPL_%i", lightId), RpgTextureFormat::TEX_DS_16, shadowTextureDimension, shadowTextureDimension);
+		depthTexture = RpgTextureCubeDepth::s_CreateShared(RpgName::Format("TEXDC_SdwVprt_PL_%i", lightId), RpgTextureFormat::TEX_DS_16, shadowTextureDimension, shadowTextureDimension);
 	}
 
 	depthTexture->Resize(shadowTextureDimension, shadowTextureDimension);
@@ -45,7 +45,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[0];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
+		view.ViewId = worldResource->AddView(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// -X
 	{
@@ -53,7 +53,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[1];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
+		view.ViewId = worldResource->AddView(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// +Y
 	{
@@ -61,7 +61,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[2];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
+		view.ViewId = worldResource->AddView(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// -Y
 	{
@@ -69,7 +69,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[3];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
+		view.ViewId = worldResource->AddView(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// +Z
 	{
@@ -77,7 +77,7 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[4];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
+		view.ViewId = worldResource->AddView(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 	// -Z
 	{
@@ -85,11 +85,11 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 
 		FViewInfo& view = FaceViews[5];
 		view.ViewMatrix = transform.ToMatrixTransform().GetInverse();
-		view.CameraId = worldResource->AddCamera(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
+		view.ViewId = worldResource->AddView(view.ViewMatrix, projMatrix, transform.Position, nearClipZ, farClipZ);
 	}
 
 	const RpgD3D12::FResourceDescriptor shadowDepthDescriptor = RpgD3D12::AllocateDescriptor_TDI_Cube(depthTexture->GPU_GetResource(), DXGI_FORMAT_R16_UNORM);
-	worldResource->SetLightShadow(lightId, FaceViews[0].CameraId, shadowDepthDescriptor.Index);
+	worldResource->SetLightShadow(lightId, FaceViews[0].ViewId, shadowDepthDescriptor.Index);
 
 
 	// build draw calls
@@ -135,7 +135,7 @@ void RpgShadowViewport_PointLight::SetupRenderPasses(const RpgRenderFrameContext
 	shadowPass->FrameContext = frameContext;
 	shadowPass->WorldResource = worldResource;
 	shadowPass->DepthTexture = frame.DepthTextureCube.Get();
-	shadowPass->CameraId = FaceViews[0].CameraId;
+	shadowPass->ViewId = FaceViews[0].ViewId;
 	shadowPass->DrawMeshData = frame.DrawMeshes.GetData();
 	shadowPass->DrawMeshCount = frame.DrawMeshes.GetCount();
 	shadowPass->DrawSkinnedMeshData = frame.DrawSkinnedMeshes.GetData();

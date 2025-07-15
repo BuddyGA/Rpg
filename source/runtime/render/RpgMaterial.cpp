@@ -68,30 +68,29 @@ void RpgMaterial::s_CreateDefaults() noexcept
 	// mesh2d
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_TEXTURE_COLOR_NAME;
-		renderState.VertexMode = RpgRenderVertexMode::MESH_2D;
+		renderState.PixelShaderName = RPG_SHADER_NAME_GUI_PS;
+		renderState.VertexMode = RpgRenderVertexMode::GUI;
 		renderState.BlendMode = RpgRenderColorBlendMode::TRANSPARENCY;
 		renderState.RasterMode = RpgRenderRasterMode::SOLID;
 
-		DefaultMaterials[RpgMaterialDefault::MESH_2D] = s_CreateShared("MAT_DEF_Mesh2d", renderState);
+		DefaultMaterials[RpgMaterialDefault::GUI] = s_CreateShared("MAT_DEF_GUI", renderState);
 	}
 
 	// font2d
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_TEXTURE_COLOR_NAME;
-		renderState.VertexMode = RpgRenderVertexMode::MESH_2D;
+		renderState.PixelShaderName = RPG_SHADER_NAME_GUI_Font_PS;
+		renderState.VertexMode = RpgRenderVertexMode::GUI;
 		renderState.BlendMode = RpgRenderColorBlendMode::TRANSPARENCY;
 		renderState.RasterMode = RpgRenderRasterMode::SOLID;
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_TEXTURE_FONT_NAME;
 
-		DefaultMaterials[RpgMaterialDefault::FONT_2D] = s_CreateShared("MAT_DEF_Font2d", renderState);
+		DefaultMaterials[RpgMaterialDefault::FONT] = s_CreateShared("MAT_DEF_Font", renderState);
 	}
 
 	// mesh phong
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_PHONG_NAME;
+		renderState.PixelShaderName = RPG_SHADER_NAME_PixelForwardPhong;
 		renderState.VertexMode = RpgRenderVertexMode::MESH;
 		renderState.RasterMode = RpgRenderRasterMode::SOLID;
 		renderState.BlendMode = RpgRenderColorBlendMode::NONE;
@@ -111,7 +110,8 @@ void RpgMaterial::s_CreateDefaults() noexcept
 	// fullscreen
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_FULLSCREEN_GAMMA_NAME;
+		renderState.VertexShaderName = RPG_SHADER_NAME_PostProcessFullscreen_VS;
+		renderState.PixelShaderName = RPG_SHADER_NAME_PostProcessFullscreen_PS;
 		renderState.VertexMode = RpgRenderVertexMode::NONE;
 		renderState.BlendMode = RpgRenderColorBlendMode::NONE;
 		renderState.RasterMode = RpgRenderRasterMode::SOLID;
@@ -126,7 +126,7 @@ void RpgMaterial::s_CreateDefaults() noexcept
 	// Debug primitive2d line
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_COLOR_NAME;
+		renderState.PixelShaderName = RPG_SHADER_NAME_Primitive2D_PS;
 		renderState.VertexMode = RpgRenderVertexMode::PRIMITIVE_2D;
 		renderState.BlendMode = RpgRenderColorBlendMode::NONE;
 		renderState.RasterMode = RpgRenderRasterMode::LINE;
@@ -137,7 +137,7 @@ void RpgMaterial::s_CreateDefaults() noexcept
 	// Debug primitive2d mesh
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_COLOR_NAME;
+		renderState.PixelShaderName = RPG_SHADER_NAME_Primitive2D_PS;
 		renderState.VertexMode = RpgRenderVertexMode::PRIMITIVE_2D;
 		renderState.BlendMode = RpgRenderColorBlendMode::NONE;
 		renderState.RasterMode = RpgRenderRasterMode::SOLID;
@@ -148,7 +148,7 @@ void RpgMaterial::s_CreateDefaults() noexcept
 	// Debug primitive line
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_COLOR_NAME;
+		renderState.PixelShaderName = RPG_SHADER_NAME_Primitive_PS;
 		renderState.VertexMode = RpgRenderVertexMode::PRIMITIVE;
 		renderState.BlendMode = RpgRenderColorBlendMode::NONE;
 		renderState.RasterMode = RpgRenderRasterMode::LINE;
@@ -167,7 +167,7 @@ void RpgMaterial::s_CreateDefaults() noexcept
 	// Debug primitive mesh
 	{
 		RpgRenderPipelineState renderState{};
-		renderState.PixelShaderName = RPG_SHADER_DEFAULT_PS_COLOR_NAME;
+		renderState.PixelShaderName = RPG_SHADER_NAME_Primitive_PS;
 		renderState.VertexMode = RpgRenderVertexMode::PRIMITIVE;
 		renderState.BlendMode = RpgRenderColorBlendMode::NONE;
 		renderState.RasterMode = RpgRenderRasterMode::SOLID;

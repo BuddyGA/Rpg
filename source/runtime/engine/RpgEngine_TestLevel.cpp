@@ -8,7 +8,7 @@
 
 
 
-static void TestLevel_AddBlocker(RpgWorld* world, RpgVector3 center, RpgVector3 halfExtents) noexcept
+static void TestLevel_AddBlocker(RpgWorld* world, RpgVector3 center, RpgVector3 halfExtents, float uvScale) noexcept
 {
 	RpgSharedModel model = RpgModel::s_CreateShared("MDL_DEF_floor");
 	{
@@ -19,7 +19,7 @@ static void TestLevel_AddBlocker(RpgWorld* world, RpgVector3 center, RpgVector3 
 		RpgVertexMeshNormalTangentArray vertexNormalTangents;
 		RpgVertexMeshTexCoordArray vertexTexCoords;
 		RpgVertexIndexArray indices;
-		RpgVertexGeometryFactory::CreateMeshBox(vertexPositions, vertexNormalTangents, vertexTexCoords, indices, -halfExtents, halfExtents, 8.0f);
+		RpgVertexGeometryFactory::CreateMeshBox(vertexPositions, vertexNormalTangents, vertexTexCoords, indices, -halfExtents, halfExtents, uvScale);
 
 		RpgSharedMesh& mesh = model->GetMeshLod(0, 0);
 		mesh->UpdateVertexData(vertexPositions.GetCount(), vertexPositions.GetData(), vertexNormalTangents.GetData(), vertexTexCoords.GetData(), nullptr, indices.GetCount(), indices.GetData());
@@ -89,6 +89,24 @@ static void TestLevel_AddLight_Point(RpgWorld* world, const RpgTransform& transf
 }
 
 
+static void TestLevel_AddLight_Spot(RpgWorld* world, const RpgTransform& transform, RpgColorLinear colorIntensity, float radius, float innerConeDeg, float outerConeDeg, bool bCastShadow) noexcept
+{
+	static int Counter = 0;
+
+	RpgGameObjectID pointLight = world->GameObject_Create(RpgName::Format("test_spotlight_%i", Counter++), transform);
+	{
+		RpgRenderComponent_Light* lightComp = world->GameObject_AddComponent<RpgRenderComponent_Light>(pointLight);
+		lightComp->Type = RpgRenderLight::TYPE_SPOT_LIGHT;
+		lightComp->ColorIntensity = colorIntensity;
+		lightComp->AttenuationRadius = radius;
+		lightComp->SpotInnerConeDegree = innerConeDeg;
+		lightComp->SpotOuterConeDegree = outerConeDeg;
+		lightComp->bIsVisible = true;
+		lightComp->bCastShadow = bCastShadow;
+	}
+}
+
+
 static void TestLevel_OBJ(RpgWorld* world, const RpgFilePath& sourceFilePath, float scale, bool bGenerateTextureMipMaps = false, bool bIgnoreTextureNormals = false) noexcept
 {
 	RpgAssetImportSetting_Model setting;
@@ -147,12 +165,16 @@ static void TestLevel_Sponza(RpgWorld* world) noexcept
 
 	transform.Position = RpgVector3(-650.0f, 200.0f, 0.0f);
 	TestLevel_AddLight_Point(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 0.33f), 800.0f, true);
+
+	transform.Position = RpgVector3(645.0f, 750.0f, 60.0f);
+	transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(20.0f, 90.0f, 0.0f);
+	TestLevel_AddLight_Spot(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 1.0f), 1600.0f, 20.0f, 40.0f, true);
 }
 
 
 static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 {
-	TestLevel_AddBlocker(world, RpgVector3::ZERO, RpgVector3(1024.0f, 16.0f, 1024.0f));
+	TestLevel_AddBlocker(world, RpgVector3::ZERO, RpgVector3(2048.0f, 16.0f, 2048.0f), 16.0f);
 
 	RpgTransform transform;
 
@@ -164,17 +186,17 @@ static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 		// +X
 		transform.Position = RpgVector3(300.0f, 500.0f, 0.0f);
 		TestLevel_AddBox(world, transform);
-		TestLevel_AddBlocker(world, RpgVector3(500.0f, 500.0f, 0.0f), RpgVector3(16, 200.0f, 200.0f));
+		TestLevel_AddBlocker(world, RpgVector3(500.0f, 500.0f, 0.0f), RpgVector3(16, 200.0f, 200.0f), 4.0f);
 
 		// -X
 		transform.Position = RpgVector3(-300.0f, 500.0f, 0.0f);
 		TestLevel_AddBox(world, transform);
-		TestLevel_AddBlocker(world, RpgVector3(-500.0f, 500.0f, 0.0f), RpgVector3(16, 200.0f, 200.0f));
+		TestLevel_AddBlocker(world, RpgVector3(-500.0f, 500.0f, 0.0f), RpgVector3(16, 200.0f, 200.0f), 4.0f);
 		
 		// +Y
 		transform.Position = RpgVector3(0.0f, 800.0f, 0.0f);
 		TestLevel_AddBox(world, transform);
-		TestLevel_AddBlocker(world, RpgVector3(0.0f, 1000.0f, 0.0f), RpgVector3(200.0f, 16.0f, 200.0f));
+		TestLevel_AddBlocker(world, RpgVector3(0.0f, 1000.0f, 0.0f), RpgVector3(200.0f, 16.0f, 200.0f), 4.0f);
 		
 		// -Y
 		transform.Position = RpgVector3(0.0f, 280.0f, 0.0f);
@@ -183,12 +205,35 @@ static void TestLevel_PrimitiveShapes(RpgWorld* world) noexcept
 		// +Z
 		transform.Position = RpgVector3(0.0f, 500.0f, 300.0f);
 		TestLevel_AddBox(world, transform);
-		TestLevel_AddBlocker(world, RpgVector3(0.0f, 500.0f, 500.0f), RpgVector3(200.0f, 200.0f, 16.0f));
+		TestLevel_AddBlocker(world, RpgVector3(0.0f, 500.0f, 500.0f), RpgVector3(200.0f, 200.0f, 16.0f), 4.0f);
 		
 		// -Z
 		transform.Position = RpgVector3(0.0f, 500.0f, -300.0f);
 		TestLevel_AddBox(world, transform);
-		TestLevel_AddBlocker(world, RpgVector3(0.0f, 500.0f, -500.0f), RpgVector3(200.0f, 200.0f, 16.0f));
+		TestLevel_AddBlocker(world, RpgVector3(0.0f, 500.0f, -500.0f), RpgVector3(200.0f, 200.0f, 16.0f), 4.0f);
+	}
+
+	// test spot light
+	{
+		transform.Position = RpgVector3(-1000.0f, 555.0f, 300.0f);
+		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(60.0f, 0.0f, 0.0f);
+		TestLevel_AddLight_Spot(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 1.0f), 1600.0f, 20.0f, 40.0f, true);
+
+		transform.Position = RpgVector3(-900.0f, 400.0f, 500.0f);
+		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(40.0f, 0.0f, 0.0f);
+		TestLevel_AddBox(world, transform);
+
+		transform.Position = RpgVector3(-1100.0f, 80.0f, 500.0f);
+		transform.Rotation = RpgQuaternion();
+		TestLevel_AddBox(world, transform);
+
+		transform.Position = RpgVector3(-1316.0f, 422.0f, 250.0f);
+		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(30.75f, 38.0f, 0.0f);
+		TestLevel_AddLight_Spot(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 1.0f), 1600.0f, 20.0f, 40.0f, true);
+
+		transform.Position = RpgVector3(-380.0f, 854.0f, -428.0f);
+		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(45.25f, 48.0f, 0.0f);
+		TestLevel_AddLight_Spot(world, transform, RpgColorLinear(1.0f, 1.0f, 1.0f, 1.0f), 3200.0f, 20.0f, 40.0f, true);
 	}
 }
 
@@ -222,11 +267,11 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 	skeletons[1] = importedSkeleton;
 	animationClips[1] = importedAnimations[0];
 
-	const int DIM_X = 1;
-	const int DIM_Z = 1;
+	const int DIM_X = 16;
+	const int DIM_Z = 16;
 	const float OFFSET = 128.0f;
-	//const RpgVector3 startPos(-(DIM_X * OFFSET * 0.5f), 0.0f, -(DIM_Z * OFFSET * 0.5f));
-	const RpgVector3 startPos(500.0f, 20.0f, 0.0f);
+	const RpgVector3 startPos(-(DIM_X * OFFSET * 0.5f), 0.0f, -(DIM_Z * OFFSET * 0.5f));
+	//const RpgVector3 startPos(500.0f, 20.0f, 0.0f);
 	RpgVector3 spawnPos = startPos;
 	int modelIndex = 0;
 

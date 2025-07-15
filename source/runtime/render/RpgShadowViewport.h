@@ -16,6 +16,9 @@ public:
 	// Attenuation radius
 	float AttenuationRadius;
 
+	float SpotInnerConeDegree;
+	float SpotOuterConeDegree;
+
 
 public:
 	RpgShadowViewport() noexcept = default;
@@ -34,7 +37,7 @@ private:
 	struct FViewInfo
 	{
 		RpgMatrixTransform ViewMatrix;
-		RpgWorldResource::FCameraID CameraId{ RPG_INDEX_INVALID };
+		RpgWorldResource::FViewID ViewId{ RPG_INDEX_INVALID };
 	};
 
 	// [0: +X] [1: -X] [2: +Y] [3: -Y] [4: +Z] [5: -Z]
@@ -71,6 +74,9 @@ public:
 class RpgShadowViewport_SpotLight : public RpgShadowViewport
 {
 private:
+	RpgWorldResource::FViewID ViewId;
+
+
 	struct FFrameData
 	{
 		RpgSharedTexture2D DepthTexture;

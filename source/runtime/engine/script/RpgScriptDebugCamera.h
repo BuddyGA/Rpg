@@ -5,16 +5,20 @@
 #include "core/world/RpgGameObject.h"
 
 
+class RpgRenderComponent_Light;
+
+
 
 class RpgScriptDebugCamera : public RpgGameObjectScript
 {
 	RPG_GAMEOBJECT_SCRIPT("RpgScript - DebugCamera")
 
 private:
+	RpgRenderComponent_Light* Flashlight;
 	float PitchValue;
 	float YawValue;
 	RpgPointInt SavedMousePos;
-	bool bInitTransform;
+	bool bInitialized;
 
 public:
 	float PitchMin;

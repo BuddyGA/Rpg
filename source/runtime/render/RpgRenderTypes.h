@@ -52,9 +52,11 @@ enum class RpgRenderVertexMode : uint8_t
 	NONE = 0,
 
 	PRIMITIVE_2D,
-	MESH_2D,
+	GUI,
+
 	PRIMITIVE,
 	MESH,
+
 	POST_PROCESS,
 
 	MAX_COUNT

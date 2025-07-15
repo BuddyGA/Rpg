@@ -1,15 +1,17 @@
 #include "RpgScriptDebugCamera.h"
 #include "core/world/RpgWorld.h"
 #include "input/RpgInputManager.h"
+#include "render/world/RpgRenderComponent.h"
 #include "../RpgEngine.h"
 
 
 
 RpgScriptDebugCamera::RpgScriptDebugCamera() noexcept
 {
+	Flashlight = nullptr;
 	PitchValue = 0.0f;
 	YawValue = 0.0f;
-	bInitTransform = false;
+	bInitialized = false;
 
 	PitchMin = -80.0f;
 	PitchMax = 80.0f;
@@ -20,15 +22,24 @@ RpgScriptDebugCamera::RpgScriptDebugCamera() noexcept
 
 void RpgScriptDebugCamera::AttachedToGameObject() noexcept
 {
-	if (!bInitTransform)
+	if (!bInitialized)
 	{
-		bInitTransform = true;
+		bInitialized = true;
 
 		RpgTransform transform = World->GameObject_GetWorldTransform(GameObject);
 		transform.Position = RpgVector3(0.0f, 500.0f, 0.0f);
 		transform.Rotation = RpgQuaternion::FromPitchYawRollDegree(0.0f, 0.0f, 0.0f);
 
 		World->GameObject_SetWorldTransform(GameObject, transform);
+
+		Flashlight = World->GameObject_AddComponent<RpgRenderComponent_Light>(GameObject);
+		Flashlight->Type = RpgRenderLight::TYPE_SPOT_LIGHT;
+		Flashlight->ColorIntensity = RpgColorLinear(1.0f, 1.0f, 1.0f, 2.0f);
+		Flashlight->AttenuationRadius = 1600.0f;
+		Flashlight->SpotInnerConeDegree = 20.0f;
+		Flashlight->SpotOuterConeDegree = 40.0f;
+		Flashlight->bCastShadow = false;
+		Flashlight->bIsVisible = false;
 	}
 }
 
@@ -91,4 +102,10 @@ void RpgScriptDebugCamera::TickUpdate(float deltaTime) noexcept
 	}
 
 	World->GameObject_SetWorldTransform(GameObject, transform);
+
+
+	if (input.IsKeyButtonPressed(RpgInputKey::KEYBOARD_F))
+	{
+		Flashlight->bIsVisible = !Flashlight->bIsVisible;
+	}
 }

@@ -32,7 +32,7 @@ void RpgAsyncTask_Compute::Execute() noexcept
 	ID3D12GraphicsCommandList* cmdList = CmdListCompute.Get();
 	RPG_D3D12_COMMAND_Begin(CmdAllocCompute, CmdListCompute);
 	
-	const RpgArray<RpgShaderConstantSkinnedObjectParameter>& objectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
+	const RpgArray<RpgShaderSkinnedObjectParameter>& objectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
 
 	if (!objectParams.IsEmpty())
 	{
@@ -69,10 +69,10 @@ void RpgAsyncTask_Compute::Execute() noexcept
 		// dispatch calls
 		for (int i = 0; i < objectParams.GetCount(); ++i)
 		{
-			const RpgShaderConstantSkinnedObjectParameter param = objectParams[i];
+			const RpgShaderSkinnedObjectParameter param = objectParams[i];
 			RPG_Check(param.SkeletonIndex != RPG_INDEX_INVALID);
 
-			cmdList->SetComputeRoot32BitConstants(RpgRenderPipeline::CRPI_SKINNED_OBJECT_PARAM, sizeof(RpgShaderConstantSkinnedObjectParameter) / sizeof(UINT), &param, 0);
+			cmdList->SetComputeRoot32BitConstants(RpgRenderPipeline::CRPI_SKINNED_OBJECT_PARAM, sizeof(RpgShaderSkinnedObjectParameter) / sizeof(UINT), &param, 0);
 			cmdList->Dispatch((param.VertexCount + 63) / 64, 1, 1);
 		}
 	}

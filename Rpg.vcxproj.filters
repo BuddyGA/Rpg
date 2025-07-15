@@ -284,9 +284,6 @@
     <ClInclude Include="source\runtime\core\RpgD3D12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\shader\RpgShaderConstant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\runtime\core\RpgConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>

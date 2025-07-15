@@ -24,8 +24,8 @@ void RpgMaterialResource::UpdateResources() noexcept
 	{
 		RpgSharedMaterial& material = Materials[m];
 
-		RpgShaderConstantMaterialParameter& parameterRootConstant = ParameterRootConstants[m];
-		RpgPlatformMemory::MemSet(&parameterRootConstant, RPG_INDEX_INVALID, sizeof(RpgShaderConstantMaterialParameter));
+		RpgShaderMaterialParameter& parameterRootConstant = ParameterRootConstants[m];
+		RpgPlatformMemory::MemSet(&parameterRootConstant, RPG_INDEX_INVALID, sizeof(RpgShaderMaterialParameter));
 		int* parameterRootConstantTextureIndexes = reinterpret_cast<int*>(&parameterRootConstant);
 
 
@@ -64,7 +64,7 @@ void RpgMaterialResource::UpdateResources() noexcept
 		material->ParameterTexturesReadUnlock();
 
 
-		RpgShaderConstantMaterialVectorScalarData& vectorScalar = VectorScalarData[m];
+		RpgShaderMaterialVectorScalarData& vectorScalar = VectorScalarData[m];
 
 		const RpgMaterialParameterVectorArray& materialVectors = material->ParameterVectorsReadLock();
 		for (int v = 0; v < materialVectors.GetCount(); ++v)
@@ -169,6 +169,6 @@ void RpgMaterialResource::CommandBindMaterial(ID3D12GraphicsCommandList* cmdList
 	ID3D12PipelineState* pipelineState = RpgRenderPipeline::GetMaterialPSO(material);
 	cmdList->SetPipelineState(pipelineState);
 
-	const RpgShaderConstantMaterialParameter& param = ParameterRootConstants[materialId];
-	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_MATERIAL_PARAM, sizeof(RpgShaderConstantMaterialParameter) / 4, &param, 0);
+	const RpgShaderMaterialParameter& param = ParameterRootConstants[materialId];
+	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_MATERIAL_PARAM, sizeof(RpgShaderMaterialParameter) / 4, &param, 0);
 }

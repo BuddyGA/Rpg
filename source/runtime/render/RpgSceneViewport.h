@@ -116,7 +116,7 @@ private:
 	{
 		RpgMaterialResource::FMaterialID LineMaterialId;
 		RpgMaterialResource::FMaterialID LineNoDepthMaterialId;
-		RpgWorldResource::FCameraID CameraId;
+		RpgWorldResource::FViewID CameraId;
 	};
 	FFrameDebug FrameDebugs[RPG_FRAME_BUFFERING];
 #endif // !RPG_BUILD_SHIPPING

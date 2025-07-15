@@ -31,14 +31,14 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 	psoDesc.PrimitiveTopologyType = (PipelineState.RasterMode == RpgRenderRasterMode::LINE) ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE : D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	// Vertex input elements
-	RpgName vertexShaderName = RPG_SHADER_DEFAULT_VS_FULLSCREEN_NAME;
+	RpgName vertexShaderName;
 	RpgArrayInline<D3D12_INPUT_ELEMENT_DESC, 10> vertexInputElements;
 	{
 		switch (PipelineState.VertexMode)
 		{
 			case RpgRenderVertexMode::PRIMITIVE_2D:
 			{
-				vertexShaderName = RPG_SHADER_DEFAULT_VS_PRIMITIVE_2D_NAME;
+				vertexShaderName = RPG_SHADER_NAME_Primitive2D_VS;
 
 				vertexInputElements.AddValue({ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 				vertexInputElements.AddValue({ "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
@@ -46,9 +46,9 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 				break;
 			}
 
-			case RpgRenderVertexMode::MESH_2D:
+			case RpgRenderVertexMode::GUI:
 			{
-				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_2D_NAME;
+				vertexShaderName = RPG_SHADER_NAME_GUI_VS;
 
 				vertexInputElements.AddValue({ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 				vertexInputElements.AddValue({ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
@@ -59,7 +59,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 			case RpgRenderVertexMode::PRIMITIVE:
 			{
-				vertexShaderName = RPG_SHADER_DEFAULT_VS_PRIMITIVE_NAME;
+				vertexShaderName = RPG_SHADER_NAME_Primitive_VS;
 
 				vertexInputElements.AddValue({ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
 				vertexInputElements.AddValue({ "COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
@@ -69,7 +69,7 @@ void RpgAsyncTask_CompilePSO::Execute() noexcept
 
 			case RpgRenderVertexMode::MESH:
 			{
-				vertexShaderName = RPG_SHADER_DEFAULT_VS_MESH_NAME;
+				vertexShaderName = RPG_SHADER_NAME_VertexMesh;
 
 				// Position
 				vertexInputElements.AddValue({ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });

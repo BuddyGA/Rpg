@@ -167,8 +167,9 @@ namespace RpgMaterialDefault
 {
 	enum EType : uint8_t
 	{
-		MESH_2D = 0,
-		FONT_2D,
+		GUI = 0,
+		FONT,
+
 		MESH_PHONG,
 		FULLSCREEN,
 

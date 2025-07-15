@@ -52,7 +52,7 @@ void RpgRenderer2D::Begin(int frameIndex, RpgPointInt viewportDimension) noexcep
 {
 	if (!DefaultMaterialMesh)
 	{
-		DefaultMaterialMesh = RpgMaterial::s_GetDefault(RpgMaterialDefault::MESH_2D);
+		DefaultMaterialMesh = RpgMaterial::s_GetDefault(RpgMaterialDefault::GUI);
 		DefaultTexture = RpgTexture2D::s_GetDefault_White();
 
 		GetOrAddMaterialInstanceId(DefaultMaterialMesh, DefaultTexture, false);
@@ -60,7 +60,7 @@ void RpgRenderer2D::Begin(int frameIndex, RpgPointInt viewportDimension) noexcep
 
 	if (!DefaultMaterialFont)
 	{
-		DefaultMaterialFont = RpgMaterial::s_GetDefault(RpgMaterialDefault::FONT_2D);
+		DefaultMaterialFont = RpgMaterial::s_GetDefault(RpgMaterialDefault::FONT);
 		DefaultFont = RpgFont::s_GetDefault_Roboto();
 		GetOrAddMaterialInstanceId(DefaultMaterialFont, DefaultFont->GetTexture(), true);
 	}
@@ -305,10 +305,10 @@ void RpgRenderer2D::CommandDraw(const RpgRenderFrameContext& frameContext, ID3D1
 
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	RpgShaderConstantViewportParameter viewportParam{};
+	RpgShaderViewportParameter viewportParam{};
 	viewportParam.Width = static_cast<float>(ViewportDimension.X);
 	viewportParam.Height = static_cast<float>(ViewportDimension.Y);
-	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_VIEWPORT_PARAM, sizeof(RpgShaderConstantViewportParameter) / 4, &viewportParam, 0);
+	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_VIEWPORT_PARAM, sizeof(RpgShaderViewportParameter) / 4, &viewportParam, 0);
 
 	const RpgMaterialResource* materialResource = frameContext.MaterialResource;
 

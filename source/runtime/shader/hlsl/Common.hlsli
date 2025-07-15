@@ -1,5 +1,5 @@
 #define RPG_SHADER_HLSL
-#include "../RpgShaderConstant.h"
+#include "../RpgShaderTypes.h"
 
 
 // ================================================================================================================================= //
@@ -18,22 +18,22 @@ Texture2D DynamicIndexingTexture2Ds[] : register(t0, space0);
 TextureCube DynamicIndexingTextureCubes[] : register(t0, space1);
 
 // Material vector/scalar values
-StructuredBuffer<RpgShaderConstantMaterialVectorScalarData> MaterialVectorScalars : register(t0, space2);
+StructuredBuffer<RpgShaderMaterialVectorScalarData> MaterialVectorScalars : register(t0, space2);
 
 // Transform data
-StructuredBuffer<RpgShaderConstantObjectTransform> ObjectTransforms : register(t1, space2);
+StructuredBuffer<float4x4> ObjectTransforms : register(t1, space2);
 
 // World data
-ConstantBuffer<RpgShaderConstantWorldData> WorldData : register(b0, space0);
+ConstantBuffer<RpgShaderWorldData> WorldData : register(b0, space0);
 
 // Viewport parameter
-ConstantBuffer<RpgShaderConstantViewportParameter> ViewportParameter : register(b1, space0);
+ConstantBuffer<RpgShaderViewportParameter> ViewportParameter : register(b1, space0);
 
 // Material parameter
-ConstantBuffer<RpgShaderConstantMaterialParameter> MaterialParameter : register(b2, space0);
+ConstantBuffer<RpgShaderMaterialParameter> MaterialParameter : register(b2, space0);
 
 // Object parameter
-ConstantBuffer<RpgShaderConstantObjectParameter> ObjectParameter : register(b3, space0);
+ConstantBuffer<RpgShaderObjectParameter> ObjectParameter : register(b3, space0);
 
 
 

@@ -46,7 +46,7 @@ RpgMeshSkinnedResource::FSkeletonID RpgMeshSkinnedResource::AddObjectBoneSkinnin
 	FMeshData& meshData = MeshDatas[meshId];
 	meshData.InstanceCount++;
 
-	RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters.Add();
+	RpgShaderSkinnedObjectParameter& param = ObjectParameters.Add();
 	param.VertexStart = meshData.VertexStart;
 	param.VertexCount = meshData.VertexCount;
 	param.IndexStart = meshData.IndexStart;
@@ -99,7 +99,7 @@ void RpgMeshSkinnedResource::UpdateResources() noexcept
 
 	for (int i = 0; i < ObjectParameters.GetCount(); ++i)
 	{
-		RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
+		RpgShaderSkinnedObjectParameter& param = ObjectParameters[i];
 		param.SkinnedVertexStart = skinnedVtxOffset;
 		param.SkinnedIndexStart = skinnedIdxOffset;
 
@@ -215,7 +215,7 @@ void RpgMeshSkinnedResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noe
 	// copy original vertex texcoord to skinned
 	for (int i = 0; i < ObjectParameters.GetCount(); ++i)
 	{
-		const RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
+		const RpgShaderSkinnedObjectParameter& param = ObjectParameters[i];
 
 		const size_t dstTexCoordOffset = sizeof(RpgVertex::FMeshTexCoord) * param.SkinnedVertexStart;
 		const size_t srcTexCoordOffset = sizeof(RpgVertex::FMeshTexCoord) * param.VertexStart;
@@ -226,7 +226,7 @@ void RpgMeshSkinnedResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noe
 	// copy original vertex index to skinned
 	for (int i = 0; i < ObjectParameters.GetCount(); ++i)
 	{
-		const RpgShaderConstantSkinnedObjectParameter& param = ObjectParameters[i];
+		const RpgShaderSkinnedObjectParameter& param = ObjectParameters[i];
 
 		const size_t dstIndexOffset = sizeof(RpgVertex::FIndex) * param.SkinnedIndexStart;
 		const size_t srcIndexOffset = sizeof(RpgVertex::FIndex) * param.IndexStart;

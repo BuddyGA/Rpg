@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/world/RpgGameObject.h"
-#include "shader/RpgShaderConstant.h"
+#include "shader/RpgShaderTypes.h"
 #include "RpgMesh.h"
 #include "RpgMaterial.h"
 
@@ -39,10 +39,10 @@ private:
 	RpgArray<FTextureDescriptor, 8> TextureDescriptors;
 
 
-	RpgArray<RpgShaderConstantMaterialVectorScalarData, 16> VectorScalarData;
+	RpgArray<RpgShaderMaterialVectorScalarData, 16> VectorScalarData;
 	ComPtr<D3D12MA::Allocation> VectorScalarStructBuffer;
 
-	RpgArray<RpgShaderConstantMaterialParameter, 16> ParameterRootConstants;
+	RpgArray<RpgShaderMaterialParameter, 16> ParameterRootConstants;
 
 	// Material vector-scalar data staging buffer
 	ComPtr<D3D12MA::Allocation> MaterialStagingBuffer;
@@ -204,10 +204,10 @@ private:
 	RpgArray<FMeshData> MeshDatas;
 
 	// Skeleton bone skinning transforms
-	RpgArray<RpgShaderConstantSkeletonBoneSkinningTransform> SkeletonBoneSkinningTransforms;
+	RpgArray<RpgMatrixTransform> SkeletonBoneSkinningTransforms;
 
 	// Per object parameter
-	RpgArray<RpgShaderConstantSkinnedObjectParameter> ObjectParameters;
+	RpgArray<RpgShaderSkinnedObjectParameter> ObjectParameters;
 
 	// Vertex count
 	int VertexCount;
@@ -290,7 +290,7 @@ public:
 		return IndexCount;
 	}
 
-	inline const RpgArray<RpgShaderConstantSkinnedObjectParameter>& GetObjectParameters() const noexcept
+	inline const RpgArray<RpgShaderSkinnedObjectParameter>& GetObjectParameters() const noexcept
 	{
 		return ObjectParameters;
 	}
@@ -403,7 +403,7 @@ public:
 class RpgWorldResource
 {
 public:
-	typedef int FCameraID;
+	typedef int FViewID;
 	typedef int FLightID;
 	typedef int FTransformID;
 
@@ -419,9 +419,9 @@ private:
 		}
 	};
 
-	RpgArrayInline<FTagLightID, RPG_RENDER_MAX_LIGHT> CachedTagLights;
+	RpgArrayInline<FTagLightID, RPG_SHADER_MAX_LIGHT> CachedTagLights;
 
-	RpgShaderConstantWorldData WorldData;
+	RpgShaderWorldData WorldData;
 	ComPtr<D3D12MA::Allocation> WorldConstantBuffer;
 
 
@@ -437,7 +437,7 @@ private:
 	};
 
 	RpgArray<FTagTransformID> CachedTagTransforms;
-	RpgArray<RpgShaderConstantObjectTransform> TransformDatas;
+	RpgArray<RpgMatrixTransform> TransformDatas;
 	ComPtr<D3D12MA::Allocation> TransformStructBuffer;
 
 	ComPtr<D3D12MA::Allocation> StagingBuffer;
@@ -463,12 +463,12 @@ public:
 	}
 
 
-	inline FCameraID AddCamera(const RpgMatrixTransform& viewMatrix, const RpgMatrixProjection& projMatrix, const RpgVector3& worldPosition, float nearClipZ, float farClipZ) noexcept
+	inline FViewID AddView(const RpgMatrixTransform& viewMatrix, const RpgMatrixProjection& projMatrix, const RpgVector3& worldPosition, float nearClipZ, float farClipZ) noexcept
 	{
-		const FCameraID id = WorldData.CameraCount++;
-		RPG_Check(WorldData.CameraCount <= RPG_RENDER_MAX_CAMERA);
+		const FViewID id = WorldData.ViewCount++;
+		RPG_Check(WorldData.ViewCount <= RPG_SHADER_MAX_VIEW);
 
-		RpgShaderConstantCamera& camera = WorldData.Cameras[id];
+		RpgShaderView& camera = WorldData.Views[id];
 		camera.ViewMatrix = viewMatrix.Xmm;
 		camera.ViewProjectionMatrix = RpgMatrixViewProjection(viewMatrix, projMatrix).Xmm;
 		camera.WorldPosition = worldPosition.Xmm;
@@ -508,10 +508,10 @@ public:
 	FLightID AddLight_Spot(int uniqueTagId, RpgVector3 worldPosition, RpgVector3 worldDirection, RpgColorLinear colorIntensity, float attRadius, float attFallOffExp, float innerConeDegree, float outerConeDegree) noexcept;
 
 
-	inline void SetLightShadow(FLightID lightId, FCameraID shadowCameraId, int shadowTextureDescriptorIndex) noexcept
+	inline void SetLightShadow(FLightID lightId, FViewID shadowCameraId, int shadowTextureDescriptorIndex) noexcept
 	{
-		RpgShaderConstantLight& data = WorldData.Lights[lightId];
-		data.ShadowCameraIndex = shadowCameraId;
+		RpgShaderLight& data = WorldData.Lights[lightId];
+		data.ShadowViewIndex = shadowCameraId;
 		data.ShadowTextureDescriptorIndex = shadowTextureDescriptorIndex;
 	}
 
@@ -529,7 +529,7 @@ public:
 
 
 public:
-	void Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource, RpgMaterialResource::FMaterialID materialId, RpgMaterialResource::FMaterialID noDepthMaterialId, FCameraID cameraId) const noexcept;
+	void Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource, RpgMaterialResource::FMaterialID materialId, RpgMaterialResource::FMaterialID noDepthMaterialId, FViewID cameraId) const noexcept;
 
 #endif // !RPG_BUILD_SHIPPING
 
@@ -565,7 +565,7 @@ struct RpgSceneLight
 struct RpgDrawIndexed
 {
 	RpgMaterialResource::FMaterialID Material;
-	RpgShaderConstantObjectParameter ObjectParam;
+	RpgShaderObjectParameter ObjectParam;
 	int IndexCount{ 0 };
 	int IndexStart{ 0 };
 	int IndexVertexOffset{ 0 };
@@ -574,7 +574,7 @@ struct RpgDrawIndexed
 
 struct RpgDrawIndexedDepth
 {
-	RpgShaderConstantObjectParameter ObjectParam;
+	RpgShaderObjectParameter ObjectParam;
 	int IndexCount{ 0 };
 	int IndexStart{ 0 };
 	int IndexVertexOffset{ 0 };

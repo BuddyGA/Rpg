@@ -2,9 +2,17 @@
 
 
 // =============================================================================================== //
-// LAYOUT
+// VERTEX SHADER
 // =============================================================================================== //
-struct PS_Input
+struct VertexShaderInput
+{
+    float2 Position : POSITION0;
+    float2 TexCoord : TEXCOORD0;
+    float4 Color : COLOR0;
+};
+
+
+struct VertexShaderOutput
 {
     float4 Position : SV_POSITION;
     float2 TexCoord : TEXCOORD0;
@@ -12,25 +20,29 @@ struct PS_Input
 };
 
 
+VertexShaderOutput VS_Main(VertexShaderInput input)
+{
+    const float2 scaledPosition = float2(input.Position.x * (2.0f / ViewportParameter.Width), input.Position.y * (2.0f / ViewportParameter.Height));
+    
+    VertexShaderOutput output;
+    output.Position = float4(float2(scaledPosition.x - 1.0f, 1.0f - scaledPosition.y), 0.0f, 1.0f);
+    output.TexCoord = input.TexCoord;
+    output.Color = input.Color;
+    
+    return output;
+}
+
+
 
 // =============================================================================================== //
-// MAIN ENTRY POINT
+// PIXEL SHADER
 // =============================================================================================== //
-float4 PS_Main(PS_Input input) : SV_TARGET
+typedef VertexShaderOutput PixelShaderInput;
+
+
+float4 PS_Main(PixelShaderInput input) : SV_TARGET
 {
-#ifdef DEPTH
-    const float D = Rpg_GetMaterialParameterTextureColor(MaterialParameter.TextureDescriptorIndex_BaseColor, SamplerPoint, input.TexCoord).r * 2.0f - 1.0f;
-    /*
-    const float N = 10.0f;
-    const float F = 10000.0f;
-    const float Ld = ((2.0f * F * N) / (F + N - D * (F - N))) / F;
-    */
-    
-    const float Ld = 0.01f / (1.01f - D);
-    
-    return float4(Ld, Ld, Ld, 1.0f);
-    
-#elif FONT
+#if FONT
     return float4(input.Color.rgb, Rpg_GetMaterialParameterTextureColor(MaterialParameter.TextureDescriptorIndex_OpacityMask, SamplerPoint, input.TexCoord).r * input.Color.a);
     
 #else

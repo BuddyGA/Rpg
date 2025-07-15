@@ -105,7 +105,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 			const RpgDrawIndexed& draw = DrawMeshData[d];
 			FrameContext.MaterialResource->CommandBindMaterial(cmdList, draw.Material);
 
-			cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / 4, &draw.ObjectParam, 0);
+			cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderObjectParameter) / 4, &draw.ObjectParam, 0);
 			cmdList->DrawIndexedInstanced(draw.IndexCount, 1, draw.IndexStart, draw.IndexVertexOffset, 0);
 		}
 	}
@@ -129,7 +129,7 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 		const D3D12_INDEX_BUFFER_VIEW indexBufferView = FrameContext.MeshSkinnedResource->GetIndexBufferView_Skinned();
 		cmdList->IASetIndexBuffer(&indexBufferView);
 
-		const RpgArray<RpgShaderConstantSkinnedObjectParameter>& skinnedObjectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
+		const RpgArray<RpgShaderSkinnedObjectParameter>& skinnedObjectParams = FrameContext.MeshSkinnedResource->GetObjectParameters();
 		RPG_Check(skinnedObjectParams.GetCount() == DrawSkinnedMeshCount);
 
 		// Draw calls
@@ -138,9 +138,9 @@ void RpgAsyncTask_RenderPass_Forward::CommandDraw(ID3D12GraphicsCommandList* cmd
 			const RpgDrawIndexed& draw = DrawSkinnedMeshData[d];
 			FrameContext.MaterialResource->CommandBindMaterial(cmdList, draw.Material);
 
-			const RpgShaderConstantSkinnedObjectParameter& skinnedParam = skinnedObjectParams[d];
+			const RpgShaderSkinnedObjectParameter& skinnedParam = skinnedObjectParams[d];
 
-			cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / 4, &draw.ObjectParam, 0);
+			cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderObjectParameter) / 4, &draw.ObjectParam, 0);
 			cmdList->DrawIndexedInstanced(skinnedParam.IndexCount, 1, skinnedParam.IndexStart, skinnedParam.VertexStart, 0);
 		}
 	}

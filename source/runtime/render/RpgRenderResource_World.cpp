@@ -13,11 +13,11 @@ void RpgWorldResource::Reset() noexcept
 	CachedTagLights.Clear();
 
 	WorldData.DeltaTime = 0.0f;
-	WorldData.CameraCount = 0;
+	WorldData.ViewCount = 0;
 	WorldData.DirectionalLightCount = 0;
 	WorldData.PointLightCount = 0;
 	WorldData.SpotLightCount = 0;
-	WorldData.AmbientColorStrength = RpgVector4(1.0f, 1.0f, 1.0f, 0.02f).Xmm;
+	WorldData.AmbientColorStrength = RpgVector4(1.0f, 1.0f, 1.0f, 0.05f).Xmm;
 
 	CachedTagTransforms.Clear();
 	TransformDatas.Clear();
@@ -34,7 +34,7 @@ void RpgWorldResource::Reset() noexcept
 
 void RpgWorldResource::UpdateResources() noexcept
 {
-	RpgD3D12::ResizeBuffer(WorldConstantBuffer, sizeof(RpgShaderConstantWorldData), false);
+	RpgD3D12::ResizeBuffer(WorldConstantBuffer, sizeof(RpgShaderWorldData), false);
 	RPG_D3D12_SetDebugNameAllocation(WorldConstantBuffer, "RES_WorldConstantBuffer");
 
 	if (!TransformDatas.IsEmpty())
@@ -101,15 +101,15 @@ RpgWorldResource::FLightID RpgWorldResource::AddLight_Point(int uniqueTagId, Rpg
 
 	FTagLightID tag;
 	tag.TagId = uniqueTagId;
-	tag.LightId = RPG_RENDER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
+	tag.LightId = RPG_SHADER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
 	CachedTagLights.AddValue(tag);
 
-	RpgShaderConstantLight& data = WorldData.Lights[tag.LightId];
-	data.Position = worldPosition.Xmm;
+	RpgShaderLight& data = WorldData.Lights[tag.LightId];
+	data.WorldPosition = worldPosition.Xmm;
 	data.ColorIntensity = DirectX::XMVectorSet(colorIntensity.R, colorIntensity.G, colorIntensity.B, colorIntensity.A);
 	data.AttenuationRadius = attRadius;
 	data.AttenuationFallOffExp = attFallOffExp;
-	data.ShadowCameraIndex = RPG_INDEX_INVALID;
+	data.ShadowViewIndex = RPG_INDEX_INVALID;
 	data.ShadowTextureDescriptorIndex = RPG_INDEX_INVALID;
 
 	return tag.LightId;
@@ -126,18 +126,18 @@ RpgWorldResource::FLightID RpgWorldResource::AddLight_Spot(int uniqueTagId, RpgV
 
 	FTagLightID tag;
 	tag.TagId = uniqueTagId;
-	tag.LightId = RPG_RENDER_LIGHT_POINT_INDEX + WorldData.PointLightCount++;
+	tag.LightId = RPG_SHADER_LIGHT_SPOT_INDEX + WorldData.SpotLightCount++;
 	CachedTagLights.AddValue(tag);
 
-	RpgShaderConstantLight& data = WorldData.Lights[tag.LightId];
-	data.Position = worldPosition.Xmm;
-	data.Direction = worldDirection.Xmm;
+	RpgShaderLight& data = WorldData.Lights[tag.LightId];
+	data.WorldPosition = worldPosition.Xmm;
+	data.WorldDirection = worldDirection.Xmm;
 	data.ColorIntensity = DirectX::XMVectorSet(colorIntensity.R, colorIntensity.G, colorIntensity.B, colorIntensity.A);
 	data.AttenuationRadius = attRadius;
 	data.AttenuationFallOffExp = attFallOffExp;
 	data.SpotLightInnerConeRadian = RpgMath::DegToRad(innerConeDegree);
 	data.SpotLightOuterConeRadian = RpgMath::DegToRad(outerConeDegree);
-	data.ShadowCameraIndex = RPG_INDEX_INVALID;
+	data.ShadowViewIndex = RPG_INDEX_INVALID;
 	data.ShadowTextureDescriptorIndex = RPG_INDEX_INVALID;
 
 	return tag.LightId;
@@ -146,7 +146,7 @@ RpgWorldResource::FLightID RpgWorldResource::AddLight_Spot(int uniqueTagId, RpgV
 
 void RpgWorldResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept
 {
-	const size_t worldDataSizeBytes = sizeof(RpgShaderConstantWorldData);
+	const size_t worldDataSizeBytes = sizeof(RpgShaderWorldData);
 	const size_t transformDataSizeBytes = TransformDatas.GetMemorySizeBytes_Allocated();
 
 
@@ -231,7 +231,7 @@ void RpgWorldResource::CommandBindShaderResources(ID3D12GraphicsCommandList* cmd
 
 #ifndef RPG_BUILD_SHIPPING
 
-void RpgWorldResource::Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource, RpgMaterialResource::FMaterialID materialId, RpgMaterialResource::FMaterialID noDepthMaterialId, FCameraID cameraId) const noexcept
+void RpgWorldResource::Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource, RpgMaterialResource::FMaterialID materialId, RpgMaterialResource::FMaterialID noDepthMaterialId, FViewID cameraId) const noexcept
 {
 	if (DebugLine.IsEmpty() && DebugLineNoDepth.IsEmpty())
 	{
@@ -256,10 +256,10 @@ void RpgWorldResource::Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* 
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	// Bind root constant object param
-	RpgShaderConstantObjectParameter param;
-	param.CameraIndex = cameraId;
+	RpgShaderObjectParameter param;
+	param.ViewIndex = cameraId;
 	param.TransformIndex = RPG_INDEX_INVALID;
-	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderConstantObjectParameter) / sizeof(uint32_t), &param, 0);
+	cmdList->SetGraphicsRoot32BitConstants(RpgRenderPipeline::GRPI_OBJECT_PARAM, sizeof(RpgShaderObjectParameter) / sizeof(uint32_t), &param, 0);
 
 	if (!DebugLine.IsEmpty())
 	{

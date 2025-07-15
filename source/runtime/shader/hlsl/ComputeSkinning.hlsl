@@ -1,5 +1,5 @@
 #define RPG_SHADER_HLSL
-#include "../RpgShaderConstant.h"
+#include "../RpgShaderTypes.h"
 
 
 
@@ -41,7 +41,7 @@ StructuredBuffer<RpgVertexMeshSkin> VertexSkins : register(t10, space0);
 StructuredBuffer<float4x4> SkeletonBoneSkinningTransforms : register(t11, space0);
 
 // Object parameter
-ConstantBuffer<RpgShaderConstantSkinnedObjectParameter> ObjectParameter : register(b0, space0);
+ConstantBuffer<RpgShaderSkinnedObjectParameter> ObjectParameter : register(b0, space0);
 
 // Vertex output position
 RWStructuredBuffer<float4> SkinnedVertexPositions : register(u0, space0);

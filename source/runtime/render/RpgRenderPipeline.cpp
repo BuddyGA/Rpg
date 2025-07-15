@@ -1,6 +1,5 @@
 #include "RpgRenderPipeline.h"
 #include "async_task/RpgAsyncTask_CompilePSO.h"
-#include "shader/RpgShaderConstant.h"
 #include "shader/RpgShaderManager.h"
 #include "core/dsa/RpgArray.h"
 
@@ -153,21 +152,21 @@ namespace RpgRenderPipeline
         D3D12_ROOT_PARAMETER1& rcViewportParameter = rootParameters[GRPI_VIEWPORT_PARAM];
         rcViewportParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
         rcViewportParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        rcViewportParameter.Constants.Num32BitValues = sizeof(RpgShaderConstantViewportParameter) / 4;
+        rcViewportParameter.Constants.Num32BitValues = sizeof(RpgShaderViewportParameter) / 4;
         rcViewportParameter.Constants.ShaderRegister = 1;	// b1
         rcViewportParameter.Constants.RegisterSpace = 0;	// space0
 
         D3D12_ROOT_PARAMETER1& rcMaterialParameter = rootParameters[GRPI_MATERIAL_PARAM];
         rcMaterialParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
         rcMaterialParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        rcMaterialParameter.Constants.Num32BitValues = sizeof(RpgShaderConstantMaterialParameter) / 4;
+        rcMaterialParameter.Constants.Num32BitValues = sizeof(RpgShaderMaterialParameter) / 4;
         rcMaterialParameter.Constants.ShaderRegister = 2;	// b2
         rcMaterialParameter.Constants.RegisterSpace = 0;	// space0
 
         D3D12_ROOT_PARAMETER1& rcObjectParameter = rootParameters[GRPI_OBJECT_PARAM];
         rcObjectParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
         rcObjectParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        rcObjectParameter.Constants.Num32BitValues = sizeof(RpgShaderConstantObjectParameter) / 4;
+        rcObjectParameter.Constants.Num32BitValues = sizeof(RpgShaderObjectParameter) / 4;
         rcObjectParameter.Constants.ShaderRegister = 3;	// b3
         rcObjectParameter.Constants.RegisterSpace = 0;	// space0
 
@@ -251,7 +250,7 @@ namespace RpgRenderPipeline
         D3D12_ROOT_PARAMETER1& rcObjectParameter = rootParameters[CRPI_SKINNED_OBJECT_PARAM];
         rcObjectParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
         rcObjectParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        rcObjectParameter.Constants.Num32BitValues = sizeof(RpgShaderConstantSkinnedObjectParameter) / sizeof(UINT);
+        rcObjectParameter.Constants.Num32BitValues = sizeof(RpgShaderSkinnedObjectParameter) / sizeof(UINT);
         rcObjectParameter.Constants.ShaderRegister = 0;	// b0
         rcObjectParameter.Constants.RegisterSpace = 0;	// space0
 
@@ -301,16 +300,16 @@ void RpgRenderPipeline::Initialize() noexcept
         // ShadowDepth
         {
             RpgRenderPipelineState state{};
-            state.VertexShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapDirectional_VS;
+            state.VertexShaderName = RPG_SHADER_NAME_ShadowMapDirectional;
             state.VertexMode = RpgRenderVertexMode::MESH;
             state.RasterMode = RpgRenderRasterMode::SOLID;
             state.BlendMode = RpgRenderColorBlendMode::NONE;
             state.DepthStencilFormat = k_Render_DefaultFormat_ShadowDepth;
             state.bDepthTest = true;
             state.bDepthWrite = true;
-            //state.DepthBias = 2;
-            //state.DepthBiasSlope = 2.0f;
-            //state.DepthBiasClamp = 10.0f;
+            state.DepthBias = 0;
+            state.DepthBiasSlope = 0.0f;
+            state.DepthBiasClamp = 0.0f;
 
             RpgAsyncTask_CompilePSO task;
             task.Reset();
@@ -325,8 +324,8 @@ void RpgRenderPipeline::Initialize() noexcept
         // ShadowDepthCube
         {
             RpgRenderPipelineState state{};
-            state.VertexShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapCube_VS;
-            state.GeometryShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapCube_GS;
+            state.VertexShaderName = RPG_SHADER_NAME_ShadowMapCube_VS;
+            state.GeometryShaderName = RPG_SHADER_NAME_ShadowMapCube_GS;
             //state.PixelShaderName = RPG_SHADER_DEFAULT_NAME_ShadowMapCube_PS;
             state.VertexMode = RpgRenderVertexMode::MESH;
             state.RasterMode = RpgRenderRasterMode::SOLID;
@@ -361,7 +360,7 @@ void RpgRenderPipeline::Initialize() noexcept
         psoDesc.CachedPSO.CachedBlobSizeInBytes = 0;
         psoDesc.pRootSignature = RootSignatureCompute.Get();
 
-        IDxcBlob* shaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(RPG_SHADER_DEFAULT_CS_SKINNING_NAME);
+        IDxcBlob* shaderCodeBlob = RpgShaderManager::GetShaderCodeBlob(RPG_SHADER_NAME_ComputeSkinning);
         psoDesc.CS.pShaderBytecode = shaderCodeBlob->GetBufferPointer();
         psoDesc.CS.BytecodeLength = shaderCodeBlob->GetBufferSize();
 

@@ -50,36 +50,8 @@
 
 
 
-// Spawn dedicated render thread
+// Use dedicated render thread
 #define RPG_RENDER_MULTITHREADED					0
 
 // All copy, compute, render execute in async task threadpool
 #define RPG_RENDER_ASYNC_TASK						1
-
-// Maximum view per world in single frame rendering
-#define RPG_RENDER_CAMERA_MAX_COUNT                 4
-
-// First index of point light in shader constant
-#define RPG_RENDER_LIGHT_POINT_INDEX				0
-
-// Maximum point light in single frame rendering
-#define RPG_RENDER_LIGHT_POINT_MAX_COUNT			200
-
-// First index of spot light in shader constant
-#define RPG_RENDER_LIGHT_SPOT_INDEX				    (RPG_RENDER_LIGHT_POINT_INDEX + RPG_RENDER_LIGHT_POINT_MAX_COUNT)
-
-// Maximum spot light in single frame rendering
-#define RPG_RENDER_LIGHT_SPOT_MAX_COUNT			    64
-
-// First index of directional light in shader constant
-#define RPG_RENDER_LIGHT_DIRECTIONAL_INDEX			(RPG_RENDER_LIGHT_SPOT_INDEX + RPG_RENDER_LIGHT_SPOT_MAX_COUNT)
-
-// Maximum directional light in single frame rendering
-#define RPG_RENDER_LIGHT_DIRECTIONAL_MAX_COUNT		4
-
-// Maximum light all types in single frame rendering
-#define RPG_RENDER_MAX_LIGHT                        (RPG_RENDER_LIGHT_DIRECTIONAL_MAX_COUNT + RPG_RENDER_LIGHT_POINT_MAX_COUNT + RPG_RENDER_LIGHT_SPOT_MAX_COUNT)
-
-// Maximum virtual camera in single frame rendering
-#define RPG_RENDER_MAX_CAMERA                       (RPG_RENDER_CAMERA_MAX_COUNT + RPG_RENDER_MAX_LIGHT)
-

@@ -9,16 +9,9 @@ class RpgRenderComponent_Light;
 
 
 
-class RpgScriptDebugCamera : public RpgGameObjectScript
+class RpgScript_DebugCamera : public RpgGameObjectScript
 {
 	RPG_GAMEOBJECT_SCRIPT("RpgScript - DebugCamera")
-
-private:
-	RpgRenderComponent_Light* Flashlight;
-	float PitchValue;
-	float YawValue;
-	RpgPointInt SavedMousePos;
-	bool bInitialized;
 
 public:
 	float PitchMin;
@@ -28,17 +21,25 @@ public:
 
 
 public:
-	RpgScriptDebugCamera() noexcept;
+	RpgScript_DebugCamera() noexcept;
 
-protected:
-	virtual void AttachedToGameObject() noexcept override;
-	virtual void TickUpdate(float deltaTime) noexcept override;
 
-public:
 	inline void GetRotationPitchYaw(float& out_Pitch, float& out_Yaw) const noexcept
 	{
 		out_Pitch = PitchValue;
 		out_Yaw = YawValue;
 	}
+
+protected:
+	virtual void AttachedToGameObject() noexcept override;
+	virtual void TickUpdate(float deltaTime) noexcept override;
+
+
+private:
+	RpgRenderComponent_Light* Flashlight;
+	float PitchValue;
+	float YawValue;
+	RpgPointInt SavedMousePos;
+	bool bInitialized;
 
 };

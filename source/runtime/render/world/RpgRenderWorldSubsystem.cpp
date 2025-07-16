@@ -8,8 +8,13 @@
 RpgRenderWorldSubsystem::RpgRenderWorldSubsystem() noexcept
 {
 	Name = "RenderWorldSubsystem";
+
+
+#ifndef RPG_BUILD_SHIPPING
 	bDebugDrawMeshBound = false;
 	bDebugDrawLightBound = false;
+#endif // !RPG_BUILD_SHIPPING
+
 }
 
 

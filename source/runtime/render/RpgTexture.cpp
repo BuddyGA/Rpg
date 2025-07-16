@@ -92,48 +92,6 @@ RpgTexture2D::~RpgTexture2D() noexcept
 }
 
 
-void RpgTexture2D::InitializeMips() noexcept
-{
-	RPG_Check(MipCount > 0 && MipCount <= RPG_TEXTURE_MAX_MIP);
-
-	const D3D12_RESOURCE_DESC textureDesc = RpgD3D12::CreateResourceDesc_Texture(RPG_TEXTURE_FORMAT_TO_DXGI_FORMAT[static_cast<uint8_t>(Format)], Width, Height, MipCount);
-
-	D3D12_PLACED_SUBRESOURCE_FOOTPRINT subresources[RPG_TEXTURE_MAX_MIP];
-	uint32_t numRows[RPG_TEXTURE_MAX_MIP];
-	uint64_t rowBytes[RPG_TEXTURE_MAX_MIP];
-	RpgD3D12::GetDevice()->GetCopyableFootprints(&textureDesc, 0, MipCount, 0, subresources, numRows, rowBytes, &TotalSizeBytes);
-	RPG_Check(TotalSizeBytes <= RPG_MAX_COUNT);
-	//PixelData.Resize(static_cast<int>(totalSizeBytes));
-
-	if (PixelData && PixelStagingBuffer)
-	{
-		RpgD3D12::UnmapBuffer(PixelStagingBuffer.Get());
-		PixelData = nullptr;
-	}
-
-	RpgD3D12::ResizeBuffer(PixelStagingBuffer, TotalSizeBytes, true);
-	RPG_D3D12_SetDebugNameAllocation(PixelStagingBuffer, "STG_%s", *Name);
-	
-	PixelData = RpgD3D12::MapBuffer<uint8_t>(PixelStagingBuffer.Get());
-
-	MipDatas.Resize(MipCount);
-	MipLocks.Resize(MipCount);
-
-	for (int m = 0; m < MipCount; ++m)
-	{
-		FMipData& mip = MipDatas[m];
-		mip.Subresource = subresources[m];
-		mip.RowCount = numRows[m];
-		mip.RowBytes = static_cast<uint32_t>(rowBytes[m]);
-		mip.SizeBytes = static_cast<uint32_t>(mip.RowCount * mip.RowBytes);
-		mip.Width = RpgMath::Max(Width >> m, 1);
-		mip.Height = RpgMath::Max(Height >> m, 1);
-
-		MipLocks[m] = SDL_CreateRWLock();
-	}
-}
-
-
 void RpgTexture2D::GPU_UpdateResource() noexcept
 {
 	const bool bIsRenderTarget = (Flags & FLAG_IsRenderTarget);
@@ -200,6 +158,47 @@ void RpgTexture2D::GPU_CommandCopy(ID3D12GraphicsCommandList* cmdList) const noe
 }
 
 
+void RpgTexture2D::InitializeMips() noexcept
+{
+	RPG_Check(MipCount > 0 && MipCount <= RPG_TEXTURE_MAX_MIP);
+
+	const D3D12_RESOURCE_DESC textureDesc = RpgD3D12::CreateResourceDesc_Texture(RPG_TEXTURE_FORMAT_TO_DXGI_FORMAT[static_cast<uint8_t>(Format)], Width, Height, MipCount);
+
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT subresources[RPG_TEXTURE_MAX_MIP];
+	uint32_t numRows[RPG_TEXTURE_MAX_MIP];
+	uint64_t rowBytes[RPG_TEXTURE_MAX_MIP];
+	RpgD3D12::GetDevice()->GetCopyableFootprints(&textureDesc, 0, MipCount, 0, subresources, numRows, rowBytes, &TotalSizeBytes);
+	RPG_Check(TotalSizeBytes <= RPG_MAX_COUNT);
+	//PixelData.Resize(static_cast<int>(totalSizeBytes));
+
+	if (PixelData && PixelStagingBuffer)
+	{
+		RpgD3D12::UnmapBuffer(PixelStagingBuffer.Get());
+		PixelData = nullptr;
+	}
+
+	RpgD3D12::ResizeBuffer(PixelStagingBuffer, TotalSizeBytes, true);
+	RPG_D3D12_SetDebugNameAllocation(PixelStagingBuffer, "STG_%s", *Name);
+
+	PixelData = RpgD3D12::MapBuffer<uint8_t>(PixelStagingBuffer.Get());
+
+	MipDatas.Resize(MipCount);
+	MipLocks.Resize(MipCount);
+
+	for (int m = 0; m < MipCount; ++m)
+	{
+		FMipData& mip = MipDatas[m];
+		mip.Subresource = subresources[m];
+		mip.RowCount = numRows[m];
+		mip.RowBytes = static_cast<uint32_t>(rowBytes[m]);
+		mip.SizeBytes = static_cast<uint32_t>(mip.RowCount * mip.RowBytes);
+		mip.Width = RpgMath::Max(Width >> m, 1);
+		mip.Height = RpgMath::Max(Height >> m, 1);
+
+		MipLocks[m] = SDL_CreateRWLock();
+	}
+}
+
 
 
 static RpgArray<RpgSharedTexture2D> DefaultTextures;
@@ -256,13 +255,13 @@ const RpgSharedTexture2D& RpgTexture2D::s_GetDefault_White() noexcept
 
 
 
-RpgTextureCubeDepth::RpgTextureCubeDepth(const RpgName name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept
+RpgTextureDepthCube::RpgTextureDepthCube(const RpgName name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept
 	: RpgTexture2D(name, format, width, height, 1, FLAG_IsDepthStencil)
 {
 }
 
 
-void RpgTextureCubeDepth::GPU_UpdateResource() noexcept
+void RpgTextureDepthCube::GPU_UpdateResource() noexcept
 {
 	bool bShouldCreateNew = (GpuAlloc == nullptr);
 
@@ -286,7 +285,7 @@ void RpgTextureCubeDepth::GPU_UpdateResource() noexcept
 
 
 
-RpgSharedTextureCubeDepth RpgTextureCubeDepth::s_CreateShared(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept
+RpgSharedTextureDepthCube RpgTextureDepthCube::s_CreateShared(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept
 {
-	return RpgSharedTextureCubeDepth(new RpgTextureCubeDepth(name, format, width, height));
+	return RpgSharedTextureDepthCube(new RpgTextureDepthCube(name, format, width, height));
 }

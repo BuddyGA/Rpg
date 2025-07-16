@@ -8,10 +8,6 @@
 
 class RpgRenderTask_Copy : public RpgThreadTask
 {
-private:
-	ComPtr<ID3D12CommandAllocator> CmdAllocCopy;
-	ComPtr<ID3D12GraphicsCommandList> CmdListCopy;
-
 public:
 	ID3D12Fence* FenceSignal;
 	uint64_t FenceSignalValue;
@@ -30,5 +26,10 @@ public:
 	{
 		return "RpgRenderTask_Copy";
 	}
+
+
+private:
+	ComPtr<ID3D12CommandAllocator> CmdAllocCopy;
+	ComPtr<ID3D12GraphicsCommandList> CmdListCopy;
 
 };

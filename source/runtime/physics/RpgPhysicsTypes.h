@@ -62,7 +62,7 @@ namespace RpgPhysicsCollision
 	};
 
 
-	struct FPairOverlapTest
+	struct FPairTest
 	{
 		RpgPhysicsComponent_Collision* FirstCollision{ nullptr };
 		RpgPhysicsComponent_Collision* SecondCollision{ nullptr };
@@ -101,13 +101,13 @@ namespace RpgPhysicsCollision
 	
 	namespace Filter
 	{
-		extern void GeneratePairs(RpgArray<FPairOverlapTest>& out_Pairs, RpgWorld* world) noexcept;
+		extern void GeneratePairs(RpgArray<FPairTest>& out_Pairs, RpgWorld* world) noexcept;
 	};
 
 
 	namespace Broadphase
 	{
-		extern void GeneratePairs(RpgArray<FPairOverlapTest>& out_Pairs, const RpgArray<FPairOverlapTest>& filterPairs) noexcept;
+		extern void GeneratePairs(RpgArray<FPairTest>& out_Pairs, const RpgArray<FPairTest>& filterPairs) noexcept;
 	};
 
 

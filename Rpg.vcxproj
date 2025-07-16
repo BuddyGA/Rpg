@@ -210,6 +210,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClCompile Include="source\runtime\animation\task\RpgAnimationTask_TickPose.cpp" />
     <ClCompile Include="source\runtime\animation\RpgAnimationPose.cpp" />
     <ClCompile Include="source\runtime\animation\world\RpgAnimationWorldSubsystem.cpp" />
+    <ClCompile Include="source\runtime\engine\script\RpgScript_Gameplay.cpp" />
     <ClCompile Include="source\runtime\physics\task\RpgPhysicsTask_UpdateBound.cpp" />
     <ClCompile Include="source\runtime\physics\RpgPhysicsCollision.cpp" />
     <ClCompile Include="source\runtime\physics\RpgPhysicsTrace.cpp" />
@@ -226,7 +227,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClCompile Include="source\runtime\core\RpgCommandLine.cpp" />
     <ClCompile Include="source\runtime\core\RpgConsoleSystem.cpp" />
     <ClCompile Include="source\runtime\core\RpgFilePath.cpp" />
-    <ClCompile Include="source\runtime\engine\script\RpgScriptDebugCamera.cpp" />
+    <ClCompile Include="source\runtime\engine\script\RpgScript_DebugCamera.cpp" />
     <ClCompile Include="source\runtime\input\RpgInputManager.cpp" />
     <ClCompile Include="source\runtime\render\task\RpgRenderTask_CaptureMesh.cpp" />
     <ClCompile Include="source\runtime\render\task\RpgRenderTask_RenderPassShadow.cpp" />
@@ -287,6 +288,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\animation\world\RpgAnimationWorldSubsystem.h" />
     <ClInclude Include="source\runtime\animation\RpgAnimationTypes.h" />
     <ClInclude Include="source\runtime\asset\task\RpgAssimpTypes.h" />
+    <ClInclude Include="source\runtime\engine\script\RpgScript_Gameplay.h" />
     <ClInclude Include="source\runtime\navigation\world\RpgNavigationComponent.h" />
     <ClInclude Include="source\runtime\physics\task\RpgPhysicsTask_UpdateBound.h" />
     <ClInclude Include="source\runtime\physics\task\RpgPhysicsTask_UpdateShape.h" />
@@ -309,7 +311,7 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\core\RpgStream.h" />
     <ClInclude Include="source\runtime\core\world\RpgGameObject.h" />
     <ClInclude Include="source\editor\RpgEditorAssetImporter.h" />
-    <ClInclude Include="source\runtime\engine\script\RpgScriptDebugCamera.h" />
+    <ClInclude Include="source\runtime\engine\script\RpgScript_DebugCamera.h" />
     <ClInclude Include="source\game\world\RpgAttributeComponent.h" />
     <ClInclude Include="source\game\world\RpgAttributeWorldSubsystem.h" />
     <ClInclude Include="source\runtime\input\RpgInputManager.h" />
@@ -320,7 +322,6 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClInclude Include="source\runtime\render\RpgMesh.h" />
     <ClInclude Include="source\runtime\render\RpgModel.h" />
     <ClInclude Include="source\runtime\core\RpgPlatform.h" />
-    <ClInclude Include="source\runtime\core\RpgConfig.h" />
     <ClInclude Include="source\runtime\core\RpgPointer.h" />
     <ClInclude Include="source\runtime\render\RpgTexture.h" />
     <ClInclude Include="source\runtime\core\RpgStateMachine.h" />

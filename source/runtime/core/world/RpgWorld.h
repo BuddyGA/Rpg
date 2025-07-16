@@ -1,15 +1,14 @@
 #pragma once
 
-#include "../RpgConfig.h"
 #include "../RpgMath.h"
 #include "../RpgString.h"
 #include "RpgComponent.h"
 
 
-RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogWorld)
-
-
 #define RPG_WORLD_MAX_GAMEOBJECT	65536
+
+
+RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogWorld)
 
 
 class RpgWorld;
@@ -20,14 +19,6 @@ class RpgRenderer;
 class RpgWorldSubsystem
 {
 	RPG_NOCOPY(RpgWorldSubsystem)
-
-protected:
-	RpgName Name;
-
-private:
-	RpgWorld* World;
-	uint8_t UpdatePriority;
-
 
 public:
 	RpgWorldSubsystem() noexcept
@@ -47,15 +38,23 @@ protected:
 	virtual void Render(int frameIndex, RpgRenderer* renderer) noexcept {}
 
 
-	[[nodiscard]] inline const RpgName& GetName() const noexcept
+	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
 	}
 
-	[[nodiscard]] inline RpgWorld* GetWorld() const noexcept
+	inline RpgWorld* GetWorld() const noexcept
 	{
 		return World;
 	}
+
+
+protected:
+	RpgName Name;
+
+private:
+	RpgWorld* World;
+	uint8_t UpdatePriority;
 
 
 	friend RpgWorld;
@@ -68,65 +67,6 @@ protected:
 class RpgWorld
 {
 	RPG_NOCOPY(RpgWorld)
-
-protected:
-	RpgArrayInline<RpgComponentStorageInterface*, RPG_COMPONENT_TYPE_MAX_COUNT> ComponentStorages;
-
-private:
-	RpgName Name;
-	bool bHasStartedPlay;
-
-	RpgArrayInline<RpgWorldSubsystem*, 16> Subsystems;
-
-
-	enum EGameObjectFlag : uint16_t
-	{
-		FLAG_None				= (0),
-		FLAG_Allocated			= (1 << 0),
-		FLAG_Loading			= (1 << 1),
-		FLAG_Loaded				= (1 << 2),
-		FLAG_PendingDestroy		= (1 << 3),
-		FLAG_TransformUpdated	= (1 << 4),
-	};
-
-	struct FGameObjectInfo
-	{
-		// Component index for each type
-		uint16_t ComponentIndices[RPG_COMPONENT_TYPE_MAX_COUNT]{};
-
-		// Generation number
-		uint16_t Gen{ 0 };
-
-		// Flags
-		uint16_t Flags{ 0 };
-
-		// Script indices
-		int16_t ScriptIndices[RPG_GAMEOBJECT_MAX_SCRIPT]{};
-	};
-
-	struct FGameObjectTransform
-	{
-		RpgMatrixTransform LocalMatrix;
-		RpgMatrixTransform WorldMatrix;
-		RpgMatrixTransform InverseWorldMatrix;
-		RpgGameObjectID Parent;
-	};
-
-	RpgFreeList<RpgName> GameObjectNames;
-	RpgFreeList<FGameObjectInfo> GameObjectInfos;
-	RpgFreeList<FGameObjectTransform> GameObjectTransforms;
-
-	RpgArray<RpgGameObjectScript*> GameObjectScripts;
-
-
-	struct FFrameData
-	{
-		RpgArray<int> PendingDestroyObjects;
-	};
-
-	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
-	int FrameIndex;
-
 
 public:
 	RpgWorld(const RpgName& name) noexcept;
@@ -153,10 +93,24 @@ public:
 	}
 
 
+private:
+	RpgName Name;
+	bool bHasStartedPlay;
 
-// ----------------------------------------------------------------------------------------------- //
+
+	struct FFrameData
+	{
+		RpgArray<int> PendingDestroyObjects;
+	};
+
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
+	int FrameIndex;
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 // 	Subsystem interface
-// ----------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 public:
 	template<typename TWorldSubsystem>
 	inline void Subsystem_Add(uint8_t updatePriority = 0) noexcept
@@ -197,10 +151,14 @@ public:
 	}
 
 
+private:
+	RpgArrayInline<RpgWorldSubsystem*, 16> Subsystems;
 
-// ----------------------------------------------------------------------------------------------- //
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 // 	Component interface
-// ----------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 public:
 	template<typename TComponent>
 	inline void Component_Register() noexcept
@@ -235,10 +193,14 @@ public:
 	}
 
 
+private:
+	RpgArrayInline<RpgComponentStorageInterface*, RPG_COMPONENT_TYPE_MAX_COUNT> ComponentStorages;
 
-// ----------------------------------------------------------------------------------------------- //
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 // 	GameObject interface
-// ----------------------------------------------------------------------------------------------- //
+// --------------------------------------------------------------------------------------------------------------------------------------------- //
 public:
 	[[nodiscard]] RpgGameObjectID GameObject_Create(const RpgName& name, const RpgTransform& worldTransform = RpgTransform()) noexcept;
 	void GameObject_Destroy(RpgGameObjectID& gameObject) noexcept;
@@ -266,6 +228,7 @@ public:
 		GameObjectInfos[gameObject.Index].Flags |= FLAG_TransformUpdated;
 	}
 
+
 	[[nodiscard]] inline RpgTransform GameObject_GetWorldTransform(RpgGameObjectID gameObject) const noexcept
 	{
 		RPG_Check(GameObject_IsValid(gameObject));
@@ -291,7 +254,6 @@ public:
 	}
 
 
-public:
 	template<typename TComponent>
 	inline TComponent* GameObject_AddComponent(RpgGameObjectID gameObject) noexcept
 	{
@@ -358,6 +320,7 @@ public:
 		return &data;
 	}
 
+
 	template<typename TComponent>
 	[[nodiscard]] inline const TComponent* GameObject_GetComponent(RpgGameObjectID gameObject) const noexcept
 	{
@@ -378,25 +341,6 @@ public:
 	}
 
 
-private:
-	inline void RemoveGameObjectScriptAtIndex(int index) noexcept
-	{
-		RpgGameObjectScript* script = GameObjectScripts[index];
-		RPG_Check(script);
-
-		script->DetachedFromGameObject();
-		script->World = nullptr;
-		script->GameObject = RpgGameObjectID();
-
-		if (script->bStartedPlay)
-		{
-			script->StopPlay();
-		}
-
-		GameObjectScripts.RemoveAt(index);
-	}
-
-public:
 	inline void GameObject_AttachScript(RpgGameObjectID gameObject, RpgGameObjectScript* script) noexcept
 	{
 		RPG_Check(GameObject_IsValid(gameObject));
@@ -467,7 +411,7 @@ public:
 			if (GameObjectScripts[scriptIndex] == script)
 			{
 				RPG_Check(GameObjectScripts[scriptIndex]->GetTypeName() == scriptTypeName);
-				RemoveGameObjectScriptAtIndex(scriptIndex);
+				GameObject_RemoveScriptAtIndex(scriptIndex);
 				info.ScriptIndices[i] = RPG_INDEX_INVALID;
 				RPG_Log(RpgLogWorld, "Detached script of type (%s) from game object (%s)", scriptTypeName, *GameObjectNames[gameObject.Index]);
 
@@ -484,10 +428,71 @@ public:
 		return GameObjectInfos.GetCount();
 	}
 
+
 	[[nodiscard]] inline bool GameObject_IsTransformUpdated(RpgGameObjectID gameObject) const noexcept
 	{
 		RPG_Check(GameObject_IsValid(gameObject));
 		return GameObjectInfos[gameObject.Index].Flags & FLAG_TransformUpdated;
 	}
+
+
+private:
+	inline void GameObject_RemoveScriptAtIndex(int index) noexcept
+	{
+		RpgGameObjectScript* script = GameObjectScripts[index];
+		RPG_Check(script);
+
+		script->DetachedFromGameObject();
+		script->World = nullptr;
+		script->GameObject = RpgGameObjectID();
+
+		if (script->bStartedPlay)
+		{
+			script->StopPlay();
+		}
+
+		GameObjectScripts.RemoveAt(index);
+	}
+
+
+private:
+	enum EGameObjectFlag : uint16_t
+	{
+		FLAG_None				= (0),
+		FLAG_Allocated			= (1 << 0),
+		FLAG_Loading			= (1 << 1),
+		FLAG_Loaded				= (1 << 2),
+		FLAG_PendingDestroy		= (1 << 3),
+		FLAG_TransformUpdated	= (1 << 4),
+	};
+
+	struct FGameObjectInfo
+	{
+		// Component index for each type
+		uint16_t ComponentIndices[RPG_COMPONENT_TYPE_MAX_COUNT]{};
+
+		// Generation number
+		uint16_t Gen{ 0 };
+
+		// Flags
+		uint16_t Flags{ 0 };
+
+		// Script indices
+		int16_t ScriptIndices[RPG_GAMEOBJECT_MAX_SCRIPT]{};
+	};
+
+	struct FGameObjectTransform
+	{
+		RpgMatrixTransform LocalMatrix;
+		RpgMatrixTransform WorldMatrix;
+		RpgMatrixTransform InverseWorldMatrix;
+		RpgGameObjectID Parent;
+	};
+
+	RpgFreeList<RpgName> GameObjectNames;
+	RpgFreeList<FGameObjectInfo> GameObjectInfos;
+	RpgFreeList<FGameObjectTransform> GameObjectTransforms;
+
+	RpgArray<RpgGameObjectScript*> GameObjectScripts;
 
 };

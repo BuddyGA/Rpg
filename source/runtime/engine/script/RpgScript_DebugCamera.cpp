@@ -1,4 +1,4 @@
-#include "RpgScriptDebugCamera.h"
+#include "RpgScript_DebugCamera.h"
 #include "core/world/RpgWorld.h"
 #include "input/RpgInputManager.h"
 #include "render/world/RpgRenderComponent.h"
@@ -6,7 +6,7 @@
 
 
 
-RpgScriptDebugCamera::RpgScriptDebugCamera() noexcept
+RpgScript_DebugCamera::RpgScript_DebugCamera() noexcept
 {
 	Flashlight = nullptr;
 	PitchValue = 0.0f;
@@ -20,7 +20,7 @@ RpgScriptDebugCamera::RpgScriptDebugCamera() noexcept
 }
 
 
-void RpgScriptDebugCamera::AttachedToGameObject() noexcept
+void RpgScript_DebugCamera::AttachedToGameObject() noexcept
 {
 	if (!bInitialized)
 	{
@@ -44,7 +44,7 @@ void RpgScriptDebugCamera::AttachedToGameObject() noexcept
 }
 
 
-void RpgScriptDebugCamera::TickUpdate(float deltaTime) noexcept
+void RpgScript_DebugCamera::TickUpdate(float deltaTime) noexcept
 {
 	RpgInputManager& input = g_Engine->GetInputManager();
 	RpgTransform transform = World->GameObject_GetWorldTransform(GameObject);

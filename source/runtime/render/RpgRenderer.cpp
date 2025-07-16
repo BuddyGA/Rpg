@@ -11,6 +11,10 @@ RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogRenderer, VERBOSITY_DEBUG)
 RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 	: FrameDatas()
 {
+	Gamma = 1.25f;
+	ShadowQuality = RpgRenderLight::SHADOW_QUALITY_MEDIUM;
+	AntiAliasingMode = RpgRenderAntiAliasing::MODE_NONE;
+
 	WindowHandle = in_WindowHandle;
 
 	IDXGIFactory6* factory = RpgD3D12::GetFactory();
@@ -41,10 +45,6 @@ RpgRenderer::RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept
 		RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&frame.SwapChainCmdList)));
 
 	}
-
-	ShadowQuality = RpgRenderLight::SHADOW_QUALITY_MEDIUM;
-	AntiAliasingMode = RpgRenderAntiAliasing::MODE_NONE;
-	Gamma = 1.25f;
 }
 
 
@@ -58,182 +58,7 @@ RpgRenderer::~RpgRenderer() noexcept
 	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
 	{
 		WaitFrameFinished(f);
-
-		/*
-		FFrameData& frame = FrameDatas[f];
-		frame.Fence.Reset();
-		frame.MaterialResource.Release();
-		frame.MeshResource.Release();
-		frame.MeshSkinnedResource.Release();
-		frame.AsyncTaskCopy.Release();
-		frame.SwapChainCmdAlloc.Reset();
-		frame.SwapChainCmdList.Reset();
-		*/
 	}
-}
-
-
-void RpgRenderer::SwapchainWaitAllPresents() noexcept
-{
-	HANDLE waitCompletedEvents[RPG_FRAME_BUFFERING];
-	int waitCount = 0;
-
-	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
-	{
-		FFrameData& frame = FrameDatas[f];
-		
-		if (frame.Fence->GetCompletedValue() < frame.FenceValue)
-		{
-			frame.Fence->SetEventOnCompletion(frame.FenceValue, frame.PresentCompletedEvent);
-			waitCompletedEvents[waitCount++] = frame.PresentCompletedEvent;
-		}
-	}
-
-	if (waitCount > 0)
-	{
-		WaitForMultipleObjects(waitCount, waitCompletedEvents, TRUE, INFINITE);
-	}
-}
-
-
-void RpgRenderer::SwapchainReleaseResources(bool bResize) noexcept
-{
-	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
-	{
-		BackbufferResources[f].Reset();
-	}
-
-	if (!bResize)
-	{
-		SwapChain.Reset();
-	}
-}
-
-
-void RpgRenderer::SwapchainResize() noexcept
-{
-	RECT windowRect;
-	GetClientRect(WindowHandle, &windowRect);
-	RpgPointInt windowDimension(windowRect.right - windowRect.left, windowRect.bottom - windowRect.top);
-
-	// Maybe minimized
-	if (windowDimension.X == 0 && windowDimension.Y == 0)
-	{
-		return;
-	}
-
-	DXGI_SWAP_CHAIN_DESC1 desc{};
-
-	if (SwapChain)
-	{
-		SwapChain->GetDesc1(&desc);
-	}
-
-	bool bShouldResize = (SwapChain == nullptr);
-
-	if (static_cast<UINT>(windowDimension.X) != desc.Width || static_cast<UINT>(windowDimension.Y) != desc.Height)
-	{
-		RPG_LogDebug(RpgLogD3D12, "Resizing swapchain... Adjusting to window size (Swapchain: %i, %i) (Window: %i, %i)!", desc.Width, desc.Height, windowDimension.X, windowDimension.Y);
-		bShouldResize = true;
-	}
-
-	if (bVsync != bPendingChangeVsync)
-	{
-		RPG_LogDebug(RpgLogD3D12, "Resizing swapchain... Vsync changed!");
-		bShouldResize = true;
-	}
-
-	if (!bShouldResize)
-	{
-		return;
-	}
-
-	bVsync = bPendingChangeVsync;
-	const UINT flags = bSupportTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
-
-	if (SwapChain == nullptr)
-	{
-		RPG_LogDebug(RpgLogD3D12, "Create swapchain");
-
-		DXGI_SWAP_CHAIN_DESC1 swapchainDesc{};
-		swapchainDesc.Flags = flags;
-		swapchainDesc.BufferCount = RPG_FRAME_BUFFERING;
-		swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapchainDesc.Format = BackbufferFormat;
-		swapchainDesc.SampleDesc.Count = 1;
-		swapchainDesc.SampleDesc.Quality = 0;
-		swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC fullscreenDesc{};
-		fullscreenDesc.Windowed = TRUE;
-
-		IDXGIFactory6* factory = RpgD3D12::GetFactory();
-
-		ComPtr<IDXGISwapChain1> tempSwapchain;
-		RPG_D3D12_Validate(factory->CreateSwapChainForHwnd(RpgD3D12::GetCommandQueueDirect(), WindowHandle, &swapchainDesc, &fullscreenDesc, nullptr, &tempSwapchain));
-		RPG_D3D12_Validate(factory->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_ALT_ENTER));
-		RPG_D3D12_Validate(tempSwapchain->QueryInterface(IID_PPV_ARGS(&SwapChain)));
-	}
-	else
-	{
-		SwapchainWaitAllPresents();
-		SwapchainReleaseResources(true);
-
-		RPG_LogDebug(RpgLogD3D12, "Resize swapchain %i, %i", windowDimension.X, windowDimension.Y);
-		RPG_D3D12_Validate(SwapChain->ResizeBuffers(RPG_FRAME_BUFFERING, static_cast<UINT>(windowDimension.X), static_cast<UINT>(windowDimension.Y), BackbufferFormat, flags));
-	}
-
-	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
-	{
-		RPG_D3D12_Validate(SwapChain->GetBuffer(f, IID_PPV_ARGS(&BackbufferResources[f])));
-		RPG_D3D12_SetDebugName(BackbufferResources[f], "_%i_RES_SwapBackbuffer", f);
-	}
-
-	RPG_LogDebug(RpgLogD3D12, "Swapchain resized successfully");
-
-	BackbufferIndex = SwapChain->GetCurrentBackBufferIndex();
-}
-
-
-void RpgRenderer::WaitFrameFinished(int frameIndex) noexcept
-{
-	FFrameData& frame = FrameDatas[frameIndex];
-
-	const uint64_t fenceCompletedValue = frame.Fence->GetCompletedValue();
-
-	if (fenceCompletedValue < frame.FenceValue)
-	{
-		HANDLE waitFenceCompletedHandle = CreateEventA(NULL, FALSE, FALSE, NULL);
-		frame.Fence->SetEventOnCompletion(frame.FenceValue, waitFenceCompletedHandle);
-		WaitForSingleObject(waitFenceCompletedHandle, INFINITE);
-		CloseHandle(waitFenceCompletedHandle);
-	}
-}
-
-
-void RpgRenderer::RegisterWorld(const RpgWorld* world) noexcept
-{
-	RPG_Assert(world);
-
-	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
-	{
-		FFrameData& frame = FrameDatas[f];
-
-		if (frame.WorldContexts.FindIndexByCompare(world) == RPG_INDEX_INVALID)
-		{
-			FWorldContext& context = frame.WorldContexts.Add();
-			context.World = world;
-			context.Resource = RpgPointer::MakeUnique<RpgWorldResource>();
-		}
-	}
-}
-
-
-void RpgRenderer::UnregisterWorld(const RpgWorld* world) noexcept
-{
-	RPG_Assert(world);
-
-	RPG_NotImplementedYet();
 }
 
 
@@ -503,6 +328,169 @@ void RpgRenderer::EndRender(int frameIndex, float deltaTime) noexcept
 	taskCompute->Wait();
 }
 
+
+void RpgRenderer::RegisterWorld(const RpgWorld* world) noexcept
+{
+	RPG_Assert(world);
+
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
+	{
+		FFrameData& frame = FrameDatas[f];
+
+		if (frame.WorldContexts.FindIndexByCompare(world) == RPG_INDEX_INVALID)
+		{
+			FWorldContext& context = frame.WorldContexts.Add();
+			context.World = world;
+			context.Resource = RpgPointer::MakeUnique<RpgWorldResource>();
+		}
+	}
+}
+
+
+void RpgRenderer::UnregisterWorld(const RpgWorld* world) noexcept
+{
+	RPG_Assert(world);
+
+	RPG_NotImplementedYet();
+}
+
+
+void RpgRenderer::WaitFrameFinished(int frameIndex) noexcept
+{
+	FFrameData& frame = FrameDatas[frameIndex];
+
+	const uint64_t fenceCompletedValue = frame.Fence->GetCompletedValue();
+
+	if (fenceCompletedValue < frame.FenceValue)
+	{
+		HANDLE waitFenceCompletedHandle = CreateEventA(NULL, FALSE, FALSE, NULL);
+		frame.Fence->SetEventOnCompletion(frame.FenceValue, waitFenceCompletedHandle);
+		WaitForSingleObject(waitFenceCompletedHandle, INFINITE);
+		CloseHandle(waitFenceCompletedHandle);
+	}
+}
+
+
+void RpgRenderer::SwapchainWaitAllPresents() noexcept
+{
+	HANDLE waitCompletedEvents[RPG_FRAME_BUFFERING];
+	int waitCount = 0;
+
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
+	{
+		FFrameData& frame = FrameDatas[f];
+
+		if (frame.Fence->GetCompletedValue() < frame.FenceValue)
+		{
+			frame.Fence->SetEventOnCompletion(frame.FenceValue, frame.PresentCompletedEvent);
+			waitCompletedEvents[waitCount++] = frame.PresentCompletedEvent;
+		}
+	}
+
+	if (waitCount > 0)
+	{
+		WaitForMultipleObjects(waitCount, waitCompletedEvents, TRUE, INFINITE);
+	}
+}
+
+
+void RpgRenderer::SwapchainReleaseResources(bool bResize) noexcept
+{
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
+	{
+		BackbufferResources[f].Reset();
+	}
+
+	if (!bResize)
+	{
+		SwapChain.Reset();
+	}
+}
+
+
+void RpgRenderer::SwapchainResize() noexcept
+{
+	RECT windowRect;
+	GetClientRect(WindowHandle, &windowRect);
+	RpgPointInt windowDimension(windowRect.right - windowRect.left, windowRect.bottom - windowRect.top);
+
+	// Maybe minimized
+	if (windowDimension.X == 0 && windowDimension.Y == 0)
+	{
+		return;
+	}
+
+	DXGI_SWAP_CHAIN_DESC1 desc{};
+
+	if (SwapChain)
+	{
+		SwapChain->GetDesc1(&desc);
+	}
+
+	bool bShouldResize = (SwapChain == nullptr);
+
+	if (static_cast<UINT>(windowDimension.X) != desc.Width || static_cast<UINT>(windowDimension.Y) != desc.Height)
+	{
+		RPG_LogDebug(RpgLogD3D12, "Resizing swapchain... Adjusting to window size (Swapchain: %i, %i) (Window: %i, %i)!", desc.Width, desc.Height, windowDimension.X, windowDimension.Y);
+		bShouldResize = true;
+	}
+
+	if (bVsync != bPendingChangeVsync)
+	{
+		RPG_LogDebug(RpgLogD3D12, "Resizing swapchain... Vsync changed!");
+		bShouldResize = true;
+	}
+
+	if (!bShouldResize)
+	{
+		return;
+	}
+
+	bVsync = bPendingChangeVsync;
+	const UINT flags = bSupportTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+
+	if (SwapChain == nullptr)
+	{
+		RPG_LogDebug(RpgLogD3D12, "Create swapchain");
+
+		DXGI_SWAP_CHAIN_DESC1 swapchainDesc{};
+		swapchainDesc.Flags = flags;
+		swapchainDesc.BufferCount = RPG_FRAME_BUFFERING;
+		swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapchainDesc.Format = BackbufferFormat;
+		swapchainDesc.SampleDesc.Count = 1;
+		swapchainDesc.SampleDesc.Quality = 0;
+		swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC fullscreenDesc{};
+		fullscreenDesc.Windowed = TRUE;
+
+		IDXGIFactory6* factory = RpgD3D12::GetFactory();
+
+		ComPtr<IDXGISwapChain1> tempSwapchain;
+		RPG_D3D12_Validate(factory->CreateSwapChainForHwnd(RpgD3D12::GetCommandQueueDirect(), WindowHandle, &swapchainDesc, &fullscreenDesc, nullptr, &tempSwapchain));
+		RPG_D3D12_Validate(factory->MakeWindowAssociation(WindowHandle, DXGI_MWA_NO_ALT_ENTER));
+		RPG_D3D12_Validate(tempSwapchain->QueryInterface(IID_PPV_ARGS(&SwapChain)));
+	}
+	else
+	{
+		SwapchainWaitAllPresents();
+		SwapchainReleaseResources(true);
+
+		RPG_LogDebug(RpgLogD3D12, "Resize swapchain %i, %i", windowDimension.X, windowDimension.Y);
+		RPG_D3D12_Validate(SwapChain->ResizeBuffers(RPG_FRAME_BUFFERING, static_cast<UINT>(windowDimension.X), static_cast<UINT>(windowDimension.Y), BackbufferFormat, flags));
+	}
+
+	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
+	{
+		RPG_D3D12_Validate(SwapChain->GetBuffer(f, IID_PPV_ARGS(&BackbufferResources[f])));
+		RPG_D3D12_SetDebugName(BackbufferResources[f], "_%i_RES_SwapBackbuffer", f);
+	}
+
+	RPG_LogDebug(RpgLogD3D12, "Swapchain resized successfully");
+
+	BackbufferIndex = SwapChain->GetCurrentBackBufferIndex();
+}
 
 
 

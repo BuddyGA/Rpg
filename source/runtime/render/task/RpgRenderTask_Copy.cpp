@@ -6,15 +6,15 @@
 
 RpgRenderTask_Copy::RpgRenderTask_Copy() noexcept
 {
+	FenceSignal = nullptr;
+	FenceSignalValue = 0;
+	Renderer2d = nullptr;
+
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COPY, IID_PPV_ARGS(&CmdAllocCopy)));
 	RPG_D3D12_SetDebugName(CmdAllocCopy, "CmdAllocCopy_AsyncTaskCopy");
 
 	RPG_D3D12_Validate(RpgD3D12::GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_COPY, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&CmdListCopy)));
 	RPG_D3D12_SetDebugName(CmdListCopy, "CmdListCopy_AsyncTaskCopy");
-
-	FenceSignal = nullptr;
-	FenceSignalValue = 0;
-	Renderer2d = nullptr;
 }
 
 

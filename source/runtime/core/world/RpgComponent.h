@@ -39,9 +39,6 @@ public:
 template<typename TComponent>
 class RpgComponentStorage : public RpgComponentStorageInterface
 {
-private:
-	RpgFreeList<TComponent> Components;
-
 
 public:
 	RpgComponentStorage() noexcept = default;
@@ -86,5 +83,9 @@ public:
 	{
 		return Components;
 	}
+
+
+private:
+	RpgFreeList<TComponent> Components;
 
 };

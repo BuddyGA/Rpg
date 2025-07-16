@@ -22,6 +22,7 @@ void RpgWorldResource::Reset() noexcept
 	CachedTagTransforms.Clear();
 	TransformDatas.Clear();
 
+
 #ifndef RPG_BUILD_SHIPPING
 	DebugLineVertexSizeBytes = 0;
 	DebugLineIndexSizeBytes = 0;
@@ -42,6 +43,7 @@ void RpgWorldResource::UpdateResources() noexcept
 		RpgD3D12::ResizeBuffer(TransformStructBuffer, TransformDatas.GetMemorySizeBytes_Allocated(), false);
 		RPG_D3D12_SetDebugNameAllocation(TransformStructBuffer, "RES_TransformStructBuffer");
 	}
+
 
 #ifndef RPG_BUILD_SHIPPING
 	DebugLineVertexSizeBytes = 0;

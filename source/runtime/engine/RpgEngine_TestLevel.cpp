@@ -6,8 +6,6 @@
 
 
 
-
-
 static void TestLevel_AddBlocker(RpgWorld* world, RpgVector3 center, RpgVector3 halfExtents, float uvScale) noexcept
 {
 	RpgSharedModel model = RpgModel::s_CreateShared("MDL_DEF_floor");

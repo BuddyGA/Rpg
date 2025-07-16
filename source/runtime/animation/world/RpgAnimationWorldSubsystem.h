@@ -7,11 +7,6 @@
 
 class RpgAnimationWorldSubsystem : public RpgWorldSubsystem
 {
-private:
-	static constexpr int TASK_COUNT = 4;
-	RpgAnimationTask_TickPose TaskTickPoses[TASK_COUNT];
-	bool bTickAnimationPose;
-
 public:
 	float GlobalPlayRate;
 	bool bDebugDrawSkeletonBones;
@@ -25,5 +20,11 @@ protected:
 	virtual void StopPlay() noexcept override;
 	virtual void TickUpdate(float deltaTime) noexcept override;
 	virtual void Render(int frameIndex, RpgRenderer* renderer) noexcept override;
+
+
+private:
+	static constexpr int TASK_COUNT = 4;
+	RpgAnimationTask_TickPose TaskTickPoses[TASK_COUNT];
+	bool bTickAnimationPose;
 
 };

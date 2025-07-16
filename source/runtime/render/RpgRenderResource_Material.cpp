@@ -32,7 +32,7 @@ void RpgMaterialResource::UpdateResources() noexcept
 		RpgMaterialParameterTextureArray& materialParameterTextures = material->ParameterTexturesReadLock();
 		for (int t = 0; t < materialParameterTextures.GetCount(); ++t)
 		{
-			RPG_Assert(parameterRootConstantTextureIndexes[t] == RPG_INDEX_INVALID);
+			RPG_Check(parameterRootConstantTextureIndexes[t] == RPG_INDEX_INVALID);
 
 			RpgSharedTexture2D& texture = materialParameterTextures[t];
 			if (!texture)
@@ -45,7 +45,7 @@ void RpgMaterialResource::UpdateResources() noexcept
 			{
 				FTextureDescriptor& td = TextureDescriptors[texIndex];
 				RpgSharedTexture2D sharedTexture = td.WeakTexture.AsShared();
-				RPG_Assert(sharedTexture == texture);
+				RPG_Check(sharedTexture == texture);
 
 				sharedTexture->GPU_UpdateResource();
 
@@ -57,8 +57,8 @@ void RpgMaterialResource::UpdateResources() noexcept
 				td.Descriptor = RpgD3D12::AllocateDescriptor_TDI(sharedTexture->GPU_GetResource());
 			}
 
-			RPG_Assert(texIndex != RPG_INDEX_INVALID);
-			RPG_Assert(texture == TextureDescriptors[texIndex].WeakTexture);
+			RPG_Check(texIndex != RPG_INDEX_INVALID);
+			RPG_Check(texture == TextureDescriptors[texIndex].WeakTexture);
 			parameterRootConstantTextureIndexes[t] = TextureDescriptors[texIndex].Descriptor.Index;
 		}
 		material->ParameterTexturesReadUnlock();

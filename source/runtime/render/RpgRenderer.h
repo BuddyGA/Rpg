@@ -15,28 +15,12 @@ public:
 	RpgRenderer(HWND in_WindowHandle, bool bEnableVsync) noexcept;
 	~RpgRenderer() noexcept;
 
-
-private:
-	HWND WindowHandle;
-
-	uint8_t bSupportTearing : 1;
-	uint8_t bSupportHDR : 1;
-	uint8_t bPendingChangeVsync : 1;
-	uint8_t bVsync : 1;
-
-	ComPtr<IDXGISwapChain4> SwapChain;
-
-	DXGI_FORMAT BackbufferFormat;
-	ComPtr<ID3D12Resource> BackbufferResources[RPG_FRAME_BUFFERING];
-	uint32_t BackbufferIndex;
+	void BeginRender(int frameIndex, float deltaTime) noexcept;
+	void EndRender(int frameIndex, float deltaTime) noexcept;
+	void RegisterWorld(const RpgWorld* world) noexcept;
+	void UnregisterWorld(const RpgWorld* world) noexcept;
 
 
-private:
-	void SwapchainWaitAllPresents() noexcept;
-	void SwapchainReleaseResources(bool bResize) noexcept;
-	void SwapchainResize() noexcept;
-
-public:
 	inline void SetVsync(bool bEnabled) noexcept
 	{
 		if (bVsync == bEnabled)
@@ -60,11 +44,35 @@ public:
 		return RpgPointInt(static_cast<int>(desc.Width), static_cast<int>(desc.Height));
 	}
 
+	inline void AddWorldShadowViewport(int frameIndex, const RpgWorld* world, RpgShadowViewport* viewport) noexcept
+	{
+		GetWorldContext(frameIndex, world).ShadowViewports.AddUnique(viewport);
+	}
+
+	inline void AddWorldSceneViewport(int frameIndex, const RpgWorld* world, RpgSceneViewport* viewport) noexcept
+	{
+		GetWorldContext(frameIndex, world).SceneViewports.AddUnique(viewport);
+	}
+
+	inline RpgWorldResource* GetWorldResource(int frameIndex, const RpgWorld* world) noexcept
+	{
+		return GetWorldContext(frameIndex, world).Resource.Get();
+	}
+
+	inline RpgRenderer2D& GetRenderer2D() noexcept
+	{
+		return Renderer2d;
+	}
+
+
+public:
+	float Gamma;
+	RpgRenderLight::EShadowQuality ShadowQuality;
+	RpgRenderAntiAliasing::EMode AntiAliasingMode;
+	RpgSharedTexture2D FinalTexture;
+
 
 private:
-	RpgRenderer2D Renderer2d;
-
-
 	struct FWorldContext
 	{
 		const RpgWorld* World{ nullptr };
@@ -80,6 +88,41 @@ private:
 
 	};
 	typedef RpgArray<FWorldContext, 4> FWorldContextArray;
+
+
+private:
+	void WaitFrameFinished(int frameIndex) noexcept;
+	void SwapchainWaitAllPresents() noexcept;
+	void SwapchainReleaseResources(bool bResize) noexcept;
+	void SwapchainResize() noexcept;
+
+
+	inline FWorldContext& GetWorldContext(int frameIndex, const RpgWorld* world) noexcept
+	{
+		FFrameData& frame = FrameDatas[frameIndex];
+
+		const int index = frame.WorldContexts.FindIndexByCompare(world);
+		RPG_Check(index != RPG_INDEX_INVALID);
+
+		return frame.WorldContexts[index];
+	}
+
+
+private:
+	HWND WindowHandle;
+
+	uint8_t bSupportTearing : 1;
+	uint8_t bSupportHDR : 1;
+	uint8_t bPendingChangeVsync : 1;
+	uint8_t bVsync : 1;
+
+	ComPtr<IDXGISwapChain4> SwapChain;
+
+	DXGI_FORMAT BackbufferFormat;
+	ComPtr<ID3D12Resource> BackbufferResources[RPG_FRAME_BUFFERING];
+	uint32_t BackbufferIndex;
+
+	RpgRenderer2D Renderer2d;
 
 
 	struct FFrameData
@@ -101,58 +144,6 @@ private:
 		HANDLE PresentCompletedEvent;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
-
-
-public:
-	RpgRenderLight::EShadowQuality ShadowQuality;
-	RpgRenderAntiAliasing::EMode AntiAliasingMode;
-	RpgSharedTexture2D FinalTexture;
-	float Gamma;
-
-	
-private:
-	void WaitFrameFinished(int frameIndex) noexcept;
-
-
-	inline FWorldContext& GetWorldContext(int frameIndex, const RpgWorld* world) noexcept
-	{
-		FFrameData& frame = FrameDatas[frameIndex];
-
-		const int index = frame.WorldContexts.FindIndexByCompare(world);
-		RPG_Check(index != RPG_INDEX_INVALID);
-
-		return frame.WorldContexts[index];
-	}
-
-public:
-	void RegisterWorld(const RpgWorld* world) noexcept;
-	void UnregisterWorld(const RpgWorld* world) noexcept;
-
-
-	inline void AddWorldShadowViewport(int frameIndex, const RpgWorld* world, RpgShadowViewport* viewport) noexcept
-	{
-		GetWorldContext(frameIndex, world).ShadowViewports.AddUnique(viewport);
-	}
-
-	inline void AddWorldSceneViewport(int frameIndex, const RpgWorld* world, RpgSceneViewport* viewport) noexcept
-	{
-		GetWorldContext(frameIndex, world).SceneViewports.AddUnique(viewport);
-	}
-
-	inline RpgWorldResource* GetWorldResource(int frameIndex, const RpgWorld* world) noexcept
-	{
-		return GetWorldContext(frameIndex, world).Resource.Get();
-	}
-
-
-	void BeginRender(int frameIndex, float deltaTime) noexcept;
-	void EndRender(int frameIndex, float deltaTime) noexcept;
-
-
-	inline RpgRenderer2D& GetRenderer2D() noexcept
-	{
-		return Renderer2d;
-	}
 
 
 #ifndef RPG_BUILD_SHIPPING

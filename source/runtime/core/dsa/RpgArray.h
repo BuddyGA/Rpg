@@ -12,12 +12,6 @@ class RpgArray
 {
 	static_assert(RpgAlgorithm::IsPowerOfTwo(CAPACITY_ALIGNMENT), "RpgArray: CAPACITY_ALIGNMENT must be power of two!");
 
-private:
-	T* Data;
-	int Capacity;
-	int Count;
-
-
 public:
 	RpgArray(int in_Count = 0) noexcept
 		: Data(nullptr)
@@ -193,26 +187,6 @@ public:
 		return Data[index];
 	}
 
-private:
-	template<typename...TConstructorArgs>
-	inline void ConstructElements(int index, int count, TConstructorArgs&&... args) noexcept
-	{
-		for (int i = index; i < (index + count); ++i)
-		{
-			RPG_ARRAY_ValidateIndex(i);
-			new (Data + i)T(std::forward<TConstructorArgs>(args)...);
-		}
-	}
-
-
-	inline void DestructElements(int index, int count) noexcept
-	{
-		for (int i = index; i < (index + count); ++i)
-		{
-			RPG_ARRAY_ValidateIndex(i);
-			(Data + i)->~T();
-		}
-	}
 
 public:
 	inline T* GetData(int index = 0) noexcept
@@ -638,6 +612,34 @@ public:
 		return Data + Count;
 	}
 
+
+private:
+	template<typename...TConstructorArgs>
+	inline void ConstructElements(int index, int count, TConstructorArgs&&... args) noexcept
+	{
+		for (int i = index; i < (index + count); ++i)
+		{
+			RPG_ARRAY_ValidateIndex(i);
+			new (Data + i)T(std::forward<TConstructorArgs>(args)...);
+		}
+	}
+
+
+	inline void DestructElements(int index, int count) noexcept
+	{
+		for (int i = index; i < (index + count); ++i)
+		{
+			RPG_ARRAY_ValidateIndex(i);
+			(Data + i)->~T();
+		}
+	}
+
+
+private:
+	T* Data;
+	int Capacity;
+	int Count;
+
 };
 
 
@@ -647,11 +649,6 @@ class RpgArrayInline
 {
 	static_assert(std::is_trivially_copyable<T>::value, "RpgArrayInline type of <T> must be POD!");
 	static_assert(CAPACITY >= 2, "RpgArrayInline CAPACITY must be greater than or equals 2!");
-
-private:
-	T Data[CAPACITY];
-	int Count;
-
 
 public:
 	RpgArrayInline(int in_Count = 0) noexcept
@@ -876,5 +873,10 @@ public:
 
 		return true;
 	}
+
+
+private:
+	T Data[CAPACITY];
+	int Count;
 
 };

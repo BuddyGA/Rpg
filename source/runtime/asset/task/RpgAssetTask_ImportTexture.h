@@ -15,19 +15,9 @@ public:
 	RpgTextureFormat::EType Format;
 	bool bGenerateMipMaps;
 
-private:
-	RpgSharedTexture2D Result;
-
 
 public:
 	RpgAssetTask_ImportTexture() noexcept;
-
-
-	[[nodiscard]] inline RpgSharedTexture2D GetResult() noexcept
-	{
-		return std::move(Result);
-	}
-
 
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
@@ -36,5 +26,15 @@ public:
 	{
 		return "RpgAsyncTask_ImportTexture";
 	}
+
+
+	[[nodiscard]] inline RpgSharedTexture2D GetResult() noexcept
+	{
+		return std::move(Result);
+	}
+
+
+private:
+	RpgSharedTexture2D Result;
 
 };

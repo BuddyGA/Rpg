@@ -111,7 +111,7 @@ namespace RpgPhysicsCollision
 // =========================================================================================================================================================== //
 // FILTER
 // =========================================================================================================================================================== //
-	void Filter::GeneratePairs(RpgArray<FPairOverlapTest>& out_Pairs, RpgWorld* world) noexcept
+	void Filter::GeneratePairs(RpgArray<FPairTest>& out_Pairs, RpgWorld* world) noexcept
 	{
 		for (auto firstIt = world->Component_CreateIterator<RpgPhysicsComponent_Filter>(); firstIt; ++firstIt)
 		{
@@ -160,7 +160,7 @@ namespace RpgPhysicsCollision
 // =========================================================================================================================================================== //
 // BROADPHASE
 // =========================================================================================================================================================== //
-	void Broadphase::GeneratePairs(RpgArray<FPairOverlapTest>& out_Pairs, const RpgArray<FPairOverlapTest>& filterPairs) noexcept
+	void Broadphase::GeneratePairs(RpgArray<FPairTest>& out_Pairs, const RpgArray<FPairTest>& filterPairs) noexcept
 	{
 
 	}

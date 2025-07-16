@@ -210,7 +210,7 @@ void RpgWorld::GameObject_Destroy(RpgGameObjectID& gameObject) noexcept
             const int scriptIndex = info.ScriptIndices[i];
             if (scriptIndex != RPG_INDEX_INVALID)
             {
-                RemoveGameObjectScriptAtIndex(scriptIndex);
+                GameObject_RemoveScriptAtIndex(scriptIndex);
                 info.ScriptIndices[i] = RPG_INDEX_INVALID;
             }
         }

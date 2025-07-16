@@ -624,6 +624,30 @@ public:
 		DirectX::XMMatrixDecompose(&out_Scale.Xmm, &out_Rotation.Xmm, &out_Position.Xmm, Xmm);
 	}
 
+	inline RpgVector3 GetAxisRight() const noexcept
+	{
+		RpgVector3 axisRight(Xmm.r[0]);
+		axisRight.Normalize();
+
+		return axisRight;
+	}
+
+	inline RpgVector3 GetAxisUp() const noexcept
+	{
+		RpgVector3 axisUp(Xmm.r[1]);
+		axisUp.Normalize();
+
+		return axisUp;
+	}
+
+	inline RpgVector3 GetAxisForward() const noexcept
+	{
+		RpgVector3 axisForward(Xmm.r[2]);
+		axisForward.Normalize();
+
+		return axisForward;
+	}
+
 	inline RpgVector3 GetPosition() const noexcept
 	{
 		return Xmm.r[3];
@@ -1205,10 +1229,6 @@ public:
 	};
 
 
-private:
-	DirectX::BoundingFrustum DxFrustum;
-
-
 public:
 	RpgBoundingFrustum() noexcept = default;
 
@@ -1287,6 +1307,10 @@ public:
 	{
 		return DxFrustum.Intersects(frustum.DxFrustum);
 	}
+
+
+private:
+	DirectX::BoundingFrustum DxFrustum;
 
 };
 

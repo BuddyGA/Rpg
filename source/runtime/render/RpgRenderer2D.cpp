@@ -19,8 +19,8 @@ int RpgRenderer2D::GetOrAddMaterialInstanceId(const RpgSharedMaterial& material,
 	RPG_Assert(material);
 	RPG_Assert(texture);
 
-	RpgWeakPtr<RpgMaterial> materialToCheck = material->IsInstance() ? material->GetParentMaterial() : material;
-	RpgWeakPtr<RpgTexture2D> textureToCheck = texture ? texture : DefaultTexture;
+	const RpgSharedMaterial& materialToCheck = material->IsInstance() ? material->GetParentMaterial() : material;
+	const RpgSharedTexture2D& textureToCheck = texture ? texture : DefaultTexture;
 	int materialInstanceIndex = RPG_INDEX_INVALID;
 
 	for (int i = 0; i < MaterialInstanceTextures.GetCount(); ++i)
@@ -40,7 +40,7 @@ int RpgRenderer2D::GetOrAddMaterialInstanceId(const RpgSharedMaterial& material,
 
 		FMaterialInstanceTexture& instance = MaterialInstanceTextures.Add();
 		instance.Material = RpgMaterial::s_CreateSharedInstance(RpgName::Format("%s_inst_%i", *material->GetName(), material.GetRefCount()), material);
-		instance.Texture = textureToCheck.AsShared();
+		instance.Texture = textureToCheck;
 		instance.Material->SetParameterTextureValue(bIsText ? RpgMaterialParameterTexture::OPACITY_MASK : RpgMaterialParameterTexture::BASE_COLOR, instance.Texture);
 	}
 

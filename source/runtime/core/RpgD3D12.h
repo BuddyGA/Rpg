@@ -83,13 +83,6 @@ namespace RpgD3D12
 
 	class FResourceDescriptorPool
 	{
-	private:
-		ComPtr<ID3D12DescriptorHeap> Heap;
-		D3D12_DESCRIPTOR_HEAP_DESC Desc;
-		uint32_t IncrementSize;
-		SDL_AtomicInt DescriptorIndex;
-
-
 	public:
 		FResourceDescriptorPool(D3D12_DESCRIPTOR_HEAP_TYPE in_Type, uint32_t in_NumDescriptors, bool in_bShaderVisible) noexcept;
 
@@ -122,6 +115,13 @@ namespace RpgD3D12
 
 			return descriptor;
 		}
+
+
+	private:
+		ComPtr<ID3D12DescriptorHeap> Heap;
+		D3D12_DESCRIPTOR_HEAP_DESC Desc;
+		uint32_t IncrementSize;
+		SDL_AtomicInt DescriptorIndex;
 
 	};
 

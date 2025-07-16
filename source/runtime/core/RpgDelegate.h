@@ -21,9 +21,6 @@ class RpgObjectFunction : public RpgFunction<TArgs...>
 public:
 	typedef void(T::*FFunction)(TArgs...);
 
-private:
-	T* Object;
-	FFunction Function;
 
 public:
 	RpgObjectFunction(T* inObject, FFunction inFunction) noexcept
@@ -47,6 +44,11 @@ public:
 		return Function;
 	}
 
+
+private:
+	T* Object;
+	FFunction Function;
+
 };
 
 
@@ -54,12 +56,8 @@ public:
 template<typename...TArgs>
 class RpgDelegateInterface
 {
-private:
+public:
 	typedef void(*FFunction)(TArgs...);
-
-protected:
-	RpgArrayInline<FFunction, 8> FreeFunctionInvokeList;
-	RpgArrayInline<RpgFunction<TArgs...>*, 16> ObjectFunctionInvokeList;
 
 
 public:
@@ -85,6 +83,32 @@ public:
 	}
 
 
+	template<typename T>
+	inline void AddObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) noexcept
+	{
+		if (FindObjectFunction(obj, function) != RPG_INDEX_INVALID)
+		{
+			return;
+		}
+
+		RpgFunction<TArgs...>* callback = new RpgObjectFunction<T, TArgs...>(obj, function);
+		ObjectFunctionInvokeList.Add(callback);
+	}
+
+
+	template<typename T>
+	inline void RemoveObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) noexcept
+	{
+		const int index = FindObjectFunction(obj, function);
+		
+		if (index != RPG_INDEX_INVALID)
+		{
+			delete ObjectFunctionInvokeList[index];
+			ObjectFunctionInvokeList.RemoveAt(index);
+		}
+	}
+
+
 private:
 	template<typename T>
 	int FindObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) const noexcept
@@ -103,30 +127,10 @@ private:
 		return RPG_INDEX_INVALID;
 	}
 
-public:
-	template<typename T>
-	inline void AddObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) noexcept
-	{
-		if (FindObjectFunction(obj, function) != RPG_INDEX_INVALID)
-		{
-			return;
-		}
 
-		RpgFunction<TArgs...>* callback = new RpgObjectFunction<T, TArgs...>(obj, function);
-		ObjectFunctionInvokeList.Add(callback);
-	}
-
-	template<typename T>
-	inline void RemoveObjectFunction(T* obj, typename RpgObjectFunction<T, TArgs...>::FFunction function) noexcept
-	{
-		const int index = FindObjectFunction(obj, function);
-		
-		if (index != RPG_INDEX_INVALID)
-		{
-			delete ObjectFunctionInvokeList[index];
-			ObjectFunctionInvokeList.RemoveAt(index);
-		}
-	}
+protected:
+	RpgArrayInline<FFunction, 8> FreeFunctionInvokeList;
+	RpgArrayInline<RpgFunction<TArgs...>*, 16> ObjectFunctionInvokeList;
 
 };
 
@@ -136,6 +140,13 @@ class RpgDelegate : public RpgDelegateInterface<>
 {
 public:
 	RpgDelegate() noexcept = default;
+
+
+	inline void Broadcast() noexcept
+	{
+		Broadcast_Implementation();
+	}
+
 
 protected:
 	template<typename...TArgs>
@@ -150,12 +161,6 @@ protected:
 		{
 			ObjectFunctionInvokeList[i]->Execute(args...);
 		}
-	}
-
-public:
-	inline void Broadcast() noexcept
-	{
-		Broadcast_Implementation();
 	}
 
 };

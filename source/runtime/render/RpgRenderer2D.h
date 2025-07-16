@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/RpgConfig.h"
 #include "RpgFont.h"
 #include "RpgMaterial.h"
 
@@ -9,6 +8,48 @@
 class RpgRenderer2D
 {
 	RPG_NOCOPY(RpgRenderer2D)
+
+public:
+	RpgRenderer2D() noexcept;
+	~RpgRenderer2D() noexcept;
+
+private:
+	int GetOrAddMaterialInstanceId(const RpgSharedMaterial& material, const RpgSharedTexture2D& texture, bool bIsText) noexcept;
+
+public:
+	void Begin(int frameIndex, RpgPointInt viewportDimension) noexcept;
+	void End(int frameIndex) noexcept;
+
+
+	inline RpgPointInt GetViewportDimension() const noexcept
+	{
+		return ViewportDimension;
+	}
+
+
+	inline void PushClipRect(RpgRectInt rect) noexcept
+	{
+		const int parentClipIndex = CurrentClipIndex;
+		CurrentClipIndex = Clips.GetCount();
+
+		FClip& clip = Clips.Add();
+		clip.Rect = rect;
+		clip.ParentClipIndex = parentClipIndex;
+	}
+
+	inline void PopClipRect() noexcept
+	{
+		CurrentClipIndex = Clips[CurrentClipIndex].ParentClipIndex;
+	}
+
+
+	void AddRect(RpgRectInt rect, RpgColorRGBA color, const RpgSharedTexture2D& texture = RpgSharedTexture2D(), const RpgSharedMaterial& material = RpgSharedMaterial()) noexcept;
+	void AddText(const char* text, int length, int x, int y, RpgColorRGBA color, const RpgSharedFont& font = RpgSharedFont(), const RpgSharedMaterial& material = RpgSharedMaterial()) noexcept;
+
+	void PreRender(RpgRenderFrameContext& frameContext) noexcept;
+	void CommandCopy(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept;
+	void CommandDraw(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept;
+
 
 private:
 	RpgSharedMaterial DefaultMaterialMesh;
@@ -107,48 +148,5 @@ private:
 		ComPtr<D3D12MA::Allocation> LineIndexBuffer;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
-
-
-public:
-	RpgRenderer2D() noexcept;
-	~RpgRenderer2D() noexcept;
-
-private:
-	int GetOrAddMaterialInstanceId(const RpgSharedMaterial& material, const RpgSharedTexture2D& texture, bool bIsText) noexcept;
-
-public:
-	void Begin(int frameIndex, RpgPointInt viewportDimension) noexcept;
-	void End(int frameIndex) noexcept;
-
-
-	inline RpgPointInt GetViewportDimension() const noexcept
-	{
-		return ViewportDimension;
-	}
-
-
-	inline void PushClipRect(RpgRectInt rect) noexcept
-	{
-		const int parentClipIndex = CurrentClipIndex;
-		CurrentClipIndex = Clips.GetCount();
-
-		FClip& clip = Clips.Add();
-		clip.Rect = rect;
-		clip.ParentClipIndex = parentClipIndex;
-	}
-
-	inline void PopClipRect() noexcept
-	{
-		CurrentClipIndex = Clips[CurrentClipIndex].ParentClipIndex;
-	}
-
-
-	void AddRect(RpgRectInt rect, RpgColorRGBA color, const RpgSharedTexture2D& texture = RpgSharedTexture2D(), const RpgSharedMaterial& material = RpgSharedMaterial()) noexcept;
-	void AddText(const char* text, int length, int x, int y, RpgColorRGBA color, const RpgSharedFont& font = RpgSharedFont(), const RpgSharedMaterial& material = RpgSharedMaterial()) noexcept;
-
-
-	void PreRender(RpgRenderFrameContext& frameContext) noexcept;
-	void CommandCopy(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept;
-	void CommandDraw(const RpgRenderFrameContext& frameContext, ID3D12GraphicsCommandList* cmdList) noexcept;
 
 };

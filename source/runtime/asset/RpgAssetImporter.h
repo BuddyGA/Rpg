@@ -46,10 +46,6 @@ class RpgAssetImporter final
 {
 	RPG_NOCOPYMOVE(RpgAssetImporter)
 
-private:
-	RpgAssetImportType ImportingType;
-
-
 public:
 	RpgAssetImporter() noexcept;
 	~RpgAssetImporter() noexcept;
@@ -62,5 +58,9 @@ public:
 	{
 		return ImportingType;
 	}
+
+
+private:
+	RpgAssetImportType ImportingType;
 
 };

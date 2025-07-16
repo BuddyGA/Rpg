@@ -7,8 +7,12 @@ RpgPhysicsWorldSubsystem::RpgPhysicsWorldSubsystem() noexcept
 {
 	Name = "PhysicsWorldSubsystem";
 	bTickUpdateCollision = false;
+
+#ifndef RPG_BUILD_SHIPPING
 	bDebugDrawCollisionBound = false;
 	bDebugDrawCollisionShape = false;
+#endif // !RPG_BUILD_SHIPPING
+
 }
 
 

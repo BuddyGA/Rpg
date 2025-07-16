@@ -12,9 +12,9 @@ RpgAnimationWorldSubsystem::RpgAnimationWorldSubsystem() noexcept
 {
 	Name = "AnimationWorldSubsystem";
 
-	bTickAnimationPose = false;
 	GlobalPlayRate = 1.0f;
 	bDebugDrawSkeletonBones = false;
+	bTickAnimationPose = false;
 }
 
 

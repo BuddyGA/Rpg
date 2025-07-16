@@ -195,7 +195,7 @@
     <ClCompile Include="source\runtime\render\RpgRenderResource_MeshSkinned.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\engine\script\RpgScriptDebugCamera.cpp">
+    <ClCompile Include="source\runtime\engine\script\RpgScript_DebugCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\input\RpgInputManager.cpp">
@@ -226,6 +226,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\runtime\physics\task\RpgPhysicsTask_UpdateShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\runtime\engine\script\RpgScript_Gameplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -294,9 +297,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\core\RpgD3D12.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\runtime\core\RpgConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\render\task\RpgRenderTask_CompilePSO.h">
@@ -431,7 +431,7 @@
     <ClInclude Include="source\runtime\asset\task\RpgAssimpTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\runtime\engine\script\RpgScriptDebugCamera.h">
+    <ClInclude Include="source\runtime\engine\script\RpgScript_DebugCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\input\RpgInputTypes.h">
@@ -459,6 +459,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\runtime\physics\task\RpgPhysicsTask_UpdateShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\runtime\engine\script\RpgScript_Gameplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #include "render/RpgRenderer.h"
 #include "render/RpgSceneViewport.h"
 #include "gui/RpgGuiContext.h"
-#include "script/RpgScriptDebugCamera.h"
+#include "script/RpgScript_DebugCamera.h"
 
 
 
@@ -16,34 +16,6 @@ extern class RpgEngine* g_Engine;
 class RpgEngine 
 {
 	RPG_NOCOPYMOVE(RpgEngine)
-
-private:
-	// Main window
-	SDL_Window* Window;
-	HWND NativeWindowHandle;
-
-	// Input manager
-	RpgInputManager InputManager;
-
-	// Created worlds. Main world always at index 0
-	RpgArray<RpgUniquePtr<RpgWorld>> Worlds;
-	RpgWorld* MainWorld;
-
-	// Main renderer
-	RpgUniquePtr<RpgRenderer> Renderer;
-
-	// Main scene viewport
-	RpgSceneViewport SceneViewport;
-	
-	// GUI context
-	RpgGuiContext GuiContext;
-
-	// Main camera object inside main world
-	RpgGameObjectID MainCameraObject;
-
-	// Script camera
-	RpgScriptDebugCamera ScriptDebugCamera;
-
 
 public:
 	RpgEngine(const char* windowTitle) noexcept;
@@ -122,6 +94,38 @@ public:
 	}
 
 
+private:
+	void CreateTestLevel() noexcept;
+
+
+private:
+	// Main window
+	SDL_Window* Window;
+	HWND NativeWindowHandle;
+
+	// Input manager
+	RpgInputManager InputManager;
+
+	// Created worlds. Main world always at index 0
+	RpgArray<RpgUniquePtr<RpgWorld>> Worlds;
+	RpgWorld* MainWorld;
+
+	// Main renderer
+	RpgUniquePtr<RpgRenderer> Renderer;
+
+	// Main scene viewport
+	RpgSceneViewport SceneViewport;
+
+	// GUI context
+	RpgGuiContext GuiContext;
+
+	// Main camera object inside main world
+	RpgGameObjectID MainCameraObject;
+
+	// Script camera
+	RpgScript_DebugCamera ScriptDebugCamera;
+
+
 public:
 	int FpsLimit;
 
@@ -131,9 +135,5 @@ private:
 	float FpsTimeMs;
 	int FpsCountMs;
 	RpgString FpsString;
-
-
-private:
-	void CreateTestLevel() noexcept;
 
 };

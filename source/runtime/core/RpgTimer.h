@@ -6,12 +6,6 @@
 
 class RpgTimer
 {
-private:
-	float PerformanceFrequency;
-	uint64_t StartTickCounter;
-	uint64_t PrevTickCounter;
-	float DeltaTime;
-
 public:
 	// Micro seconds
 	static constexpr int TIME_UNIT = 1000000;
@@ -71,5 +65,12 @@ public:
 	{
 		return DeltaTime / TIME_UNIT;
 	}
+
+
+private:
+	float PerformanceFrequency;
+	uint64_t StartTickCounter;
+	uint64_t PrevTickCounter;
+	float DeltaTime;
 
 };

@@ -15,6 +15,38 @@ class RpgMaterialResource
 public:
 	typedef int FMaterialID;
 
+
+public:
+	RpgMaterialResource() noexcept;
+	void UpdateResources() noexcept;
+	void CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept;
+	void CommandBindShaderResources(ID3D12GraphicsCommandList* cmdList) const noexcept;
+	void CommandBindMaterial(ID3D12GraphicsCommandList* cmdList, FMaterialID materialId) const noexcept;
+
+
+	inline void Reset() noexcept
+	{
+		Materials.Clear();
+		TextureDescriptors.Clear();
+		VectorScalarData.Clear();
+		ParameterRootConstants.Clear();
+		UploadTextureIndices.Clear(true);
+	}
+
+	inline FMaterialID AddMaterial(const RpgSharedMaterial& material) noexcept
+	{
+		FMaterialID id = Materials.FindIndexByValue(material);
+
+		if (id == RPG_INDEX_INVALID)
+		{
+			id = Materials.GetCount();
+			Materials.AddValue(material);
+		}
+
+		return id;
+	}
+
+
 private:
 	RpgArray<RpgSharedMaterial, 8> Materials;
 
@@ -49,37 +81,6 @@ private:
 
 	RpgArray<int, 16> UploadTextureIndices;
 
-
-public:
-	RpgMaterialResource() noexcept;
-	void UpdateResources() noexcept;
-	void CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept;
-	void CommandBindShaderResources(ID3D12GraphicsCommandList* cmdList) const noexcept;
-	void CommandBindMaterial(ID3D12GraphicsCommandList* cmdList, FMaterialID materialId) const noexcept;
-
-
-	inline void Reset() noexcept
-	{
-		Materials.Clear();
-		TextureDescriptors.Clear();
-		VectorScalarData.Clear();
-		ParameterRootConstants.Clear();
-		UploadTextureIndices.Clear(true);
-	}
-
-	inline FMaterialID AddMaterial(const RpgSharedMaterial& material) noexcept
-	{
-		FMaterialID id = Materials.FindIndexByValue(material);
-
-		if (id == RPG_INDEX_INVALID)
-		{
-			id = Materials.GetCount();
-			Materials.AddValue(material);
-		}
-
-		return id;
-	}
-
 };
 
 
@@ -90,6 +91,60 @@ class RpgMeshResource
 {
 public:
 	typedef int FMeshID;
+
+
+public:
+	RpgMeshResource() noexcept;
+	FMeshID AddMesh(const RpgSharedMesh& mesh, int& out_IndexCount, int& out_IndexStart, int& out_IndexVertexOffset) noexcept;
+	void UpdateResources() noexcept;
+	void CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept;
+
+
+	inline void Reset() noexcept
+	{
+		TotalVertexCount = 0;
+		TotalIndexCount = 0;
+		MeshDatas.Clear();
+	}
+
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
+	{
+		return GetVertexBufferView<RpgVertex::FMeshPosition>(VertexPositionBuffer->GetResource());
+	}
+
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_NormalTangent() const noexcept
+	{
+		return GetVertexBufferView<RpgVertex::FMeshNormalTangent>(VertexNormalTangentBuffer->GetResource());
+	}
+
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_TexCoord() const noexcept
+	{
+		return GetVertexBufferView<RpgVertex::FMeshTexCoord>(VertexTexCoordBuffer->GetResource());
+	}
+
+	inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const noexcept
+	{
+		D3D12_INDEX_BUFFER_VIEW view{};
+		view.BufferLocation = IndexBuffer->GetResource()->GetGPUVirtualAddress();
+		view.Format = DXGI_FORMAT_R32_UINT;
+		view.SizeInBytes = static_cast<UINT>(sizeof(RpgVertex::FIndex) * TotalIndexCount);
+
+		return view;
+	}
+
+
+private:
+	template<typename TVertex>
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource) const noexcept
+	{
+		D3D12_VERTEX_BUFFER_VIEW view{};
+		view.BufferLocation = vertexBufferResource->GetGPUVirtualAddress();
+		view.StrideInBytes = sizeof(TVertex);
+		view.SizeInBytes = static_cast<UINT>(sizeof(TVertex) * TotalVertexCount);
+
+		return view;
+	}
+
 
 private:
 	struct FMeshData
@@ -123,59 +178,6 @@ private:
 	// Staging buffer
 	ComPtr<D3D12MA::Allocation> StagingBuffer;
 
-
-public:
-	RpgMeshResource() noexcept;
-	FMeshID AddMesh(const RpgSharedMesh& mesh, int& out_IndexCount, int& out_IndexStart, int& out_IndexVertexOffset) noexcept;
-	void UpdateResources() noexcept;
-	void CommandCopy(ID3D12GraphicsCommandList* cmdList) noexcept;
-
-
-	inline void Reset() noexcept
-	{
-		TotalVertexCount = 0;
-		TotalIndexCount = 0;
-		MeshDatas.Clear();
-	}
-
-private:
-	template<typename TVertex>
-	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource) const noexcept
-	{
-		D3D12_VERTEX_BUFFER_VIEW view{};
-		view.BufferLocation = vertexBufferResource->GetGPUVirtualAddress();
-		view.StrideInBytes = sizeof(TVertex);
-		view.SizeInBytes = static_cast<UINT>(sizeof(TVertex) * TotalVertexCount);
-
-		return view;
-	}
-
-public:
-	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
-	{
-		return GetVertexBufferView<RpgVertex::FMeshPosition>(VertexPositionBuffer->GetResource());
-	}
-
-	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_NormalTangent() const noexcept
-	{
-		return GetVertexBufferView<RpgVertex::FMeshNormalTangent>(VertexNormalTangentBuffer->GetResource());
-	}
-
-	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_TexCoord() const noexcept
-	{
-		return GetVertexBufferView<RpgVertex::FMeshTexCoord>(VertexTexCoordBuffer->GetResource());
-	}
-
-	inline D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const noexcept
-	{
-		D3D12_INDEX_BUFFER_VIEW view{};
-		view.BufferLocation = IndexBuffer->GetResource()->GetGPUVirtualAddress();
-		view.Format = DXGI_FORMAT_R32_UINT;
-		view.SizeInBytes = static_cast<UINT>(sizeof(RpgVertex::FIndex) * TotalIndexCount);
-
-		return view;
-	}
-
 };
 
 
@@ -187,76 +189,6 @@ class RpgMeshSkinnedResource
 public:
 	typedef int FMeshID;
 	typedef int FSkeletonID;
-
-
-private:
-	struct FMeshData
-	{
-		RpgSharedMesh Mesh;
-		int VertexStart{ 0 };
-		int VertexCount{ 0 };
-		int IndexStart{ 0 };
-		int IndexCount{ 0 };
-		int InstanceCount{ 0 };
-	};
-
-	// Per mesh data
-	RpgArray<FMeshData> MeshDatas;
-
-	// Skeleton bone skinning transforms
-	RpgArray<RpgMatrixTransform> SkeletonBoneSkinningTransforms;
-
-	// Per object parameter
-	RpgArray<RpgShaderSkinnedObjectParameter> ObjectParameters;
-
-	// Vertex count
-	int VertexCount;
-
-	// Index count
-	int IndexCount;
-
-	// Skinned vertex count
-	int SkinnedVertexCount;
-
-	// Skinned index count
-	int SkinnedIndexCount;
-
-
-	// (VBO) Vertex position
-	ComPtr<D3D12MA::Allocation> VertexPositionBuffer;
-
-	// (VBO) Vertex normal-tangent
-	ComPtr<D3D12MA::Allocation> VertexNormalTangentBuffer;
-
-	// (VBO) Vertex texcoord
-	ComPtr<D3D12MA::Allocation> VertexTexCoordBuffer;
-
-	// (VBO) Vertex skin (bone, weight)
-	ComPtr<D3D12MA::Allocation> VertexSkinBuffer;
-
-	// (IBO) Vertex index
-	ComPtr<D3D12MA::Allocation> IndexBuffer;
-
-
-	// (SRV) Skeleton bone skinning buffer
-	ComPtr<D3D12MA::Allocation> SkeletonBoneSkinningBuffer;
-
-
-	// (UAV->VBO) Skinned vertex position from compute
-	ComPtr<D3D12MA::Allocation> SkinnedVertexPositionBuffer;
-
-	// (UAV->VBO) Skinned vertex normal-tangent from compute
-	ComPtr<D3D12MA::Allocation> SkinnedVertexNormalTangentBuffer;
-
-	// (VBO) Skinned vertex texcoord
-	ComPtr<D3D12MA::Allocation> SkinnedVertexTexCoordBuffer;
-
-	// (IBO) Skinned vertex index
-	ComPtr<D3D12MA::Allocation> SkinnedIndexBuffer;
-
-
-	// Staging buffer
-	ComPtr<D3D12MA::Allocation> StagingBuffer;
 
 
 public:
@@ -295,20 +227,6 @@ public:
 		return ObjectParameters;
 	}
 
-
-private:
-	template<typename TVertex>
-	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource, int vertexCount) const noexcept
-	{
-		D3D12_VERTEX_BUFFER_VIEW view{};
-		view.BufferLocation = vertexBufferResource->GetGPUVirtualAddress();
-		view.StrideInBytes = sizeof(TVertex);
-		view.SizeInBytes = static_cast<UINT>(sizeof(TVertex) * vertexCount);
-
-		return view;
-	}
-
-public:
 	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView_Position() const noexcept
 	{
 		return GetVertexBufferView<RpgVertex::FMeshPosition>(VertexPositionBuffer->GetResource(), VertexCount);
@@ -394,6 +312,89 @@ public:
 		return SkinnedVertexNormalTangentBuffer->GetResource();
 	}
 
+
+private:
+	template<typename TVertex>
+	inline D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView(ID3D12Resource* vertexBufferResource, int vertexCount) const noexcept
+	{
+		D3D12_VERTEX_BUFFER_VIEW view{};
+		view.BufferLocation = vertexBufferResource->GetGPUVirtualAddress();
+		view.StrideInBytes = sizeof(TVertex);
+		view.SizeInBytes = static_cast<UINT>(sizeof(TVertex) * vertexCount);
+
+		return view;
+	}
+
+
+private:
+	struct FMeshData
+	{
+		RpgSharedMesh Mesh;
+		int VertexStart{ 0 };
+		int VertexCount{ 0 };
+		int IndexStart{ 0 };
+		int IndexCount{ 0 };
+		int InstanceCount{ 0 };
+	};
+
+	// Per mesh data
+	RpgArray<FMeshData> MeshDatas;
+
+	// Skeleton bone skinning transforms
+	RpgArray<RpgMatrixTransform> SkeletonBoneSkinningTransforms;
+
+	// Per object parameter
+	RpgArray<RpgShaderSkinnedObjectParameter> ObjectParameters;
+
+	// Vertex count
+	int VertexCount;
+
+	// Index count
+	int IndexCount;
+
+	// Skinned vertex count
+	int SkinnedVertexCount;
+
+	// Skinned index count
+	int SkinnedIndexCount;
+
+
+	// (VBO) Vertex position
+	ComPtr<D3D12MA::Allocation> VertexPositionBuffer;
+
+	// (VBO) Vertex normal-tangent
+	ComPtr<D3D12MA::Allocation> VertexNormalTangentBuffer;
+
+	// (VBO) Vertex texcoord
+	ComPtr<D3D12MA::Allocation> VertexTexCoordBuffer;
+
+	// (VBO) Vertex skin (bone, weight)
+	ComPtr<D3D12MA::Allocation> VertexSkinBuffer;
+
+	// (IBO) Vertex index
+	ComPtr<D3D12MA::Allocation> IndexBuffer;
+
+
+	// (SRV) Skeleton bone skinning buffer
+	ComPtr<D3D12MA::Allocation> SkeletonBoneSkinningBuffer;
+
+
+	// (UAV->VBO) Skinned vertex position from compute
+	ComPtr<D3D12MA::Allocation> SkinnedVertexPositionBuffer;
+
+	// (UAV->VBO) Skinned vertex normal-tangent from compute
+	ComPtr<D3D12MA::Allocation> SkinnedVertexNormalTangentBuffer;
+
+	// (VBO) Skinned vertex texcoord
+	ComPtr<D3D12MA::Allocation> SkinnedVertexTexCoordBuffer;
+
+	// (IBO) Skinned vertex index
+	ComPtr<D3D12MA::Allocation> SkinnedIndexBuffer;
+
+
+	// Staging buffer
+	ComPtr<D3D12MA::Allocation> StagingBuffer;
+
 };
 
 
@@ -406,41 +407,6 @@ public:
 	typedef int FViewID;
 	typedef int FLightID;
 	typedef int FTransformID;
-
-private:
-	struct FTagLightID
-	{
-		int TagId{ 0 };
-		int LightId{ 0 };
-
-		inline bool operator==(int rhs) const noexcept
-		{
-			return TagId == rhs;
-		}
-	};
-
-	RpgArrayInline<FTagLightID, RPG_SHADER_MAX_LIGHT> CachedTagLights;
-
-	RpgShaderWorldData WorldData;
-	ComPtr<D3D12MA::Allocation> WorldConstantBuffer;
-
-
-	struct FTagTransformID
-	{
-		int TagId{ 0 };
-		int TransformId{ 0 };
-
-		inline bool operator==(int rhs) const noexcept
-		{
-			return TagId == rhs;
-		}
-	};
-
-	RpgArray<FTagTransformID> CachedTagTransforms;
-	RpgArray<RpgMatrixTransform> TransformDatas;
-	ComPtr<D3D12MA::Allocation> TransformStructBuffer;
-
-	ComPtr<D3D12MA::Allocation> StagingBuffer;
 
 
 public:
@@ -516,6 +482,43 @@ public:
 	}
 
 
+private:
+	struct FTagLightID
+	{
+		int TagId{ 0 };
+		int LightId{ 0 };
+
+		inline bool operator==(int rhs) const noexcept
+		{
+			return TagId == rhs;
+		}
+	};
+
+	RpgArrayInline<FTagLightID, RPG_SHADER_MAX_LIGHT> CachedTagLights;
+
+	RpgShaderWorldData WorldData;
+	ComPtr<D3D12MA::Allocation> WorldConstantBuffer;
+
+
+	struct FTagTransformID
+	{
+		int TagId{ 0 };
+		int TransformId{ 0 };
+
+		inline bool operator==(int rhs) const noexcept
+		{
+			return TagId == rhs;
+		}
+	};
+
+	RpgArray<FTagTransformID> CachedTagTransforms;
+	RpgArray<RpgMatrixTransform> TransformDatas;
+	ComPtr<D3D12MA::Allocation> TransformStructBuffer;
+
+	ComPtr<D3D12MA::Allocation> StagingBuffer;
+
+
+
 #ifndef RPG_BUILD_SHIPPING
 private:
 	size_t DebugLineVertexSizeBytes;
@@ -530,7 +533,6 @@ public:
 
 public:
 	void Debug_CommandDrawIndexed_Line(ID3D12GraphicsCommandList* cmdList, const RpgMaterialResource* materialResource, RpgMaterialResource::FMaterialID materialId, RpgMaterialResource::FMaterialID noDepthMaterialId, FViewID cameraId) const noexcept;
-
 #endif // !RPG_BUILD_SHIPPING
 
 };

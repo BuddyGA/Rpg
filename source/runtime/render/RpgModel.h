@@ -4,6 +4,13 @@
 #include "RpgMaterial.h"
 
 
+// Maximum model meshes/materials 
+#define RPG_MODEL_MAX_MESH	8
+
+// Maximum model LOD count
+#define RPG_MODEL_MAX_LOD	4
+
+
 
 typedef RpgSharedPtr<class RpgModel> RpgSharedModel;
 
@@ -11,20 +18,8 @@ class RpgModel
 {
 	RPG_NOCOPY(RpgModel)
 
-private:
-	RpgName Name;
-	int MeshCount;
-	int LodCount;
-	RpgBoundingAABB Bound;
-
-	RpgSharedMesh Meshes[RPG_MODEL_MAX_MESH][RPG_MODEL_MAX_LOD];
-	RpgSharedMaterial Materials[RPG_MODEL_MAX_MESH];
-
-
-private:
-	RpgModel(const RpgName& name) noexcept;
-
 public:
+	RpgModel(const RpgName& name) noexcept;
 	~RpgModel() noexcept;
 
 	int AddMeshEmpty() noexcept;
@@ -98,6 +93,16 @@ public:
 
 		return Materials[meshIndex];
 	}
+
+
+private:
+	RpgName Name;
+	int MeshCount;
+	int LodCount;
+	RpgBoundingAABB Bound;
+
+	RpgSharedMesh Meshes[RPG_MODEL_MAX_MESH][RPG_MODEL_MAX_LOD];
+	RpgSharedMaterial Materials[RPG_MODEL_MAX_MESH];
 
 
 public:

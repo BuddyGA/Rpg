@@ -1,9 +1,19 @@
 #pragma once
 
-#include "core/RpgConfig.h"
 #include "core/RpgMath.h"
 #include "core/RpgString.h"
 #include "core/RpgPointer.h"
+
+
+// Maximum bone count in skeleton
+#define RPG_SKELETON_MAX_BONE				254
+
+// Invalid skeleton bone index
+#define RPG_SKELETON_BONE_INDEX_INVALID		255
+
+// Maximum number of vertex a bone can influences
+#define RPG_SKELETON_BONE_MAX_VERTEX		8
+
 
 
 RPG_LOG_DECLARE_CATEGORY_EXTERN(RpgLogAnimation)
@@ -22,12 +32,6 @@ class RpgAnimationTask_TickPose;
 // ======================================================================================================================= //
 class RpgAnimationPose
 {
-private:
-	RpgArray<RpgMatrixTransform> BoneLocalTransforms;
-	RpgArray<RpgMatrixTransform> BonePoseTransforms;
-	RpgArray<uint8_t> BoneDirtyTransforms;
-
-
 public:
 	RpgAnimationPose() noexcept = default;
 
@@ -126,6 +130,12 @@ public:
 		return BonePoseTransforms;
 	}
 
+
+private:
+	RpgArray<RpgMatrixTransform> BoneLocalTransforms;
+	RpgArray<RpgMatrixTransform> BonePoseTransforms;
+	RpgArray<uint8_t> BoneDirtyTransforms;
+
 };
 
 
@@ -141,14 +151,6 @@ class RpgAnimationSkeleton
 	RPG_NOCOPY(RpgAnimationSkeleton)
 
 private:
-	RpgName Name;
-	RpgArray<RpgName> BoneNames;
-	RpgArray<int> BoneParentIndices;
-	RpgArray<RpgMatrixTransform> BoneInverseBindPoseTransforms;
-	RpgAnimationPose BindPose;
-
-
-private:
 	RpgAnimationSkeleton(const RpgName& name) noexcept;
 
 public:
@@ -156,7 +158,6 @@ public:
 
 	void SaveToAssetFile(const RpgString& filePath) noexcept;
 	void LoadFromAssetFile(const RpgString& filePath) noexcept;
-
 
 
 	inline int AddBone(const RpgName& name, int parentIndex, const RpgMatrixTransform& boneLocalTransform, const RpgMatrixTransform& boneInverseBindPoseTransform) noexcept
@@ -180,8 +181,6 @@ public:
 	{
 		BindPose.UpdateBonePoseTransforms(this);
 	}
-
-
 
 	inline const RpgName& GetName() const noexcept
 	{
@@ -229,6 +228,14 @@ public:
 	}
 
 
+private:
+	RpgName Name;
+	RpgArray<RpgName> BoneNames;
+	RpgArray<int> BoneParentIndices;
+	RpgArray<RpgMatrixTransform> BoneInverseBindPoseTransforms;
+	RpgAnimationPose BindPose;
+
+
 public:
 	[[nodiscard]] static RpgSharedAnimationSkeleton s_CreateShared(const RpgName& name) noexcept;
 
@@ -271,17 +278,6 @@ class RpgAnimationClip
 	RPG_NOCOPY(RpgAnimationClip)
 
 private:
-	// Clip name
-	RpgName Name;
-
-	// Animation duration in seconds
-	float DurationSeconds;
-
-	// Track for each bone
-	RpgArray<RpgAnimationTrack> Tracks;
-
-
-private:
 	RpgAnimationClip(const RpgName& in_Name, float in_DurationSeconds) noexcept;
 
 public:
@@ -311,6 +307,16 @@ public:
 		return Tracks;
 	}
 
+
+private:
+	// Clip name
+	RpgName Name;
+
+	// Animation duration in seconds
+	float DurationSeconds;
+
+	// Track for each bone
+	RpgArray<RpgAnimationTrack> Tracks;
 
 
 public:

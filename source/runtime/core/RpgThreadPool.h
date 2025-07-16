@@ -8,11 +8,6 @@ class RpgThreadTask
 {
 	RPG_NOCOPYMOVE(RpgThreadTask)
 
-private:
-	// [0]: Idle, [1]: Running, [2]: Done
-	mutable SDL_AtomicInt State;
-
-
 public:
 	RpgThreadTask() noexcept
 		: State()
@@ -73,6 +68,11 @@ public:
 	{
 		return SDL_GetAtomicInt(&State) == 2;
 	}
+
+
+private:
+	// [0]: Idle, [1]: Running, [2]: Done
+	mutable SDL_AtomicInt State;
 
 };
 

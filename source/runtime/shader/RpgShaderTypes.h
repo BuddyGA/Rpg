@@ -2,7 +2,6 @@
 
 #ifndef RPG_SHADER_HLSL
 
-#include "core/RpgConfig.h"
 #include "core/RpgMath.h"
 
 
@@ -17,7 +16,6 @@ static_assert(sizeof(type) <= limitSizeBytes, "Shader constant type of <" ## #ty
 
 
 #else
-#include "../../core/RpgConfig.h"
 
 typedef float4      RpgShaderFloat4;
 typedef float4x4    RpgShaderMatrix;
@@ -28,6 +26,11 @@ typedef int4        RpgShaderInt4;
 #endif // !RPG_SHADER_HLSL
 
 
+// Maximum material param vector
+#define RPG_SHADER_MATERIAL_PARAM_VECTOR_COUNT      12
+
+// Maximum material param scalar
+#define RPG_SHADER_MATERIAL_PARAM_SCALAR_COUNT      16
 
 // Maximum camera per world in single frame rendering
 #define RPG_SHADER_CAMERA_MAX_COUNT                 4
@@ -60,8 +63,8 @@ typedef int4        RpgShaderInt4;
 
 struct RpgShaderMaterialVectorScalarData
 {
-    RpgShaderFloat4 Vectors[RPG_MATERIAL_PARAM_VECTOR_COUNT];
-    float Scalars[RPG_MATERIAL_PARAM_SCALAR_COUNT];
+    RpgShaderFloat4 Vectors[RPG_SHADER_MATERIAL_PARAM_VECTOR_COUNT];
+    float Scalars[RPG_SHADER_MATERIAL_PARAM_SCALAR_COUNT];
 };
 RPG_SHADER_CONSTANT_STATIC_ASSERT_LIMIT(RpgShaderMaterialVectorScalarData, 16, 256)
 

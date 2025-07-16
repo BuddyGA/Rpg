@@ -7,15 +7,17 @@
 class RpgRenderWorldSubsystem : public RpgWorldSubsystem
 {
 public:
-	bool bDebugDrawMeshBound;
-	bool bDebugDrawLightBound;
-
-
-public:
 	RpgRenderWorldSubsystem() noexcept;
 
 protected:
 	virtual void PostTickUpdate() noexcept override;
 	virtual void Render(int frameIndex, RpgRenderer* renderer) noexcept override;
+
+
+#ifndef RPG_BUILD_SHIPPING
+public:
+	bool bDebugDrawMeshBound;
+	bool bDebugDrawLightBound;
+#endif // !RPG_BUILD_SHIPPING
 
 };

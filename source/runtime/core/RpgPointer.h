@@ -22,14 +22,6 @@ class RpgUniquePtr
 {
 	RPG_NOCOPY(RpgUniquePtr)
 
-	template<typename U, TUniqueDeleteFunction<U>>
-	friend class RpgUniquePtr;
-
-
-private:
-	T* Ref;
-
-
 public:
 	RpgUniquePtr(T* in_Ref = nullptr) noexcept
 		: Ref(in_Ref)
@@ -113,6 +105,7 @@ public:
 		return Ref != nullptr;
 	}
 
+
 public:
 	inline bool IsValid() const noexcept
 	{
@@ -135,6 +128,14 @@ public:
 		return Ref;
 	}
 
+
+private:
+	T* Ref;
+
+
+	template<typename U, TUniqueDeleteFunction<U>>
+	friend class RpgUniquePtr;
+
 };
 
 
@@ -153,9 +154,6 @@ struct RpgRefCount
 template<typename T>
 class RpgSharedPtr
 {
-private:
-	RpgRefCount<T>* Ref;
-
 
 public:
 	explicit RpgSharedPtr(T* in_Obj = nullptr) noexcept
@@ -301,13 +299,9 @@ public:
 
 
 	template<typename U>
-	friend class RpgSharedPtr;
-
-
-	template<typename U>
 	[[nodiscard]] inline RpgSharedPtr<U> Cast() const noexcept
 	{
-		static_assert(std::is_base_of<U, T>::value, "RpgSharePtr Cast type of <U> must be a parent of type of <T>!");
+		static_assert(std::is_convertible<T*, U*>::value, "RpgSharedPtr: Cast type <T> must be convertible to type <U>!");
 		
 		if (Ref)
 		{
@@ -323,6 +317,13 @@ public:
 	}
 
 
+private:
+	RpgRefCount<T>* Ref;
+
+
+	template<typename U>
+	friend class RpgSharedPtr;
+
 	template<typename>
 	friend class RpgWeakPtr;
 
@@ -334,12 +335,15 @@ public:
 template<typename T>
 class RpgWeakPtr
 {
-private:
-	RpgRefCount<T>* Ref;
-
 
 public:
-	RpgWeakPtr(const RpgSharedPtr<T>& shared) noexcept
+	RpgWeakPtr() noexcept
+	{
+		Ref = nullptr;
+	}
+
+
+	explicit RpgWeakPtr(const RpgSharedPtr<T>& shared) noexcept
 	{
 		Ref = shared.Ref;
 
@@ -424,10 +428,14 @@ public:
 		return Ref == rhs.Ref;
 	}
 
-
 	inline bool operator!=(const RpgWeakPtr& rhs) const noexcept
 	{
-		return !(*this == rhs);
+		return Ref != rhs.Ref;
+	}
+
+	inline bool operator==(const RpgSharedPtr<T>& rhs) noexcept
+	{
+		return Ref == rhs.Ref;
 	}
 
 
@@ -476,12 +484,11 @@ public:
 	}
 
 
-	inline bool operator==(const RpgSharedPtr<T>& rhs) const noexcept
-	{
-		return Ref == rhs.Ref;
-	}
+private:
+	RpgRefCount<T>* Ref;
 
 };
+
 
 
 

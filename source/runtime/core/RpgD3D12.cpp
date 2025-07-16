@@ -1,5 +1,4 @@
 #include "RpgD3D12.h"
-#include "core/RpgConfig.h"
 #include "core/RpgCommandLine.h"
 
 

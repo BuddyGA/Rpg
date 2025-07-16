@@ -12,13 +12,6 @@ class RpgState
 {
 	RPG_NOCOPYMOVE(RpgState)
 
-	friend class RpgStateMachine;
-
-protected:
-	RpgName Name;
-	bool bTickUpdate;
-
-
 public:
 	RpgState(const RpgName& in_Name) noexcept
 	{
@@ -29,17 +22,25 @@ public:
 	virtual ~RpgState() noexcept = default;
 
 
+	inline const RpgName& GetName() const noexcept
+	{
+		return Name;
+	}
+
+
 protected:
 	virtual bool CanEnterState(RpgStateMachine& stateMachine) const noexcept { return true; }
 	virtual void OnEnterState(RpgStateMachine& stateMachine) noexcept {}
 	virtual void OnLeaveState(RpgStateMachine& stateMachine) noexcept {}
 	virtual void OnTickUpdateState(RpgStateMachine& stateMachine, float deltaTime) {}
 
-public:
-	inline const RpgName& GetName() const noexcept
-	{
-		return Name;
-	}
+
+protected:
+	RpgName Name;
+	bool bTickUpdate;
+
+
+	friend class RpgStateMachine;
 
 };
 
@@ -48,11 +49,6 @@ public:
 class RpgStateMachine
 {
 	RPG_NOCOPYMOVE(RpgStateMachine)
-
-private:
-	RpgArrayInline<RpgState*, 32> States;
-	RpgState* CurrentState;
-
 
 public:
 	RpgStateMachine() noexcept
@@ -128,5 +124,10 @@ public:
 			CurrentState->OnTickUpdateState(*this, deltaTime);
 		}
 	}
+
+
+private:
+	RpgArrayInline<RpgState*, 32> States;
+	RpgState* CurrentState;
 
 };

@@ -18,7 +18,7 @@ void RpgShadowViewport_SpotLight::PreRender(RpgRenderFrameContext& frameContext,
 	frame.DrawSkinnedMeshes.Clear();
 
 	const uint16_t shadowTextureDimension = RpgRenderLight::SHADOW_TEXTURE_DIMENSION_SPOT_LIGHT[frameContext.ShadowQuality];
-	RpgSharedTexture2D& depthTexture = frame.DepthTexture;
+	RpgSharedTexture2D& depthTexture = frame.TextureDepth;
 
 	if (!depthTexture)
 	{
@@ -83,7 +83,7 @@ void RpgShadowViewport_SpotLight::SetupRenderPasses(const RpgRenderFrameContext&
 	shadowPass->Reset();
 	shadowPass->FrameContext = frameContext;
 	shadowPass->WorldResource = worldResource;
-	shadowPass->DepthTexture = frame.DepthTexture.Get();
+	shadowPass->TextureDepth = frame.TextureDepth.Get();
 	shadowPass->ViewId = ViewId;
 	shadowPass->DrawMeshData = frame.DrawMeshes.GetData();
 	shadowPass->DrawMeshCount = frame.DrawMeshes.GetCount();

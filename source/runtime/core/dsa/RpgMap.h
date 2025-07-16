@@ -13,11 +13,6 @@
 template<typename TUniqueKey, typename TValue>
 class RpgMap
 {
-private:
-	RpgArray<uint64_t> Hashes;
-	RpgArray<TUniqueKey> Keys;
-	RpgArray<TValue> Values;
-
 
 public:
 	RpgMap() noexcept
@@ -47,18 +42,47 @@ public:
 	~RpgMap() noexcept = default;
 
 
-private:
-	inline int FindIndex(uint64_t hashValue) const noexcept
+public:
+	inline RpgMap& operator=(const RpgMap& rhs) noexcept
 	{
-		for (int i = 0; i < Hashes.GetCount(); ++i)
+		if (this != &rhs)
 		{
-			if (Hashes[i] == hashValue)
-			{
-				return i;
-			}
+			Hashes = rhs.Hashes;
+			Keys = rhs.Keys;
+			Values = rhs.Values;
 		}
 
-		return RPG_INDEX_INVALID;
+		return *this;
+	}
+
+
+	inline RpgMap& operator=(RpgMap&& rhs) noexcept
+	{
+		if (this != &rhs)
+		{
+			Hashes = std::move(rhs.Hashes);
+			Keys = std::move(rhs.Keys);
+			Values = std::move(rhs.Values);
+		}
+
+		return *this;
+	}
+
+
+	/*
+	inline TValue& operator[](const TUniqueKey& key) noexcept
+	{
+		return Add(key);
+	}
+	*/
+
+
+	inline const TValue& operator[](const TUniqueKey& key) const noexcept
+	{
+		const int index = FindIndex(Rpg_GetHash(key));
+		RPG_ValidateV(index != RPG_INDEX_INVALID, "RpgMap key not found!");
+
+		return Values[index];
 	}
 
 
@@ -253,47 +277,24 @@ public:
 	}
 
 
-public:
-	inline RpgMap& operator=(const RpgMap& rhs) noexcept
+private:
+	inline int FindIndex(uint64_t hashValue) const noexcept
 	{
-		if (this != &rhs)
+		for (int i = 0; i < Hashes.GetCount(); ++i)
 		{
-			Hashes = rhs.Hashes;
-			Keys = rhs.Keys;
-			Values = rhs.Values;
+			if (Hashes[i] == hashValue)
+			{
+				return i;
+			}
 		}
 
-		return *this;
+		return RPG_INDEX_INVALID;
 	}
 
 
-	inline RpgMap& operator=(RpgMap&& rhs) noexcept
-	{
-		if (this != &rhs)
-		{
-			Hashes = std::move(rhs.Hashes);
-			Keys = std::move(rhs.Keys);
-			Values = std::move(rhs.Values);
-		}
-
-		return *this;
-	}
-
-
-	/*
-	inline TValue& operator[](const TUniqueKey& key) noexcept
-	{
-		return Add(key);
-	}
-	*/
-
-
-	inline const TValue& operator[](const TUniqueKey& key) const noexcept
-	{
-		const int index = FindIndex(Rpg_GetHash(key));
-		RPG_ValidateV(index != RPG_INDEX_INVALID, "RpgMap key not found!");
-
-		return Values[index];
-	}
+private:
+	RpgArray<uint64_t> Hashes;
+	RpgArray<TUniqueKey> Keys;
+	RpgArray<TValue> Values;
 
 };

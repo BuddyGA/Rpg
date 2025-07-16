@@ -15,6 +15,9 @@
 #define RPG_MEMORY_SIZE_MiB(n)		(RPG_MEMORY_SIZE_KiB(n) * 1024)
 #define RPG_MEMORY_SIZE_GiB(n)		(RPG_MEMORY_SIZE_MiB(n) * 1024)
 
+#define RPG_FRAME_BUFFERING			3
+
+
 
 #define RPG_NOCOPY(type)					\
 private:									\

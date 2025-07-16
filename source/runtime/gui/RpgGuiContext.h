@@ -10,13 +10,6 @@ class RpgGuiContext
 {
 	RPG_NOCOPY(RpgGuiContext)
 
-private:
-	RpgRectInt Rect;
-	RpgArray<RpgSharedFont, 4> Fonts;
-	RpgArray<RpgSharedTexture2D, 4> Textures;
-	bool bClayInitialized;
-
-
 public:
 	RpgGuiContext() noexcept;
 
@@ -24,5 +17,12 @@ public:
 	void End(RpgRenderer2D& renderer) noexcept;
 
 	void AddRect(RpgPointInt dimension, RpgColorRGBA color, const RpgSharedTexture2D& texture = RpgSharedTexture2D(), const RpgSharedMaterial& material = RpgSharedMaterial()) noexcept;
+
+
+private:
+	RpgRectInt Rect;
+	RpgArray<RpgSharedFont, 4> Fonts;
+	RpgArray<RpgSharedTexture2D, 4> Textures;
+	bool bClayInitialized;
 
 };

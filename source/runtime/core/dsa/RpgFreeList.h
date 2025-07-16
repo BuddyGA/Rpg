@@ -8,18 +8,6 @@ class RpgFreeList
 {
 	static_assert(sizeof(T) >= sizeof(int), "RpgFreeList size of type <T> must be greater than sizeof(int) 4 bytes! ");
 
-private:
-	int Capacity;
-	int Count;
-	int NextFreeIndex;
-
-	// For fast checking if index is valid
-	bool* ValidIndexArray;
-
-	// Actual data array
-	T* DataArray;
-
-
 public:
 	RpgFreeList() noexcept
 		: Capacity(0)
@@ -335,15 +323,23 @@ public:
 	}
 
 
+private:
+	int Capacity;
+	int Count;
+	int NextFreeIndex;
+
+	// For fast checking if index is valid
+	bool* ValidIndexArray;
+
+	// Actual data array
+	T* DataArray;
+
+
 
 // Iterator and ConstIterator
 public:
 	class Iterator
 	{
-		RpgFreeList* FreeList;
-		int Index;
-
-
 	public:
 		Iterator() noexcept
 			: FreeList(nullptr)
@@ -358,21 +354,7 @@ public:
 			UpdateValidIndex();
 		}
 
-	private:
-		inline void UpdateValidIndex() noexcept
-		{
-			const int capacity = FreeList->GetCapacity();
-
-			do
-			{
-				if (FreeList->IsValid(++Index))
-				{
-					break;
-				}
-			}
-			while (Index < capacity);
-		}
-
+	
 	public:
 		[[nodiscard]] inline int GetIndex() const noexcept
 		{
@@ -415,27 +397,6 @@ public:
 			return FreeList && Index >= 0 && Index < FreeList->GetCapacity();
 		}
 
-	};
-
-
-	class ConstIterator
-	{
-		const RpgFreeList* FreeList;
-		int Index;
-
-	public:
-		ConstIterator() noexcept
-			: FreeList(nullptr)
-			, Index(-1)
-		{
-		}
-
-		ConstIterator(const RpgFreeList* in_FreeList) noexcept
-			: FreeList(in_FreeList)
-			, Index(-1)
-		{
-			UpdateValidIndex();
-		}
 
 	private:
 		inline void UpdateValidIndex() noexcept
@@ -451,6 +412,32 @@ public:
 			}
 			while (Index < capacity);
 		}
+
+
+	private:
+		RpgFreeList* FreeList;
+		int Index;
+
+	};
+
+
+	class ConstIterator
+	{
+
+	public:
+		ConstIterator() noexcept
+			: FreeList(nullptr)
+			, Index(-1)
+		{
+		}
+
+		ConstIterator(const RpgFreeList* in_FreeList) noexcept
+			: FreeList(in_FreeList)
+			, Index(-1)
+		{
+			UpdateValidIndex();
+		}
+
 
 	public:
 		inline int GetIndex() const noexcept
@@ -493,6 +480,27 @@ public:
 		{
 			return FreeList && Index >= 0 && Index < FreeList->GetCapacity();
 		}
+
+
+	private:
+		inline void UpdateValidIndex() noexcept
+		{
+			const int capacity = FreeList->GetCapacity();
+
+			do
+			{
+				if (FreeList->IsValid(++Index))
+				{
+					break;
+				}
+			}
+			while (Index < capacity);
+		}
+
+
+	private:
+		const RpgFreeList* FreeList;
+		int Index;
 
 	};
 

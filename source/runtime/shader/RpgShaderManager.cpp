@@ -1,7 +1,6 @@
 #include "RpgShaderManager.h"
 #include "core/RpgThreadPool.h"
 #include "core/RpgFilePath.h"
-#include "core/RpgConfig.h"
 
 
 #define RPG_SHADER_Check(hr)	RPG_Check((hr) == S_OK)
@@ -10,34 +9,43 @@ RPG_LOG_DECLARE_CATEGORY_STATIC(RpgLogShader, VERBOSITY_DEBUG)
 
 
 
-static const wchar_t* RPG_DXC_ENTRY_POINTS[RpgShader::TYPE_MAX_COUNT] =
-{
-	L"__none__",
-	L"VS_Main",
-	L"AS_Main",
-	L"MS_Main",
-	L"GS_Main",
-	L"PS_Main",
-	L"CS_Main"
-};
-
-
-static const wchar_t* RPG_DXC_TARGET_PROFILES[RpgShader::TYPE_MAX_COUNT] =
-{
-	L"__none__",
-	L"vs_6_0",
-	L"as_6_0",
-	L"ms_6_0",
-	L"gs_6_0",
-	L"ps_6_0",
-	L"cs_6_0",
-};
 
 
 
 class RpgShaderTask_CompileHLSL : public RpgThreadTask
 {
+public:
+	RpgName Name;
+	RpgString FilePath;
+	RpgShader::EType Type;
+	RpgShader::FCompileMacros CompileMacros;
+
+
 private:
+	inline static const wchar_t* DXC_ENTRY_POINTS[RpgShader::TYPE_MAX_COUNT] =
+	{
+		L"__none__",
+		L"VS_Main",
+		L"AS_Main",
+		L"MS_Main",
+		L"GS_Main",
+		L"PS_Main",
+		L"CS_Main"
+	};
+
+
+	inline static const wchar_t* DXC_TARGET_PROFILES[RpgShader::TYPE_MAX_COUNT] =
+	{
+		L"__none__",
+		L"vs_6_0",
+		L"as_6_0",
+		L"ms_6_0",
+		L"gs_6_0",
+		L"ps_6_0",
+		L"cs_6_0",
+	};
+
+
 	struct FDefine
 	{
 		wchar_t Name[32];
@@ -45,12 +53,6 @@ private:
 	};
 
 	ComPtr<IDxcBlob> CodeBlob;
-
-public:
-	RpgName Name;
-	RpgString FilePath;
-	RpgShader::EType Type;
-	RpgShader::FCompileMacros CompileMacros;
 
 
 public:
@@ -97,8 +99,8 @@ public:
 			dxcDef.Value = defines[i].Value;
 		}
 
-		const wchar_t* entryPoint = RPG_DXC_ENTRY_POINTS[Type];
-		const wchar_t* targetProfile = RPG_DXC_TARGET_PROFILES[Type];
+		const wchar_t* entryPoint = DXC_ENTRY_POINTS[Type];
+		const wchar_t* targetProfile = DXC_TARGET_PROFILES[Type];
 
 		const wchar_t* args[] =
 		{

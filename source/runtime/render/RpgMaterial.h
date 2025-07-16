@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/RpgMath.h"
+#include "shader/RpgShaderTypes.h"
 #include "RpgTexture.h"
 
 
@@ -43,7 +44,7 @@ struct RpgMaterialParameterVector
 		return Name == rhs;
 	}
 };
-typedef RpgArrayInline<RpgMaterialParameterVector, RPG_MATERIAL_PARAM_VECTOR_COUNT> RpgMaterialParameterVectorArray;
+typedef RpgArrayInline<RpgMaterialParameterVector, RPG_SHADER_MATERIAL_PARAM_VECTOR_COUNT> RpgMaterialParameterVectorArray;
 
 
 
@@ -57,19 +58,13 @@ struct RpgMaterialParameterScalar
 		return Name == rhs;
 	}
 };
-typedef RpgArrayInline<RpgMaterialParameterScalar, RPG_MATERIAL_PARAM_SCALAR_COUNT> RpgMaterialParameterScalarArray;
+typedef RpgArrayInline<RpgMaterialParameterScalar, RPG_SHADER_MATERIAL_PARAM_SCALAR_COUNT> RpgMaterialParameterScalarArray;
 
 
 
 
 struct RpgMaterialParameterLayout
 {
-private:
-	RpgMaterialParameterTextureArray Textures;
-	RpgMaterialParameterVectorArray Vectors;
-	RpgMaterialParameterScalarArray Scalars;
-
-
 public:
 	RpgMaterialParameterLayout() noexcept
 	{
@@ -159,6 +154,12 @@ public:
 		return Scalars;
 	}
 
+
+private:
+	RpgMaterialParameterTextureArray Textures;
+	RpgMaterialParameterVectorArray Vectors;
+	RpgMaterialParameterScalarArray Scalars;
+
 };
 
 
@@ -192,34 +193,9 @@ class RpgMaterial
 {
 	RPG_NOCOPY(RpgMaterial)
 
-private:
-	RpgName Name;
-	RpgSharedMaterial ParentMaterial;
-	RpgRenderPipelineState RenderState;
-	RpgMaterialParameterLayout ParameterLayout;
-	SDL_RWLock* ParameterTextureLock;
-	SDL_RWLock* ParameterVectorLock;
-	SDL_RWLock* ParameterScalarLock;
-
-
-	enum EFlag : uint8_t
-	{
-		FLAG_None				= (0),
-		FLAG_Loading			= (1 << 0),
-		FLAG_Loaded				= (1 << 1),
-		FLAG_PendingDestroy		= (1 << 2),
-		FLAG_PSO_Pending		= (1 << 3),
-		FLAG_PSO_Compiling		= (1 << 4),
-		FLAG_PSO_Compiled		= (1 << 5),
-	};
-	uint8_t Flags;
-
-
-private:
+public:
 	RpgMaterial(const RpgName& in_Name, const RpgRenderPipelineState& in_RenderState, const RpgMaterialParameterLayout& in_ParameterLayout) noexcept;
 	RpgMaterial(const RpgName& in_Name, const RpgSharedMaterial& in_ParentMaterial) noexcept;
-
-public:
 	~RpgMaterial() noexcept;
 
 
@@ -368,6 +344,29 @@ public:
 	{
 		return (Flags & FLAG_PSO_Compiled);
 	}
+
+
+private:
+	RpgName Name;
+	RpgSharedMaterial ParentMaterial;
+	RpgRenderPipelineState RenderState;
+	RpgMaterialParameterLayout ParameterLayout;
+	SDL_RWLock* ParameterTextureLock;
+	SDL_RWLock* ParameterVectorLock;
+	SDL_RWLock* ParameterScalarLock;
+
+
+	enum EFlag : uint8_t
+	{
+		FLAG_None			= (0),
+		FLAG_Loading		= (1 << 0),
+		FLAG_Loaded			= (1 << 1),
+		FLAG_PendingDestroy = (1 << 2),
+		FLAG_PSO_Pending	= (1 << 3),
+		FLAG_PSO_Compiling	= (1 << 4),
+		FLAG_PSO_Compiled	= (1 << 5),
+	};
+	uint8_t Flags;
 
 
 public:

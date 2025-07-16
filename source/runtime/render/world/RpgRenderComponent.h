@@ -14,7 +14,7 @@ class RpgRenderTask_CaptureLight;
 
 class RpgRenderComponent_Mesh
 {
-	RPG_COMPONENT_TYPE("RpgComponent - Mesh");
+	RPG_COMPONENT_TYPE("RpgComponent (Render) - Mesh");
 
 public:
 	RpgBoundingAABB Bound;
@@ -44,7 +44,7 @@ public:
 
 class RpgRenderComponent_Light
 {
-	RPG_COMPONENT_TYPE("RpgComponent - Light");
+	RPG_COMPONENT_TYPE("RpgComponent (Render) - Light");
 
 public:
 	// Light type (point light, spot light, directional light)
@@ -73,10 +73,6 @@ public:
 	bool bIsVisible;
 	
 
-private:
-	RpgUniquePtr<RpgShadowViewport> ShadowViewport;
-
-
 public:
 	RpgRenderComponent_Light() noexcept
 	{
@@ -103,6 +99,10 @@ public:
 	}
 
 
+private:
+	RpgUniquePtr<RpgShadowViewport> ShadowViewport;
+
+
 	friend class RpgRenderWorldSubsystem;
 
 };
@@ -111,7 +111,7 @@ public:
 
 class RpgRenderComponent_Camera
 {
-	RPG_COMPONENT_TYPE("RpgComponent - Camera");
+	RPG_COMPONENT_TYPE("RpgComponent (Render) - Camera");
 
 public:
 	RpgPointInt RenderTargetDimension;
@@ -123,9 +123,6 @@ public:
 	bool bFrustumCulling;
 
 	RpgSceneViewport* Viewport;
-
-private:
-	RpgUniquePtr<RpgSceneViewport> SelfViewport;
 
 
 public:
@@ -162,6 +159,10 @@ public:
 
 		return SelfViewport.Get();
 	}
+
+
+private:
+	RpgUniquePtr<RpgSceneViewport> SelfViewport;
 
 
 	friend RpgRenderWorldSubsystem;

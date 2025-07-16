@@ -10,9 +10,6 @@ class RpgTexture2D;
 
 class RpgRenderTask_RenderPass : public RpgThreadTask
 {
-private:
-	ComPtr<ID3D12CommandAllocator> CmdAllocDirect;
-	ComPtr<ID3D12GraphicsCommandList> CmdListDirect;
 
 public:
 	RpgRenderFrameContext FrameContext;
@@ -24,14 +21,20 @@ public:
 	virtual void Reset() noexcept override;
 	virtual void Execute() noexcept override;
 
-protected:
-	virtual void CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept = 0;
 
-public:
 	inline ID3D12CommandList* GetCommandList() const noexcept
 	{
 		return CmdListDirect.Get();
 	}
+
+
+protected:
+	virtual void CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept = 0;
+
+
+private:
+	ComPtr<ID3D12CommandAllocator> CmdAllocDirect;
+	ComPtr<ID3D12GraphicsCommandList> CmdListDirect;
 
 };
 
@@ -40,7 +43,7 @@ public:
 class RpgRenderTask_RenderPassShadow : public RpgRenderTask_RenderPass
 {
 public:
-	RpgTexture2D* DepthTexture;
+	RpgTexture2D* TextureDepth;
 	RpgWorldResource::FViewID ViewId;
 
 	const RpgDrawIndexedDepth* DrawMeshData;
@@ -55,6 +58,7 @@ public:
 public:
 	RpgRenderTask_RenderPassShadow() noexcept;
 	virtual void Reset() noexcept override;
+
 
 	virtual const char* GetTaskName() const noexcept override
 	{
@@ -72,8 +76,8 @@ protected:
 class RpgRenderTask_RenderPassForward : public RpgRenderTask_RenderPass
 {
 public:
-	RpgTexture2D* RenderTargetTexture;
-	RpgTexture2D* DepthStencilTexture;
+	RpgTexture2D* TextureRenderTarget;
+	RpgTexture2D* TextureDepthStencil;
 
 	const RpgDrawIndexed* DrawMeshData;
 	int DrawMeshCount;
@@ -85,6 +89,7 @@ public:
 public:
 	RpgRenderTask_RenderPassForward() noexcept;
 	virtual void Reset() noexcept override;
+
 
 	virtual const char* GetTaskName() const noexcept override
 	{

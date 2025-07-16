@@ -21,11 +21,18 @@ public:
 
 
 public:
-	RpgShadowViewport() noexcept = default;
+	RpgShadowViewport() noexcept
+	{
+		AttenuationRadius = 0.0f;
+		SpotInnerConeDegree = 0.0f;
+		SpotOuterConeDegree = 0.0f;
+	}
+
+
 	virtual ~RpgShadowViewport() noexcept = default;
 	virtual void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept = 0;
 	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept = 0;
-	virtual RpgSharedTexture2D GetDepthTexture(int frameIndex) noexcept = 0;
+	virtual RpgSharedTexture2D GetTextureDepth(int frameIndex) noexcept = 0;
 
 };
 
@@ -33,6 +40,19 @@ public:
 
 class RpgShadowViewport_PointLight : public RpgShadowViewport
 {
+public:
+	RpgShadowViewport_PointLight() noexcept;
+
+	virtual void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept override;
+	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
+	
+	
+	virtual RpgSharedTexture2D GetTextureDepth(int frameIndex) noexcept override
+	{
+		return FrameDatas[frameIndex].TextureDepthCube.Cast<RpgTexture2D>();
+	}
+
+
 private:
 	struct FViewInfo
 	{
@@ -46,26 +66,12 @@ private:
 
 	struct FFrameData
 	{
-		RpgSharedTextureCubeDepth DepthTextureCube;
+		RpgSharedTextureDepthCube TextureDepthCube;
 		RpgArray<RpgDrawIndexedDepth> DrawMeshes;
 		RpgArray<RpgDrawIndexedDepth> DrawSkinnedMeshes;
 		RpgRenderTask_RenderPassShadow TaskRenderPassShadow;
 	};
 	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
-
-
-public:
-	RpgShadowViewport_PointLight() noexcept;
-	~RpgShadowViewport_PointLight() noexcept;
-
-	virtual void PreRender(RpgRenderFrameContext& frameContext, RpgWorldResource* worldResource, const RpgWorld* world, RpgWorldResource::FLightID lightId) noexcept override;
-	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
-	
-	
-	virtual RpgSharedTexture2D GetDepthTexture(int frameIndex) noexcept override
-	{
-		return FrameDatas[frameIndex].DepthTextureCube.Cast<RpgTexture2D>();
-	}
 
 };
 
@@ -73,20 +79,6 @@ public:
 
 class RpgShadowViewport_SpotLight : public RpgShadowViewport
 {
-private:
-	RpgWorldResource::FViewID ViewId;
-
-
-	struct FFrameData
-	{
-		RpgSharedTexture2D DepthTexture;
-		RpgArray<RpgDrawIndexedDepth> DrawMeshes;
-		RpgArray<RpgDrawIndexedDepth> DrawSkinnedMeshes;
-		RpgRenderTask_RenderPassShadow TaskRenderPassShadow;
-	};
-	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
-
-
 public:
 	RpgShadowViewport_SpotLight() noexcept;
 
@@ -94,9 +86,23 @@ public:
 	virtual void SetupRenderPasses(const RpgRenderFrameContext& frameContext, const RpgWorldResource* worldResource, const RpgWorld* world, RpgRenderTask_RenderPassShadowArray& out_ShadowPasses) noexcept override;
 
 
-	virtual RpgSharedTexture2D GetDepthTexture(int frameIndex) noexcept override
+	virtual RpgSharedTexture2D GetTextureDepth(int frameIndex) noexcept override
 	{
-		return FrameDatas[frameIndex].DepthTexture;
+		return FrameDatas[frameIndex].TextureDepth;
 	}
+
+
+private:
+	RpgWorldResource::FViewID ViewId;
+
+
+	struct FFrameData
+	{
+		RpgSharedTexture2D TextureDepth;
+		RpgArray<RpgDrawIndexedDepth> DrawMeshes;
+		RpgArray<RpgDrawIndexedDepth> DrawSkinnedMeshes;
+		RpgRenderTask_RenderPassShadow TaskRenderPassShadow;
+	};
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 };

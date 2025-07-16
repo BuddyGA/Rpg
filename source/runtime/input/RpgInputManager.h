@@ -7,21 +7,6 @@ class RpgInputManager
 {
 	RPG_NOCOPYMOVE(RpgInputManager)
 
-private:
-	// Mouse cursor position
-	RpgPointInt MouseCursorPosition;
-
-	// Mouse cursor delta position
-	RpgPointInt MouseCursorDeltaPosition;
-
-	// Mouse wheel value
-	RpgPointInt MouseWheelValue;
-
-	// Key button states
-	// [0]: Previous, [1]: Current
-	bool KeyButtonStates[2][RpgInputKey::MAX_COUNT];
-
-
 public:
 	RpgInputManager() noexcept;
 
@@ -102,5 +87,20 @@ public:
 	{
 		return GetKeyButtonState(button) == RpgInputButtonState::RELEASED;
 	}
+
+
+private:
+	// Mouse cursor position
+	RpgPointInt MouseCursorPosition;
+
+	// Mouse cursor delta position
+	RpgPointInt MouseCursorDeltaPosition;
+
+	// Mouse wheel value
+	RpgPointInt MouseWheelValue;
+
+	// Key button states
+	// [0]: Previous, [1]: Current
+	bool KeyButtonStates[2][RpgInputKey::MAX_COUNT];
 
 };

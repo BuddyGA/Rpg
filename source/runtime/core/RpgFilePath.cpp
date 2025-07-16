@@ -3,95 +3,6 @@
 
 
 
-void RpgFilePath::InitializeInternal()
-{
-	DirectoryPath = RpgStringView();
-	DirectoryName = RpgStringView();
-	FileName = RpgStringView();
-	FileExt = RpgStringView();
-
-	if (FullPath.IsEmpty())
-	{
-		return;
-	}
-
-	const int length = FullPath.GetLength();
-	const int dirToken = FullPath.FindLastIndexOf('/');
-	const int extToken = FullPath.FindLastIndexOf('.');
-
-	// Directory path
-	if (dirToken != RPG_INDEX_INVALID)
-	{
-		DirectoryPath = FullPath.SubstringView(0, dirToken + 1);
-	}
-
-	// Directory name
-	if (DirectoryPath.GetLength() > 0)
-	{
-		int prevDirToken = RPG_INDEX_INVALID;
-		for (int i = dirToken - 1; i >= 0 && i != RPG_INDEX_INVALID; --i)
-		{
-			if (FullPath[i] == '/')
-			{
-				prevDirToken = i;
-				break;
-			}
-		}
-
-		if (prevDirToken != RPG_INDEX_INVALID)
-		{
-			const int dirNameLength = dirToken - (prevDirToken + 1);
-			DirectoryName = FullPath.SubstringView(prevDirToken + 1, dirNameLength);
-		}
-		else
-		{
-			DirectoryName = FullPath.SubstringView(0, length - 1);
-		}
-	}
-
-
-	// if last character is '/' ignore FileName and FileExt
-	if (dirToken == length - 1)
-	{
-		return;
-	}
-
-	if (DirectoryPath.GetLength() > 0)
-	{
-		FileName = (extToken == RPG_INDEX_INVALID) ? FullPath.SubstringView(dirToken + 1, length - dirToken - 1) : FullPath.SubstringView(dirToken + 1, extToken - dirToken - 1);
-	}
-	else
-	{
-		FileName = (extToken == RPG_INDEX_INVALID) ? FullPath.SubstringView(0, length) : FullPath.SubstringView(0, extToken);
-	}
-
-	if (FileName.GetLength() > 0 && extToken != RPG_INDEX_INVALID)
-	{
-		FileExt = FullPath.SubstringView(extToken, length - extToken);
-	}
-}
-
-
-bool RpgFilePath::IsPathValid() const noexcept
-{
-	const int length = FullPath.GetLength();
-	if (length == 0)
-	{
-		return false;
-	}
-
-	if (length == 1 && FullPath[0] == '.')
-	{
-		return false;
-	}
-
-	if (length == 2 && (FullPath[0] == '.' || FullPath[1] == '.'))
-	{
-		return false;
-	}
-
-	return true;
-}
 
 
 RpgFilePath RpgFilePath::GetParentDirectoryPath() const noexcept
@@ -208,6 +119,97 @@ RpgName RpgFilePath::GetFileExtension() const noexcept
 	tempFileExt[length] = '\0';
 
 	return tempFileExt;
+}
+
+
+void RpgFilePath::InitializeInternal()
+{
+	DirectoryPath = RpgStringView();
+	DirectoryName = RpgStringView();
+	FileName = RpgStringView();
+	FileExt = RpgStringView();
+
+	if (FullPath.IsEmpty())
+	{
+		return;
+	}
+
+	const int length = FullPath.GetLength();
+	const int dirToken = FullPath.FindLastIndexOf('/');
+	const int extToken = FullPath.FindLastIndexOf('.');
+
+	// Directory path
+	if (dirToken != RPG_INDEX_INVALID)
+	{
+		DirectoryPath = FullPath.SubstringView(0, dirToken + 1);
+	}
+
+	// Directory name
+	if (DirectoryPath.GetLength() > 0)
+	{
+		int prevDirToken = RPG_INDEX_INVALID;
+		for (int i = dirToken - 1; i >= 0 && i != RPG_INDEX_INVALID; --i)
+		{
+			if (FullPath[i] == '/')
+			{
+				prevDirToken = i;
+				break;
+			}
+		}
+
+		if (prevDirToken != RPG_INDEX_INVALID)
+		{
+			const int dirNameLength = dirToken - (prevDirToken + 1);
+			DirectoryName = FullPath.SubstringView(prevDirToken + 1, dirNameLength);
+		}
+		else
+		{
+			DirectoryName = FullPath.SubstringView(0, length - 1);
+		}
+	}
+
+
+	// if last character is '/' ignore FileName and FileExt
+	if (dirToken == length - 1)
+	{
+		return;
+	}
+
+	if (DirectoryPath.GetLength() > 0)
+	{
+		FileName = (extToken == RPG_INDEX_INVALID) ? FullPath.SubstringView(dirToken + 1, length - dirToken - 1) : FullPath.SubstringView(dirToken + 1, extToken - dirToken - 1);
+	}
+	else
+	{
+		FileName = (extToken == RPG_INDEX_INVALID) ? FullPath.SubstringView(0, length) : FullPath.SubstringView(0, extToken);
+	}
+
+	if (FileName.GetLength() > 0 && extToken != RPG_INDEX_INVALID)
+	{
+		FileExt = FullPath.SubstringView(extToken, length - extToken);
+	}
+}
+
+
+bool RpgFilePath::IsPathValid() const noexcept
+{
+	const int length = FullPath.GetLength();
+	if (length == 0)
+	{
+		return false;
+	}
+
+	if (length == 1 && FullPath[0] == '.')
+	{
+		return false;
+	}
+
+	if (length == 2 && (FullPath[0] == '.' || FullPath[1] == '.'))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 

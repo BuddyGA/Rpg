@@ -12,9 +12,6 @@ public:
 	RpgName Name;
 	RpgRenderPipelineState PipelineState;
 
-private:
-	ComPtr<ID3D12PipelineState> PSO;
-
 
 public:
 	RpgRenderTask_CompilePSO() noexcept;
@@ -31,5 +28,9 @@ public:
 	{
 		return std::move(PSO);
 	}
+
+
+private:
+	ComPtr<ID3D12PipelineState> PSO;
 
 };

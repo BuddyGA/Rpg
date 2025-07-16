@@ -93,10 +93,6 @@ namespace RpgVertexGeometryFactory
 
 class RpgVertexPrimitiveBatchLine
 {
-private:
-	RpgVertexPrimitiveArray Vertices;
-	RpgVertexIndexArray Indices;
-
 
 public:
 	RpgVertexPrimitiveBatchLine() noexcept = default;
@@ -146,6 +142,11 @@ public:
 		return Indices.GetMemorySizeBytes_Allocated();
 	}
 
+
+private:
+	RpgVertexPrimitiveArray Vertices;
+	RpgVertexIndexArray Indices;
+
 };
 
 
@@ -153,10 +154,6 @@ public:
 
 class RpgVertexPrimitiveBatchMesh
 {
-private:
-	RpgVertexPrimitiveArray Vertices;
-	RpgVertexIndexArray Indices;
-
 
 public:
 	RpgVertexPrimitiveBatchMesh() noexcept = default;
@@ -199,5 +196,10 @@ public:
 	{
 		return Indices.GetMemorySizeBytes_Allocated();
 	}
+
+
+private:
+	RpgVertexPrimitiveArray Vertices;
+	RpgVertexIndexArray Indices;
 
 };

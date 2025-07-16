@@ -205,12 +205,12 @@ void RpgMeshSkinnedResource::CommandCopy(ID3D12GraphicsCommandList* cmdList) noe
 
 
 	// transition original vertex (texcoord, index) to COPY_SOURCE
-	D3D12_RESOURCE_BARRIER copySourceTransitionBarriers[] =
+	D3D12_RESOURCE_BARRIER copySourceTransitionBarriers[2] =
 	{
 		RpgD3D12::CreateResourceBarrier_Transition(VertexTexCoordBuffer->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE),
 		RpgD3D12::CreateResourceBarrier_Transition(IndexBuffer->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE),
 	};
-	cmdList->ResourceBarrier(ARRAYSIZE(copySourceTransitionBarriers), copySourceTransitionBarriers);
+	cmdList->ResourceBarrier(2, copySourceTransitionBarriers);
 
 	// copy original vertex texcoord to skinned
 	for (int i = 0; i < ObjectParameters.GetCount(); ++i)

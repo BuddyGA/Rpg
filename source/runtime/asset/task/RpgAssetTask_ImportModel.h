@@ -21,26 +21,18 @@ public:
 	bool bIgnoreTextureNormals;
 
 
-private:
-	RpgArray<class RpgAssetTask_ImportTexture*> ImportTextureTasks;
-	RpgArray<RpgAssimp::FMaterialPhong> IntermediateMaterialPhongs;
-	RpgArray<RpgAssimp::FModel> IntermediateModels;
-
-	RpgArray<RpgSharedModel> ImportedModels;
-	RpgArray<RpgSharedAnimationClip> ImportedAnimations;
-	RpgSharedAnimationSkeleton ImportedSkeleton;
-
-
 public:
 	RpgAssetTask_ImportModel() noexcept;
 
-private:
-	void ExtractMaterialTextures(const aiScene* assimpScene);
-	void ExtractSkeleton(const aiMesh* assimpMesh) noexcept;
-	void ExtractMeshesFromNode(const aiScene* assimpScene, const aiNode* assimpNode) noexcept;
-	void ExtractAnimations(const aiScene* assimpScene) noexcept;
+	virtual void Reset() noexcept override;
+	virtual void Execute() noexcept override;
 
-public:
+	virtual const char* GetTaskName() const noexcept
+	{
+		return "RpgAsyncTask_ImportModel";
+	}
+
+
 	[[nodiscard]] inline RpgArray<RpgSharedModel> GetImportedModels() noexcept
 	{
 		return std::move(ImportedModels);
@@ -57,12 +49,20 @@ public:
 	}
 
 
-	virtual void Reset() noexcept override;
-	virtual void Execute() noexcept override;
+private:
+	void ExtractMaterialTextures(const aiScene* assimpScene);
+	void ExtractSkeleton(const aiMesh* assimpMesh) noexcept;
+	void ExtractMeshesFromNode(const aiScene* assimpScene, const aiNode* assimpNode) noexcept;
+	void ExtractAnimations(const aiScene* assimpScene) noexcept;
 
-	virtual const char* GetTaskName() const noexcept
-	{
-		return "RpgAsyncTask_ImportModel";
-	}
+
+private:
+	RpgArray<class RpgAssetTask_ImportTexture*> ImportTextureTasks;
+	RpgArray<RpgAssimp::FMaterialPhong> IntermediateMaterialPhongs;
+	RpgArray<RpgAssimp::FModel> IntermediateModels;
+
+	RpgArray<RpgSharedModel> ImportedModels;
+	RpgArray<RpgSharedAnimationClip> ImportedAnimations;
+	RpgSharedAnimationSkeleton ImportedSkeleton;
 
 };

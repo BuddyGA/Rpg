@@ -8,16 +8,6 @@
 
 class RpgPhysicsWorldSubsystem : public RpgWorldSubsystem
 {
-private:
-	RpgPhysicsTask_UpdateBound TaskUpdateBound;
-	RpgPhysicsTask_UpdateShape TaskUpdateShape;
-	RpgArray<RpgPhysicsCollision::FPairOverlapTest> BroadphaseCollisionPairs;
-	RpgArray<RpgPhysicsCollision::FPairOverlapTest> NarrowphaseCollisionPairs;
-	bool bTickUpdateCollision;
-	bool bDebugDrawCollisionBound;
-	bool bDebugDrawCollisionShape;
-
-
 public:
 	RpgPhysicsWorldSubsystem() noexcept;
 
@@ -26,5 +16,20 @@ protected:
 	virtual void StopPlay() noexcept override;
 	virtual void TickUpdate(float deltaTime) noexcept override;
 	virtual void Render(int frameIndex, RpgRenderer* renderer) noexcept override;
+
+
+private:
+	RpgPhysicsTask_UpdateBound TaskUpdateBound;
+	RpgPhysicsTask_UpdateShape TaskUpdateShape;
+	RpgArray<RpgPhysicsCollision::FPairTest> BroadphaseCollisionPairs;
+	RpgArray<RpgPhysicsCollision::FPairTest> NarrowphaseCollisionPairs;
+	bool bTickUpdateCollision;
+
+
+#ifndef RPG_BUILD_SHIPPING
+public:
+	bool bDebugDrawCollisionBound;
+	bool bDebugDrawCollisionShape;
+#endif // !RPG_BUILD_SHIPPING
 
 };

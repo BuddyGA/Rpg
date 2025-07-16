@@ -304,7 +304,7 @@ void RpgRenderPipeline::Initialize() noexcept
             state.VertexMode = RpgRenderVertexMode::MESH;
             state.RasterMode = RpgRenderRasterMode::SOLID;
             state.BlendMode = RpgRenderColorBlendMode::NONE;
-            state.DepthStencilFormat = k_Render_DefaultFormat_ShadowDepth;
+            state.DepthStencilFormat = RpgRender::DEFAULT_FORMAT_SHADOW_DEPTH;
             state.bDepthTest = true;
             state.bDepthWrite = true;
             state.DepthBias = 0;
@@ -330,7 +330,7 @@ void RpgRenderPipeline::Initialize() noexcept
             state.VertexMode = RpgRenderVertexMode::MESH;
             state.RasterMode = RpgRenderRasterMode::SOLID;
             state.BlendMode = RpgRenderColorBlendMode::NONE;
-            state.DepthStencilFormat = k_Render_DefaultFormat_ShadowDepth;
+            state.DepthStencilFormat = RpgRender::DEFAULT_FORMAT_SHADOW_DEPTH;
             state.RenderTargetCount = 0;
             state.bDepthTest = true;
             state.bDepthWrite = true;

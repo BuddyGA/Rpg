@@ -7,10 +7,6 @@
 
 class RpgRenderTask_Compute : public RpgThreadTask
 {
-private:
-	ComPtr<ID3D12CommandAllocator> CmdAllocCompute;
-	ComPtr<ID3D12GraphicsCommandList> CmdListCompute;
-
 public:
 	ID3D12Fence* FenceSignal;
 	uint64_t WaitFenceCopyValue;
@@ -34,5 +30,10 @@ public:
 	{
 		return CmdListCompute.Get();
 	}
+
+
+private:
+	ComPtr<ID3D12CommandAllocator> CmdAllocCompute;
+	ComPtr<ID3D12GraphicsCommandList> CmdListCompute;
 
 };

@@ -5,6 +5,14 @@
 #include "core/world/RpgGameObject.h"
 
 
+// Use dedicated render thread
+#define RPG_RENDER_MULTITHREADED		0
+
+// All copy, compute, render execute in async task threadpool
+#define RPG_RENDER_ASYNC_TASK			1
+
+
+
 class RpgRenderer;
 class RpgRenderer2D;
 
@@ -197,6 +205,10 @@ struct RpgRenderFrameContext
 
 
 
-constexpr const DXGI_FORMAT k_Render_DefaultFormat_RenderTarget = DXGI_FORMAT_R8G8B8A8_UNORM;
-constexpr const DXGI_FORMAT k_Render_DefaultFormat_DepthStencil = DXGI_FORMAT_D24_UNORM_S8_UINT;
-constexpr const DXGI_FORMAT k_Render_DefaultFormat_ShadowDepth = DXGI_FORMAT_D16_UNORM;
+namespace RpgRender
+{
+	constexpr const DXGI_FORMAT DEFAULT_FORMAT_SCENE_RENDER_TARGET = DXGI_FORMAT_R8G8B8A8_UNORM;
+	constexpr const DXGI_FORMAT DEFAULT_FORMAT_SCENE_DEPTH_STENCIL = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	constexpr const DXGI_FORMAT DEFAULT_FORMAT_SHADOW_DEPTH = DXGI_FORMAT_D16_UNORM;
+
+};

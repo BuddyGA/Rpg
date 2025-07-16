@@ -11,10 +11,6 @@
 // ==================================================================================================== //
 class RpgStringView
 {
-private:
-	const char* Data;
-	int Length;
-
 
 public:
 	RpgStringView() noexcept
@@ -46,6 +42,11 @@ public:
 		return Length == 0;
 	}
 
+
+private:
+	const char* Data;
+	int Length;
+
 };
 
 
@@ -59,9 +60,6 @@ public:
 
 class RpgString
 {
-private:
-	RpgArray<char, 16> CharArray;
-
 
 public:
 	RpgString() noexcept = default;
@@ -162,18 +160,6 @@ public:
 	inline const char& operator[](int index) const noexcept
 	{
 		return CharArray[index];
-	}
-
-
-private:
-	inline void CopyFromCstr(const char* cstr) noexcept
-	{
-		const int len = RpgPlatformMemory::CStringLength(cstr);
-		if (len > 0)
-		{
-			Resize(len);
-			RpgPlatformMemory::CStringCopy(CharArray.GetData(), cstr);
-		}
 	}
 
 
@@ -316,9 +302,25 @@ public:
 	}
 
 
+private:
+	inline void CopyFromCstr(const char* cstr) noexcept
+	{
+		const int len = RpgPlatformMemory::CStringLength(cstr);
+		if (len > 0)
+		{
+			Resize(len);
+			RpgPlatformMemory::CStringCopy(CharArray.GetData(), cstr);
+		}
+	}
+
+
+private:
+	RpgArray<char, 16> CharArray;
+
+
 public:
 	template<typename...TVarArgs>
-	[[nodiscard]] static inline RpgString Format(const char* format, TVarArgs&&...args) noexcept
+	static inline RpgString Format(const char* format, TVarArgs&&...args) noexcept
 	{
 		char buffer[RPG_STRING_FORMAT_BUFFER_COUNT];
 		snprintf(buffer, RPG_STRING_FORMAT_BUFFER_COUNT, format, std::forward<TVarArgs>(args)...);
@@ -329,7 +331,7 @@ public:
 };
 
 
-[[nodiscard]] inline uint64_t Rpg_GetHash(const RpgString& value) noexcept
+inline uint64_t Rpg_GetHash(const RpgString& value) noexcept
 {
 	return RpgPlatformMemory::CStringHash(*value);
 }
@@ -340,9 +342,6 @@ public:
 
 class alignas(16) RpgName
 {
-private:
-	char CharArray[RPG_NAME_MAX_COUNT];
-
 
 public:
 	RpgName() noexcept
@@ -355,6 +354,7 @@ public:
 	{
 		CopyFromCstr(cstr);
 	}
+
 
 public:
 	inline RpgName& operator=(const char* rhs) noexcept
@@ -393,17 +393,6 @@ public:
 	}
 
 
-private:
-	inline void CopyFromCstr(const char* cstr) noexcept
-	{
-		RpgPlatformMemory::MemZero(CharArray, RPG_NAME_MAX_COUNT);
-
-		if (cstr && RpgPlatformMemory::CStringLength(cstr) > 0)
-		{
-			snprintf(CharArray, RPG_NAME_MAX_COUNT, "%s", cstr);
-		}
-	}
-
 public:
 	inline char* GetData() noexcept
 	{
@@ -425,8 +414,25 @@ public:
 		return GetLength() == 0;
 	}
 
+
+private:
+	inline void CopyFromCstr(const char* cstr) noexcept
+	{
+		RpgPlatformMemory::MemZero(CharArray, RPG_NAME_MAX_COUNT);
+
+		if (cstr && RpgPlatformMemory::CStringLength(cstr) > 0)
+		{
+			snprintf(CharArray, RPG_NAME_MAX_COUNT, "%s", cstr);
+		}
+	}
+
+
+private:
+	char CharArray[RPG_NAME_MAX_COUNT];
+
+
 public:
-	[[nodiscard]] static inline RpgName Format(const char* format, ...) noexcept
+	static inline RpgName Format(const char* format, ...) noexcept
 	{
 		char buffer[RPG_NAME_MAX_COUNT];
 		va_list args;
@@ -440,8 +446,7 @@ public:
 };
 
 
-
-[[nodiscard]] inline uint64_t Rpg_GetHash(const RpgName& value) noexcept
+inline uint64_t Rpg_GetHash(const RpgName& value) noexcept
 {
 	return RpgPlatformMemory::CStringHash(*value);
 }

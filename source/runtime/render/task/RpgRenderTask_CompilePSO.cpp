@@ -146,7 +146,7 @@ void RpgRenderTask_CompilePSO::Execute() noexcept
 	psoDesc.NumRenderTargets = PipelineState.RenderTargetCount;
 	psoDesc.BlendState.AlphaToCoverageEnable = FALSE;
 	const RpgRenderColorBlendMode blendMode = PipelineState.BlendMode;
-	const DXGI_FORMAT renderTargetFormat = PipelineState.RenderTargetFormat != DXGI_FORMAT_UNKNOWN ? PipelineState.RenderTargetFormat : k_Render_DefaultFormat_RenderTarget;
+	const DXGI_FORMAT renderTargetFormat = PipelineState.RenderTargetFormat != DXGI_FORMAT_UNKNOWN ? PipelineState.RenderTargetFormat : RpgRender::DEFAULT_FORMAT_SCENE_RENDER_TARGET;
 
 	for (UINT r = 0; r < psoDesc.NumRenderTargets; ++r)
 	{

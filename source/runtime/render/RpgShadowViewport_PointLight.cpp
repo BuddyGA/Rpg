@@ -6,13 +6,6 @@
 
 RpgShadowViewport_PointLight::RpgShadowViewport_PointLight() noexcept
 {
-	AttenuationRadius = 0.0f;
-}
-
-
-RpgShadowViewport_PointLight::~RpgShadowViewport_PointLight() noexcept
-{
-	RPG_LogDebug(RpgLogTemp, "Destruct (RpgShadowViewport_PointLight)");
 }
 
 
@@ -23,11 +16,11 @@ void RpgShadowViewport_PointLight::PreRender(RpgRenderFrameContext& frameContext
 	frame.DrawSkinnedMeshes.Clear();
 
 	const uint16_t shadowTextureDimension = RpgRenderLight::SHADOW_TEXTURE_DIMENSION_POINT_LIGHT[frameContext.ShadowQuality];
-	RpgSharedTextureCubeDepth& depthTexture = frame.DepthTextureCube;
+	RpgSharedTextureDepthCube& depthTexture = frame.TextureDepthCube;
 
 	if (!depthTexture)
 	{
-		depthTexture = RpgTextureCubeDepth::s_CreateShared(RpgName::Format("TEXDC_SdwVprt_PL_%i", lightId), RpgTextureFormat::TEX_DS_16, shadowTextureDimension, shadowTextureDimension);
+		depthTexture = RpgTextureDepthCube::s_CreateShared(RpgName::Format("TEXDC_SdwVprt_PL_%i", lightId), RpgTextureFormat::TEX_DS_16, shadowTextureDimension, shadowTextureDimension);
 	}
 
 	depthTexture->Resize(shadowTextureDimension, shadowTextureDimension);
@@ -134,7 +127,7 @@ void RpgShadowViewport_PointLight::SetupRenderPasses(const RpgRenderFrameContext
 	shadowPass->Reset();
 	shadowPass->FrameContext = frameContext;
 	shadowPass->WorldResource = worldResource;
-	shadowPass->DepthTexture = frame.DepthTextureCube.Get();
+	shadowPass->TextureDepth = frame.TextureDepthCube.Get();
 	shadowPass->ViewId = FaceViews[0].ViewId;
 	shadowPass->DrawMeshData = frame.DrawMeshes.GetData();
 	shadowPass->DrawMeshCount = frame.DrawMeshes.GetCount();

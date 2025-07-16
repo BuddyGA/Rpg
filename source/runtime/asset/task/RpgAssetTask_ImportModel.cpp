@@ -86,6 +86,137 @@ RpgAssetTask_ImportModel::RpgAssetTask_ImportModel() noexcept
 }
 
 
+void RpgAssetTask_ImportModel::Reset() noexcept
+{
+	RpgThreadTask::Reset();
+
+	SourceFilePath.Clear(true);
+	Scale = 1.0f;
+	bImportMaterialTexture = false;
+	bImportSkeleton = false;
+	bImportAnimation = false;
+	bGenerateTextureMipMaps = false;
+	bIgnoreTextureNormals = false;
+	IntermediateMaterialPhongs.Clear(true);
+	IntermediateModels.Clear(true);
+	ImportedSkeleton.Release();
+	ImportedModels.Clear(true);
+	ImportedAnimations.Clear(true);
+}
+
+
+void RpgAssetTask_ImportModel::Execute() noexcept
+{
+	RPG_Check(SourceFilePath.IsFilePath());
+
+	Assimp::Importer assimpImporter;
+	assimpImporter.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, Scale);
+	assimpImporter.SetPropertyBool(AI_CONFIG_PP_FD_REMOVE, true);
+	assimpImporter.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
+	assimpImporter.SetPropertyBool(AI_CONFIG_PP_FD_CHECKAREA, false);
+
+	uint32_t flags =
+		aiProcess_ConvertToLeftHanded |
+		aiProcess_GlobalScale |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_GenNormals |
+		aiProcess_CalcTangentSpace |
+		aiProcess_FindDegenerates | aiProcess_SortByPType |
+		//aiProcess_FindInvalidData |
+		aiProcess_ValidateDataStructure;
+
+	if (bImportSkeleton || bImportAnimation)
+	{
+		assimpImporter.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 8);
+		flags |= aiProcess_LimitBoneWeights | aiProcess_PopulateArmatureData;
+	}
+
+	const aiScene* assimpScene = assimpImporter.ReadFile(*SourceFilePath, flags);
+
+	// extract materials and textures
+	ExtractMaterialTextures(assimpScene);
+
+	// extract meshes
+	ExtractMeshesFromNode(assimpScene, assimpScene->mRootNode);
+
+	// extract animations
+	ExtractAnimations(assimpScene);
+
+	// wait all import texture tasks
+	RPG_THREAD_TASK_WaitAll(ImportTextureTasks.GetData(), ImportTextureTasks.GetCount());
+
+	RpgArray<RpgSharedTexture2D> ImportedTextures(ImportTextureTasks.GetCount());
+
+	for (int t = 0; t < ImportedTextures.GetCount(); ++t)
+	{
+		ImportedTextures[t] = ImportTextureTasks[t]->GetResult();
+	}
+
+
+	// process intermediate models
+	const RpgSharedMaterial& defaultMaterialMeshPhong = RpgMaterial::s_GetDefault(RpgMaterialDefault::MESH_PHONG);
+
+	ImportedModels.Resize(IntermediateModels.GetCount());
+
+	for (int i = 0; i < IntermediateModels.GetCount(); ++i)
+	{
+		const RpgAssimp::FModel& intModel = IntermediateModels[i];
+		RpgSharedModel model = RpgModel::s_CreateShared(intModel.Name);
+		model->AddLod();
+
+		for (int j = 0; j < intModel.Meshes.GetCount(); ++j)
+		{
+			const RpgSharedMesh& mesh = intModel.Meshes[j];
+			model->AddMesh(mesh);
+
+			// setup material
+			if (IntermediateMaterialPhongs.IsEmpty())
+			{
+				// Set to default
+				model->SetMaterial(j, defaultMaterialMeshPhong);
+				continue;
+			}
+
+			const int materialIndex = intModel.Materials[j];
+			const RpgAssimp::FMaterialPhong& intMat = IntermediateMaterialPhongs[materialIndex];
+
+			RpgSharedMaterial material = RpgMaterial::s_CreateSharedInstance(intMat.Name, defaultMaterialMeshPhong);
+			material->SetParameterVectorValue("base_color", intMat.ParamVectorBaseColor);
+			material->SetParameterVectorValue("specular_color", intMat.ParamVectorSpecularColor);
+			material->SetParameterScalarValue("shininess", intMat.ParamScalarShininess);
+			material->SetParameterScalarValue("opacity", intMat.ParamScalarOpacity);
+
+			if (intMat.TextureIndexBaseColor != RPG_INDEX_INVALID)
+			{
+				material->SetParameterTextureValue(RpgMaterialParameterTexture::BASE_COLOR, ImportedTextures[intMat.TextureIndexBaseColor]);
+			}
+
+			if (intMat.TextureIndexNormal != RPG_INDEX_INVALID)
+			{
+				material->SetParameterTextureValue(RpgMaterialParameterTexture::NORMAL, ImportedTextures[intMat.TextureIndexNormal]);
+			}
+
+			if (intMat.TextureIndexSpecular != RPG_INDEX_INVALID)
+			{
+				material->SetParameterTextureValue(RpgMaterialParameterTexture::SPECULAR, ImportedTextures[intMat.TextureIndexSpecular]);
+			}
+
+			model->SetMaterial(j, material);
+		}
+
+		ImportedModels[i] = model;
+	}
+
+
+	// Cleanup import texture tasks
+	for (int i = 0; i < ImportTextureTasks.GetCount(); ++i)
+	{
+		delete ImportTextureTasks[i];
+	}
+}
+
+
 void RpgAssetTask_ImportModel::ExtractMaterialTextures(const aiScene* assimpScene)
 {
 	if (!bImportMaterialTexture)
@@ -552,136 +683,5 @@ void RpgAssetTask_ImportModel::ExtractAnimations(const aiScene* assimpScene) noe
 		}
 
 		ImportedAnimations.AddValue(animClip);
-	}
-}
-
-
-void RpgAssetTask_ImportModel::Reset() noexcept
-{
-	RpgThreadTask::Reset();
-
-	SourceFilePath.Clear(true);
-	Scale = 1.0f;
-	bImportMaterialTexture = false;
-	bImportSkeleton = false;
-	bImportAnimation = false;
-	bGenerateTextureMipMaps = false;
-	bIgnoreTextureNormals = false;
-	IntermediateMaterialPhongs.Clear(true);
-	IntermediateModels.Clear(true);
-	ImportedSkeleton.Release();
-	ImportedModels.Clear(true);
-	ImportedAnimations.Clear(true);
-}
-
-
-void RpgAssetTask_ImportModel::Execute() noexcept
-{
-	RPG_Check(SourceFilePath.IsFilePath());
-
-	Assimp::Importer assimpImporter;
-	assimpImporter.SetPropertyFloat(AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY, Scale);
-	assimpImporter.SetPropertyBool(AI_CONFIG_PP_FD_REMOVE, true);
-	assimpImporter.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
-	assimpImporter.SetPropertyBool(AI_CONFIG_PP_FD_CHECKAREA, false);
-
-	uint32_t flags =
-		aiProcess_ConvertToLeftHanded |
-		aiProcess_GlobalScale |
-		aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices |
-		aiProcess_GenNormals |
-		aiProcess_CalcTangentSpace |
-		aiProcess_FindDegenerates | aiProcess_SortByPType |
-		//aiProcess_FindInvalidData |
-		aiProcess_ValidateDataStructure;
-
-	if (bImportSkeleton || bImportAnimation)
-	{
-		assimpImporter.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 8);
-		flags |= aiProcess_LimitBoneWeights | aiProcess_PopulateArmatureData;
-	}
-
-	const aiScene* assimpScene = assimpImporter.ReadFile(*SourceFilePath, flags);
-
-	// extract materials and textures
-	ExtractMaterialTextures(assimpScene);
-
-	// extract meshes
-	ExtractMeshesFromNode(assimpScene, assimpScene->mRootNode);
-
-	// extract animations
-	ExtractAnimations(assimpScene);
-
-	// wait all import texture tasks
-	RPG_THREAD_TASK_WaitAll(ImportTextureTasks.GetData(), ImportTextureTasks.GetCount());
-
-	RpgArray<RpgSharedTexture2D> ImportedTextures(ImportTextureTasks.GetCount());
-
-	for (int t = 0; t < ImportedTextures.GetCount(); ++t)
-	{
-		ImportedTextures[t] = ImportTextureTasks[t]->GetResult();
-	}
-
-
-	// process intermediate models
-	const RpgSharedMaterial& defaultMaterialMeshPhong = RpgMaterial::s_GetDefault(RpgMaterialDefault::MESH_PHONG);
-
-	ImportedModels.Resize(IntermediateModels.GetCount());
-
-	for (int i = 0; i < IntermediateModels.GetCount(); ++i)
-	{
-		const RpgAssimp::FModel& intModel = IntermediateModels[i];
-		RpgSharedModel model = RpgModel::s_CreateShared(intModel.Name);
-		model->AddLod();
-
-		for (int j = 0; j < intModel.Meshes.GetCount(); ++j)
-		{
-			const RpgSharedMesh& mesh = intModel.Meshes[j];
-			model->AddMesh(mesh);
-
-			// setup material
-			if (IntermediateMaterialPhongs.IsEmpty())
-			{
-				// Set to default
-				model->SetMaterial(j, defaultMaterialMeshPhong);
-				continue;
-			}
-
-			const int materialIndex = intModel.Materials[j];
-			const RpgAssimp::FMaterialPhong& intMat = IntermediateMaterialPhongs[materialIndex];
-
-			RpgSharedMaterial material = RpgMaterial::s_CreateSharedInstance(intMat.Name, defaultMaterialMeshPhong);
-			material->SetParameterVectorValue("base_color", intMat.ParamVectorBaseColor);
-			material->SetParameterVectorValue("specular_color", intMat.ParamVectorSpecularColor);
-			material->SetParameterScalarValue("shininess", intMat.ParamScalarShininess);
-			material->SetParameterScalarValue("opacity", intMat.ParamScalarOpacity);
-
-			if (intMat.TextureIndexBaseColor != RPG_INDEX_INVALID)
-			{
-				material->SetParameterTextureValue(RpgMaterialParameterTexture::BASE_COLOR, ImportedTextures[intMat.TextureIndexBaseColor]);
-			}
-
-			if (intMat.TextureIndexNormal != RPG_INDEX_INVALID)
-			{
-				material->SetParameterTextureValue(RpgMaterialParameterTexture::NORMAL, ImportedTextures[intMat.TextureIndexNormal]);
-			}
-
-			if (intMat.TextureIndexSpecular != RPG_INDEX_INVALID)
-			{
-				material->SetParameterTextureValue(RpgMaterialParameterTexture::SPECULAR, ImportedTextures[intMat.TextureIndexSpecular]);
-			}
-
-			model->SetMaterial(j, material);
-		}
-
-		ImportedModels[i] = model;
-	}
-
-
-	// Cleanup import texture tasks
-	for (int i = 0; i < ImportTextureTasks.GetCount(); ++i)
-	{
-		delete ImportTextureTasks[i];
 	}
 }

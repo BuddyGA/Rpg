@@ -5,60 +5,104 @@
 RpgMesh::RpgMesh(const RpgName& name) noexcept
 {
 	Name = name;
-	Lock = SDL_CreateRWLock();
+	Flags = FLAG_None;
+	LockPosition = SDL_CreateRWLock();
+	LockNormalTangent = SDL_CreateRWLock();
+	LockTexCoord = SDL_CreateRWLock();
+	LockSkin = SDL_CreateRWLock();
+	LockIndex = SDL_CreateRWLock();
 }
 
 
 RpgMesh::~RpgMesh() noexcept
 {
-	SDL_DestroyRWLock(Lock);
+	SDL_DestroyRWLock(LockPosition);
+	SDL_DestroyRWLock(LockNormalTangent);
+	SDL_DestroyRWLock(LockTexCoord);
+	SDL_DestroyRWLock(LockSkin);
+	SDL_DestroyRWLock(LockIndex);
 }
 
 
 void RpgMesh::UpdateVertexData(int vertexCount, const RpgVertex::FMeshPosition* positionData, const RpgVertex::FMeshNormalTangent* normalTangentData, const RpgVertex::FMeshTexCoord* texCoordData, const RpgVertex::FMeshSkin* skinData, int indexCount, const RpgVertex::FIndex* indexData) noexcept
 {
 	RPG_Assert(vertexCount > 0);
-	RPG_Assert(positionData && normalTangentData && texCoordData);
+	RPG_Assert(positionData);
 	RPG_Assert(indexCount > 0);
 	RPG_Assert(indexData);
 
-	SDL_LockRWLockForWriting(Lock);
+	Flags = FLAG_None;
+
+	WriteLockAll();
 	{
 		Positions.Clear(true);
 		Positions.InsertAtRange(positionData, vertexCount, RPG_INDEX_LAST);
+		Flags |= FLAG_Attribute_Position;
 
 		NormalTangents.Clear(true);
-		NormalTangents.InsertAtRange(normalTangentData, vertexCount, RPG_INDEX_LAST);
+		if (normalTangentData)
+		{
+			NormalTangents.InsertAtRange(normalTangentData, vertexCount, RPG_INDEX_LAST);
+			Flags |= FLAG_Attribute_NormalTangent;
+		}
 
 		TexCoords.Clear(true);
-		TexCoords.InsertAtRange(texCoordData, vertexCount, RPG_INDEX_LAST);
-
+		if (texCoordData)
+		{
+			TexCoords.InsertAtRange(texCoordData, vertexCount, RPG_INDEX_LAST);
+			Flags |= FLAG_Attribute_TexCoord;
+		}
+		
 		Skins.Clear(true);
-
 		if (skinData)
 		{
 			Skins.InsertAtRange(skinData, vertexCount, RPG_INDEX_LAST);
+			Flags |= FLAG_Attribute_Skin;
 		}
 
 		Indices.Clear(true);
 		Indices.InsertAtRange(indexData, indexCount, RPG_INDEX_LAST);
+		Flags |= FLAG_Attribute_Index;
 	}
-	SDL_UnlockRWLock(Lock);
+	ReadWriteUnlockAll();
 }
 
 
 void RpgMesh::AddBatchVertexData(int vertexCount, const RpgVertex::FMeshPosition* positionData, const RpgVertex::FMeshNormalTangent* normalTangentData, const RpgVertex::FMeshTexCoord* texCoordData, const RpgVertex::FMeshSkin* skinData, int indexCount, const RpgVertex::FIndex* indexData) noexcept
 {
 	RPG_Assert(vertexCount > 0);
-	RPG_Assert(positionData && normalTangentData && texCoordData);
+	RPG_Assert(positionData);
 	RPG_Assert(indexCount > 0);
 	RPG_Assert(indexData);
 
 	const uint32_t baseVertex = static_cast<uint32_t>(Positions.GetCount());
+	if (baseVertex == 0)
+	{
+		UpdateVertexData(vertexCount, positionData, normalTangentData, texCoordData, skinData, indexCount, indexData);
+		return;
+	}
 
 	if (baseVertex > 0)
 	{
-		if (HasSkin())
+		if (Flags & FLAG_Attribute_NormalTangent)
+		{
+			RPG_CheckV(normalTangentData, "Vertex data added to batch must have normal-tangent data if original mesh contains normal-tangent data!");
+		}
+		else
+		{
+			RPG_CheckV(skinData == nullptr, "Vertex data added to batch must not contain normal-tangent data if original mesh does not have normal-tangent data!");
+		}
+
+		if (Flags & FLAG_Attribute_TexCoord)
+		{
+			RPG_CheckV(skinData, "Vertex data added to batch must have texcoord data if original mesh contains texcoord data!");
+		}
+		else
+		{
+			RPG_CheckV(skinData == nullptr, "Vertex data added to batch must not contain texcoord data if original mesh does not have texcoord data!");
+		}
+
+		if (Flags & FLAG_Attribute_Skin)
 		{
 			RPG_CheckV(skinData, "Vertex data added to batch must have skin data if original mesh contains skin data!");
 		}
@@ -68,7 +112,7 @@ void RpgMesh::AddBatchVertexData(int vertexCount, const RpgVertex::FMeshPosition
 		}
 	}
 
-	SDL_LockRWLockForWriting(Lock);
+	WriteLockAll();
 	{
 		Positions.InsertAtRange(positionData, vertexCount, RPG_INDEX_LAST);
 		NormalTangents.InsertAtRange(normalTangentData, vertexCount, RPG_INDEX_LAST);
@@ -87,11 +131,11 @@ void RpgMesh::AddBatchVertexData(int vertexCount, const RpgVertex::FMeshPosition
 			RpgVertexGeometryFactory::UpdateBatchIndices(Indices, baseVertex, baseIndex, indexCount);
 		}
 	}
-	SDL_UnlockRWLock(Lock);
+	ReadWriteUnlockAll();
 }
 
 
-RpgBoundingAABB RpgMesh::CalculateBounding() const noexcept
+RpgBoundingAABB RpgMesh::CalculateBound() const noexcept
 {
 	RpgBoundingAABB aabb;
 

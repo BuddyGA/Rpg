@@ -6,14 +6,6 @@
 
 class RpgFilePath
 {
-private:
-	RpgString FullPath;
-	RpgStringView DirectoryPath;
-	RpgStringView DirectoryName;
-	RpgStringView FileName;
-	RpgStringView FileExt;
-
-
 public:
 	RpgFilePath() noexcept = default;
 	~RpgFilePath() noexcept = default;
@@ -134,11 +126,6 @@ public:
 	}
 
 
-private:
-	void InitializeInternal();
-	bool IsPathValid() const noexcept;
-
-
 public:
 	RpgFilePath GetParentDirectoryPath() const noexcept;
 	RpgString GetDirectoryPath() const noexcept;
@@ -173,6 +160,19 @@ public:
 	{
 		return FullPath;
 	}
+
+
+private:
+	void InitializeInternal();
+	bool IsPathValid() const noexcept;
+
+
+private:
+	RpgString FullPath;
+	RpgStringView DirectoryPath;
+	RpgStringView DirectoryName;
+	RpgStringView FileName;
+	RpgStringView FileExt;
 
 };
 

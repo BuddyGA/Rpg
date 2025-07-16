@@ -19,11 +19,6 @@ public:
 	bool bPauseAnim;
 	bool bDebugDrawSkeletonPose;
 
-private:
-	RpgSharedAnimationSkeleton Skeleton;
-	RpgAnimationPose FinalPose;
-	float AnimTimer;
-
 
 public:
 	RpgAnimationComponent() noexcept
@@ -72,6 +67,12 @@ public:
 	{
 		return FinalPose;
 	}
+
+
+private:
+	RpgSharedAnimationSkeleton Skeleton;
+	RpgAnimationPose FinalPose;
+	float AnimTimer;
 
 
 	friend RpgAnimationWorldSubsystem;

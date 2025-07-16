@@ -143,8 +143,6 @@ public:
 
 class RpgBinaryStreamWriter : public RpgStreamWriter
 {
-private:
-	RpgArray<uint8_t> Bytes;
 
 public:
 	RpgBinaryStreamWriter() noexcept
@@ -176,16 +174,16 @@ public:
 		return Bytes.GetCount();
 	}
 
+
+private:
+	RpgArray<uint8_t> Bytes;
+
 };
 
 
 
 class RpgBinaryStreamReader : public RpgStreamReader
 {
-private:
-	RpgArray<uint8_t> Bytes;
-	size_t Offset;
-
 
 public:
 	RpgBinaryStreamReader(RpgArray<uint8_t>& inBytes) noexcept
@@ -223,5 +221,10 @@ public:
 	{
 		return Bytes.GetCount();
 	}
+
+
+private:
+	RpgArray<uint8_t> Bytes;
+	size_t Offset;
 
 };

@@ -7,34 +7,6 @@
 
 class RpgSceneViewport
 {
-private:
-	RpgMatrixTransform ViewMatrix;
-	RpgMatrixProjection ProjectionMatrix;
-	RpgQuaternion ViewRotation;
-	RpgVector3 ViewPosition;
-	RpgBoundingFrustum ViewFrustum;
-	float FovDegree;
-	float NearClipZ;
-	float FarClipZ;
-	bool bOrthographicProjection;
-	bool bDirtyProjection;
-
-
-	struct FFrameData
-	{
-		RpgSharedTexture2D RenderTargetTexture;
-		RpgSharedTexture2D DepthStencilTexture;
-		
-		RpgArray<RpgDrawIndexed> DrawOpaqueMeshes;
-		RpgArray<RpgDrawIndexed> DrawOpaqueSkinnedMeshes;
-
-		RpgArray<RpgDrawIndexed> DrawTransparencies;
-
-		RpgRenderTask_RenderPassForward TaskRenderPassForward;
-	};
-	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
-
-
 public:
 	RpgPointInt RenderTargetDimension;
 	RpgArray<RpgSceneMesh> Meshes;
@@ -99,15 +71,43 @@ public:
 		return ViewFrustum;
 	}
 
-	inline const RpgSharedTexture2D& GetRenderTargetTexture(int frameIndex) const noexcept
+	inline const RpgSharedTexture2D& GetTextureRenderTarget(int frameIndex) const noexcept
 	{
-		return FrameDatas[frameIndex].RenderTargetTexture;
+		return FrameDatas[frameIndex].TextureRenderTarget;
 	}
 
-	inline const RpgSharedTexture2D& GetDepthStencilTexture(int frameIndex) const noexcept
+	inline const RpgSharedTexture2D& GetTextureDepthStencil(int frameIndex) const noexcept
 	{
-		return FrameDatas[frameIndex].DepthStencilTexture;
+		return FrameDatas[frameIndex].TextureDepthStencil;
 	}
+
+
+private:
+	RpgMatrixTransform ViewMatrix;
+	RpgMatrixProjection ProjectionMatrix;
+	RpgQuaternion ViewRotation;
+	RpgVector3 ViewPosition;
+	RpgBoundingFrustum ViewFrustum;
+	float FovDegree;
+	float NearClipZ;
+	float FarClipZ;
+	bool bOrthographicProjection;
+	bool bDirtyProjection;
+
+
+	struct FFrameData
+	{
+		RpgSharedTexture2D TextureRenderTarget;
+		RpgSharedTexture2D TextureDepthStencil;
+
+		RpgArray<RpgDrawIndexed> DrawOpaqueMeshes;
+		RpgArray<RpgDrawIndexed> DrawOpaqueSkinnedMeshes;
+
+		RpgArray<RpgDrawIndexed> DrawTransparencies;
+
+		RpgRenderTask_RenderPassForward TaskRenderPassForward;
+	};
+	FFrameData FrameDatas[RPG_FRAME_BUFFERING];
 
 
 #ifndef RPG_BUILD_SHIPPING

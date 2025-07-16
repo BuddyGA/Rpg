@@ -1,9 +1,18 @@
 #pragma once
 
-#include "core/RpgConfig.h"
 #include "core/RpgString.h"
 #include "core/RpgPointer.h"
 #include "RpgRenderTypes.h"
+
+
+// Minimum texture dimension
+#define RPG_TEXTURE_MIN_DIM		64
+
+// Maxiimum texture dimension
+#define RPG_TEXTURE_MAX_DIM		4096
+
+// Maximum texture mip count
+#define RPG_TEXTURE_MAX_MIP		13
 
 
 
@@ -25,44 +34,11 @@ public:
 	};
 
 
-protected:
-	RpgName Name;
-	RpgTextureFormat::EType Format;
-	uint16_t Width;
-	uint16_t Height;
-	uint8_t MipCount;
-	size_t TotalSizeBytes;
-	RpgArrayInline<FMipData, RPG_TEXTURE_MAX_MIP> MipDatas;
-	RpgArrayInline<SDL_RWLock*, RPG_TEXTURE_MAX_MIP> MipLocks;
-	ComPtr<D3D12MA::Allocation> PixelStagingBuffer;
-	uint8_t* PixelData;
-
-
-	enum EFlag : uint16_t
-	{
-		FLAG_None				= (0),
-		FLAG_Loading			= (1 << 0),
-		FLAG_Loaded				= (1 << 1),
-		FLAG_PendingDestroy		= (1 << 2),
-		FLAG_Dirty				= (1 << 3),
-		FLAG_IsRenderTarget		= (1 << 4),
-		FLAG_IsDepthStencil		= (1 << 5),
-		FLAG_GPU_Loading		= (1 << 6),
-		FLAG_GPU_Loaded			= (1 << 7),
-	};
-	uint16_t Flags;
-
-
-protected:
-	RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height, uint8_t mipCount, uint16_t flags) noexcept;
-
 public:
+	RpgTexture2D(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height, uint8_t mipCount, uint16_t flags) noexcept;
 	~RpgTexture2D() noexcept;
 
-private:
-	void InitializeMips() noexcept;
 
-public:
 	inline const RpgName& GetName() const noexcept
 	{
 		return Name;
@@ -150,12 +126,6 @@ public:
 	}
 
 
-protected:
-	ComPtr<D3D12MA::Allocation> GpuAlloc;
-	D3D12_RESOURCE_STATES GpuState;
-
-
-public:
 	virtual void GPU_UpdateResource() noexcept;
 	void GPU_CommandCopy(ID3D12GraphicsCommandList* cmdList) const noexcept;
 
@@ -202,6 +172,41 @@ public:
 	}
 
 
+private:
+	void InitializeMips() noexcept;
+
+
+protected:
+	RpgName Name;
+	RpgTextureFormat::EType Format;
+	uint16_t Width;
+	uint16_t Height;
+	uint8_t MipCount;
+	size_t TotalSizeBytes;
+	RpgArrayInline<FMipData, RPG_TEXTURE_MAX_MIP> MipDatas;
+	RpgArrayInline<SDL_RWLock*, RPG_TEXTURE_MAX_MIP> MipLocks;
+	ComPtr<D3D12MA::Allocation> PixelStagingBuffer;
+	uint8_t* PixelData;
+
+
+	enum EFlag : uint16_t
+	{
+		FLAG_None				= (0),
+		FLAG_Loading			= (1 << 0),
+		FLAG_Loaded				= (1 << 1),
+		FLAG_PendingDestroy		= (1 << 2),
+		FLAG_Dirty				= (1 << 3),
+		FLAG_IsRenderTarget		= (1 << 4),
+		FLAG_IsDepthStencil		= (1 << 5),
+		FLAG_GPU_Loading		= (1 << 6),
+		FLAG_GPU_Loaded			= (1 << 7),
+	};
+	uint16_t Flags;
+
+	ComPtr<D3D12MA::Allocation> GpuAlloc;
+	D3D12_RESOURCE_STATES GpuState;
+
+
 public:
 	[[nodiscard]] static RpgSharedTexture2D s_CreateShared2D(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height, uint8_t mipCount) noexcept;
 	[[nodiscard]] static RpgSharedTexture2D s_CreateSharedRenderTarget(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
@@ -216,18 +221,17 @@ public:
 
 
 
-typedef RpgSharedPtr<class RpgTextureCubeDepth> RpgSharedTextureCubeDepth;
+typedef RpgSharedPtr<class RpgTextureDepthCube> RpgSharedTextureDepthCube;
 
-class RpgTextureCubeDepth : public RpgTexture2D
+class RpgTextureDepthCube : public RpgTexture2D
 {
-private:
-	RpgTextureCubeDepth(const RpgName name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
-
 public:
+	RpgTextureDepthCube(const RpgName name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
+
 	virtual void GPU_UpdateResource() noexcept override;
 
 
 public:
-	[[nodiscard]] static RpgSharedTextureCubeDepth s_CreateShared(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
+	[[nodiscard]] static RpgSharedTextureDepthCube s_CreateShared(const RpgName& name, RpgTextureFormat::EType format, uint16_t width, uint16_t height) noexcept;
 
 };

@@ -17,7 +17,7 @@ void RpgRenderTask_RenderPassShadow::Reset() noexcept
 {
 	RpgRenderTask_RenderPass::Reset();
 
-	DepthTexture = nullptr;
+	TextureDepth = nullptr;
 	ViewId = RPG_INDEX_INVALID;
 	DrawMeshData = nullptr;
 	DrawMeshCount = 0;
@@ -29,7 +29,7 @@ void RpgRenderTask_RenderPassShadow::Reset() noexcept
 
 void RpgRenderTask_RenderPassShadow::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
 {
-	const RpgPointInt dimension = DepthTexture->GetDimension();
+	const RpgPointInt dimension = TextureDepth->GetDimension();
 
 	// Set viewport
 	RpgD3D12Command::SetViewport(cmdList, 0, 0, dimension.X, dimension.Y, 0.0f, 1.0f);
@@ -43,12 +43,12 @@ void RpgRenderTask_RenderPassShadow::CommandDraw(ID3D12GraphicsCommandList* cmdL
 	// Bind shader resource world
 	WorldResource->CommandBindShaderResources(cmdList);
 
-	ID3D12Resource* depthStencilResource = DepthTexture->GPU_GetResource();
+	ID3D12Resource* depthStencilResource = TextureDepth->GPU_GetResource();
 	const RpgD3D12::FResourceDescriptor depthStencilDescriptor = RpgD3D12::AllocateDescriptor_DSV(depthStencilResource);
 
 	// Transition resource to depth-write
-	RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, DepthTexture->GPU_GetState(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-	DepthTexture->GPU_SetState(D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, TextureDepth->GPU_GetState(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	TextureDepth->GPU_SetState(D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 	// Set and clear render targets
 	RpgD3D12Command::SetAndClearRenderTargets(cmdList, nullptr, 0, RpgColorLinear(), &depthStencilDescriptor, 1.0f, 0);
@@ -122,6 +122,6 @@ void RpgRenderTask_RenderPassShadow::CommandDraw(ID3D12GraphicsCommandList* cmdL
 
 
 	// Transition resource to pixel shader
-	RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, DepthTexture->GPU_GetState(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	DepthTexture->GPU_SetState(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, TextureDepth->GPU_GetState(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	TextureDepth->GPU_SetState(D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }

@@ -8,12 +8,13 @@
 RpgSceneViewport::RpgSceneViewport() noexcept
 	: FrameDatas()
 {
+	RenderTargetDimension = RpgPointInt(1600, 900);
 	FovDegree = 90.0f;
 	NearClipZ = 10.0f;
 	FarClipZ = 10000.0f;
 	bOrthographicProjection = false;
 	bDirtyProjection = true;
-	RenderTargetDimension = RpgPointInt(1600, 900);
+
 
 #ifndef RPG_BUILD_SHIPPING
 	for (int f = 0; f < RPG_FRAME_BUFFERING; ++f)
@@ -37,23 +38,23 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 
 	// Resize render target
 	{
-		if (!frame.RenderTargetTexture)
+		if (!frame.TextureRenderTarget)
 		{
-			frame.RenderTargetTexture = RpgTexture2D::s_CreateSharedRenderTarget("TEXRT_ScnVprt", RpgTextureFormat::TEX_RT_RGBA, RenderTargetDimension.X, RenderTargetDimension.Y);
+			frame.TextureRenderTarget = RpgTexture2D::s_CreateSharedRenderTarget("TEXRT_ScnVprt", RpgTextureFormat::TEX_RT_RGBA, RenderTargetDimension.X, RenderTargetDimension.Y);
 		}
 
-		frame.RenderTargetTexture->Resize(RenderTargetDimension.X, RenderTargetDimension.Y);
-		frame.RenderTargetTexture->GPU_UpdateResource();
+		frame.TextureRenderTarget->Resize(RenderTargetDimension.X, RenderTargetDimension.Y);
+		frame.TextureRenderTarget->GPU_UpdateResource();
 
 
 		// Resize depth-stencil
-		if (!frame.DepthStencilTexture)
+		if (!frame.TextureDepthStencil)
 		{
-			frame.DepthStencilTexture = RpgTexture2D::s_CreateSharedDepthStencil("TEXDS_ScnVprt", RpgTextureFormat::TEX_DS_32, RenderTargetDimension.X, RenderTargetDimension.Y);
+			frame.TextureDepthStencil = RpgTexture2D::s_CreateSharedDepthStencil("TEXDS_ScnVprt", RpgTextureFormat::TEX_DS_32, RenderTargetDimension.X, RenderTargetDimension.Y);
 		}
 
-		frame.DepthStencilTexture->Resize(RenderTargetDimension.X, RenderTargetDimension.Y);
-		frame.DepthStencilTexture->GPU_UpdateResource();
+		frame.TextureDepthStencil->Resize(RenderTargetDimension.X, RenderTargetDimension.Y);
+		frame.TextureDepthStencil->GPU_UpdateResource();
 	}
 
 
@@ -183,8 +184,8 @@ void RpgSceneViewport::SetupRenderPasses(const RpgRenderFrameContext& frameConte
 	forwardPass->Reset();
 	forwardPass->FrameContext = frameContext;
 	forwardPass->WorldResource = worldResource;
-	forwardPass->RenderTargetTexture = frame.RenderTargetTexture.Get();
-	forwardPass->DepthStencilTexture = frame.DepthStencilTexture.Get();
+	forwardPass->TextureRenderTarget = frame.TextureRenderTarget.Get();
+	forwardPass->TextureDepthStencil = frame.TextureDepthStencil.Get();
 	forwardPass->DrawMeshData = frame.DrawOpaqueMeshes.GetData();
 	forwardPass->DrawMeshCount = frame.DrawOpaqueMeshes.GetCount();
 	forwardPass->DrawSkinnedMeshData = frame.DrawOpaqueSkinnedMeshes.GetData();

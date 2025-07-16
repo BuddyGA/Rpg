@@ -9,11 +9,13 @@ class RpgWorld;
 
 struct RpgGameObjectID
 {
-private:
-	class RpgWorld* World;
-	int Index;
-	uint16_t Gen;
-
+public:
+	RpgGameObjectID() noexcept
+	{
+		World = nullptr;
+		Index = -1;
+		Gen = UINT16_MAX;
+	}
 
 private:
 	RpgGameObjectID(RpgWorld* in_World, int in_Index, uint16_t in_Gen) noexcept
@@ -23,14 +25,8 @@ private:
 		Gen = in_Gen;
 	}
 
-public:
-	RpgGameObjectID() noexcept
-	{
-		World = nullptr;
-		Index = -1;
-		Gen = UINT16_MAX;
-	}
 
+public:
 	inline bool IsValid() const noexcept
 	{
 		return World && Index != -1 && Gen != UINT16_MAX;
@@ -52,6 +48,12 @@ public:
 	}
 
 
+private:
+	class RpgWorld* World;
+	int Index;
+	uint16_t Gen;
+
+
 	friend RpgWorld;
 
 };
@@ -70,18 +72,9 @@ friend RpgWorld;
 
 
 
-class RpgGameObjectScript abstract
+class RpgGameObjectScript
 {
 	RPG_NOCOPY(RpgGameObjectScript)
-
-protected:
-	RpgGameObjectID GameObject;
-	RpgWorld* World;
-
-private:
-	bool bInitialized;
-	bool bStartedPlay;
-
 
 protected:
 	RpgGameObjectScript() noexcept
@@ -91,6 +84,7 @@ protected:
 		bStartedPlay = false;
 	}
 
+public:
 	virtual ~RpgGameObjectScript() noexcept = default;
 
 	virtual void AttachedToGameObject() noexcept {}
@@ -98,8 +92,16 @@ protected:
 	virtual void StartPlay() noexcept {}
 	virtual void StopPlay() noexcept {}
 	virtual void TickUpdate(float deltaTime) noexcept {}
-
 	virtual const char* GetTypeName() const noexcept { return "RpgScript"; }
+
+
+protected:
+	RpgGameObjectID GameObject;
+	RpgWorld* World;
+
+private:
+	bool bInitialized;
+	bool bStartedPlay;
 
 
 	friend RpgWorld;

@@ -7,8 +7,8 @@
 
 RpgRenderTask_RenderPassForward::RpgRenderTask_RenderPassForward() noexcept
 {
-	RenderTargetTexture = nullptr;
-	DepthStencilTexture = nullptr;
+	TextureRenderTarget = nullptr;
+	TextureDepthStencil = nullptr;
 	DrawMeshData = nullptr;
 	DrawMeshCount = 0;
 	DrawSkinnedMeshData = nullptr;
@@ -26,8 +26,8 @@ void RpgRenderTask_RenderPassForward::Reset() noexcept
 {
 	RpgRenderTask_RenderPass::Reset();
 
-	RenderTargetTexture = nullptr;
-	DepthStencilTexture = nullptr;
+	TextureRenderTarget = nullptr;
+	TextureDepthStencil = nullptr;
 	DrawMeshData = nullptr;
 	DrawMeshCount = 0;
 	DrawSkinnedMeshData = nullptr;
@@ -43,10 +43,10 @@ void RpgRenderTask_RenderPassForward::Reset() noexcept
 
 void RpgRenderTask_RenderPassForward::CommandDraw(ID3D12GraphicsCommandList* cmdList) const noexcept
 {
-	RPG_Assert(RenderTargetTexture);
-	RPG_Assert(DepthStencilTexture);
+	RPG_Assert(TextureRenderTarget);
+	RPG_Assert(TextureDepthStencil);
 	
-	const RpgPointInt renderTargetDimension = RenderTargetTexture->GetDimension();
+	const RpgPointInt renderTargetDimension = TextureRenderTarget->GetDimension();
 
 	// Set viewport
 	RpgD3D12Command::SetViewport(cmdList, 0, 0, renderTargetDimension.X, renderTargetDimension.Y, 0.0f, 1.0f);
@@ -54,19 +54,19 @@ void RpgRenderTask_RenderPassForward::CommandDraw(ID3D12GraphicsCommandList* cmd
 	// Set scissor
 	RpgD3D12Command::SetScissor(cmdList, 0, 0, renderTargetDimension.X, renderTargetDimension.Y);
 
-	ID3D12Resource* renderTargetResource = RenderTargetTexture->GPU_GetResource();
+	ID3D12Resource* renderTargetResource = TextureRenderTarget->GPU_GetResource();
 	const RpgD3D12::FResourceDescriptor renderTargetDescriptor = RpgD3D12::AllocateDescriptor_RTV(renderTargetResource);
 
 	// Transition resource to render target
-	RpgD3D12Command::TransitionAllSubresources(cmdList, renderTargetResource, RenderTargetTexture->GPU_GetState(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-	RenderTargetTexture->GPU_SetState(D3D12_RESOURCE_STATE_RENDER_TARGET);
+	RpgD3D12Command::TransitionAllSubresources(cmdList, renderTargetResource, TextureRenderTarget->GPU_GetState(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+	TextureRenderTarget->GPU_SetState(D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	ID3D12Resource* depthStencilResource = DepthStencilTexture->GPU_GetResource();
+	ID3D12Resource* depthStencilResource = TextureDepthStencil->GPU_GetResource();
 	const RpgD3D12::FResourceDescriptor depthStencilDescriptor = RpgD3D12::AllocateDescriptor_DSV(depthStencilResource);
 
 	// Transition resource to depth-write
-	RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, DepthStencilTexture->GPU_GetState(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-	DepthStencilTexture->GPU_SetState(D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	RpgD3D12Command::TransitionAllSubresources(cmdList, depthStencilResource, TextureDepthStencil->GPU_GetState(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	TextureDepthStencil->GPU_SetState(D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 	// Set and clear render targets
 	RpgD3D12Command::SetAndClearRenderTargets(cmdList, &renderTargetDescriptor, 1, RpgColorLinear(0.0f, 0.0f, 0.0f), &depthStencilDescriptor, 1.0f, 0);

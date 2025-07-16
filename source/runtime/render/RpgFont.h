@@ -4,6 +4,19 @@
 #include "RpgTexture.h"
 
 
+// Font size small
+#define RPG_FONT_SIZE_SMALL		10
+
+// Font size medium
+#define RPG_FONT_SIZE_MEDIUM	15
+
+// Font size large
+#define RPG_FONT_SIZE_LARGE		20
+
+// Font tab indent pixel size
+#define RPG_FONT_TAB_INDENT_PX	16
+
+
 
 struct RpgFontUnicodeRange
 {
@@ -29,17 +42,8 @@ class RpgFont
 {
 	RPG_NOCOPY(RpgFont)
 
-private:
-	RpgName Name;
-	RpgFontUnicodeRange UnicodeRange;
-	RpgFontMetric Metric;
-	RpgSharedTexture2D Texture;
-
-
-private:
-	RpgFont(const RpgName& in_Name, const RpgString& ttfFilePath, int in_SizePx, int in_UnicodeStart, int in_UnicodeCount) noexcept;
-
 public:
+	RpgFont(const RpgName& in_Name, const RpgString& ttfFilePath, int in_SizePx, int in_UnicodeStart, int in_UnicodeCount) noexcept;
 	~RpgFont() noexcept;
 
 	RpgPointInt CalculateTextDimension(const char* text, int length) const noexcept;
@@ -60,6 +64,13 @@ public:
 	{
 		return Texture;
 	}
+
+
+private:
+	RpgName Name;
+	RpgFontUnicodeRange UnicodeRange;
+	RpgFontMetric Metric;
+	RpgSharedTexture2D Texture;
 
 
 public:

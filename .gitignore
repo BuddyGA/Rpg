@@ -4,9 +4,13 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 # Project 
+__archived/
 __build/
 __intermediate/
 __temp/
+
+# render doc
+*.cap
 
 
 # User-specific files

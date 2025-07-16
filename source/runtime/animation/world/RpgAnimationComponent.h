@@ -8,25 +8,23 @@
 // ======================================================================================================================= //
 // ANIMATION COMPONENT
 // ======================================================================================================================= //
-class RpgAnimationComponent
+class RpgAnimationComponent_AnimSkeletonPose
 {
-	RPG_COMPONENT_TYPE("RpgComponent - Animation")
+	RPG_COMPONENT_TYPE("RpgComponent (Animation) - AnimSkeletonPose")
 
 public:
 	RpgSharedAnimationClip Clip;
 	float PlayRate;
 	bool bLoopAnim;
 	bool bPauseAnim;
-	bool bDebugDrawSkeletonPose;
 
 
 public:
-	RpgAnimationComponent() noexcept
+	RpgAnimationComponent_AnimSkeletonPose() noexcept
 	{
 		PlayRate = 1.0f;
 		bLoopAnim = false;
 		bPauseAnim = false;
-		bDebugDrawSkeletonPose = false;
 		AnimTimer = 0.0f;
 	}
 

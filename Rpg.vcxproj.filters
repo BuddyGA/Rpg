@@ -123,9 +123,6 @@
     <ClCompile Include="source\runtime\navigation\world\RpgNavigationWorldSubsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\runtime\thirdparty\clay\__clay__build.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\runtime\gui\RpgGuiWidget_Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

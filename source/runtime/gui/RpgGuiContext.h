@@ -21,8 +21,5 @@ public:
 
 private:
 	RpgRectInt Rect;
-	RpgArray<RpgSharedFont, 4> Fonts;
-	RpgArray<RpgSharedTexture2D, 4> Textures;
-	bool bClayInitialized;
 
 };

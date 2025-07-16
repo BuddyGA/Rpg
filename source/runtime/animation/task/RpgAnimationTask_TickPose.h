@@ -5,7 +5,7 @@
 
 
 class RpgWorld;
-class RpgAnimationComponent;
+class RpgAnimationComponent_AnimSkeletonPose;
 
 
 
@@ -15,7 +15,7 @@ public:
 	const RpgWorld* World;
 	float DeltaTime;
 	float GlobalPlayRate;
-	RpgArray<RpgAnimationComponent*> AnimationComponents;
+	RpgArray<RpgAnimationComponent_AnimSkeletonPose*> AnimationComponents;
 
 
 public:

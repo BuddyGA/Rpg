@@ -85,7 +85,7 @@ void RpgSceneViewport::PreRender(RpgRenderFrameContext& frameContext, RpgWorldRe
 
 		if (bHasSkin)
 		{
-			const RpgAnimationComponent* animComp = world->GameObject_GetComponent<RpgAnimationComponent>(data.GameObject);
+			const RpgAnimationComponent_AnimSkeletonPose* animComp = world->GameObject_GetComponent<RpgAnimationComponent_AnimSkeletonPose>(data.GameObject);
 
 			// draw as static mesh if no animation component
 			bIsStaticMesh = (animComp == nullptr);

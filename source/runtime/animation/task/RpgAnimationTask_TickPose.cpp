@@ -27,7 +27,7 @@ void RpgAnimationTask_TickPose::Execute() noexcept
 {
 	for (int i = 0; i < AnimationComponents.GetCount(); ++i)
 	{
-		RpgAnimationComponent* comp = AnimationComponents[i];
+		RpgAnimationComponent_AnimSkeletonPose* comp = AnimationComponents[i];
 
 		// Check if paused
 		if (comp->bPauseAnim)

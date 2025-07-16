@@ -270,7 +270,6 @@ copy /y "$(SolutionDir)externals\SDL3\lib\SDL3.dll" "$(OutDir)SDL3.dll"</Command
     <ClCompile Include="source\runtime\render\task\RpgRenderTask_CompilePSO.cpp" />
     <ClCompile Include="source\runtime\RpgMain.cpp" />
     <ClCompile Include="source\runtime\core\world\RpgWorld.cpp" />
-    <ClCompile Include="source\runtime\thirdparty\clay\__clay__build.cpp" />
     <ClCompile Include="source\runtime\thirdparty\D3D12MA\__D3D12MA__build.cpp" />
     <ClCompile Include="source\runtime\thirdparty\libccd\__libccd__build.cpp" />
     <ClCompile Include="source\runtime\thirdparty\simdjson\__simdjson__build.cpp" />

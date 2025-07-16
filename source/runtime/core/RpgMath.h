@@ -997,41 +997,43 @@ public:
 class RpgBoundingSphere
 {
 public:
-	RpgVector3 Center;
-	float Radius;
-
-
-public:
 	RpgBoundingSphere() noexcept = default;
 
-	RpgBoundingSphere(RpgVector3 inCenter, float inRadius) noexcept
-		: Center(inCenter)
-		, Radius(inRadius)
+	RpgBoundingSphere(RpgVector3 in_Center, float in_Radius) noexcept
 	{
+		DirectX::XMStoreFloat3(&DxBoundingSphere.Center, in_Center.Xmm);
+		DxBoundingSphere.Radius = in_Radius;
 	}
 
 
+	inline RpgVector3 GetCenter() const noexcept
+	{
+		return DirectX::XMLoadFloat3(&DxBoundingSphere.Center);
+	}
+
+	inline float GetRadius() const noexcept
+	{
+		return DxBoundingSphere.Radius;
+	}
+
+	inline bool TestIntersectSphere(const RpgBoundingSphere& sphere) const noexcept
+	{
+		return DxBoundingSphere.Intersects(sphere.DxBoundingSphere);
+	}
+
 	inline bool TestIntersectAABB(const RpgBoundingAABB& aabb) const noexcept
 	{
-		DirectX::BoundingSphere dxSphere;
-		DirectX::XMStoreFloat3(&dxSphere.Center, Center.Xmm);
-		dxSphere.Radius = Radius;
-
 		DirectX::BoundingBox dxAABB;
 		DirectX::XMStoreFloat3(&dxAABB.Center, aabb.GetCenter().Xmm);
 		DirectX::XMStoreFloat3(&dxAABB.Extents, aabb.GetHalfExtents().Xmm);
 
-		return dxSphere.Intersects(dxAABB);
+		return DxBoundingSphere.Intersects(dxAABB);
 	}
 
 	inline bool TestIntersectRay(const RpgVector3& rayOrigin, const RpgVector3& rayDirection, float* outDistance = nullptr) const noexcept
 	{
-		DirectX::BoundingSphere dxSphere;
-		DirectX::XMStoreFloat3(&dxSphere.Center, Center.Xmm);
-		dxSphere.Radius = Radius;
-
 		float distance = 999999999.0f;
-		const bool bIntersect = dxSphere.Intersects(rayOrigin.Xmm, rayDirection.Xmm, distance);
+		const bool bIntersect = DxBoundingSphere.Intersects(rayOrigin.Xmm, rayDirection.Xmm, distance);
 
 		if (outDistance)
 		{
@@ -1040,6 +1042,10 @@ public:
 
 		return bIntersect;
 	}
+
+
+private:
+	DirectX::BoundingSphere DxBoundingSphere;
 
 };
 
@@ -1240,15 +1246,15 @@ public:
 
 	inline void CreateFromMatrix(const RpgMatrixTransform& transformMatrix, const RpgMatrixProjection& projectionMatrix) noexcept
 	{
-		DirectX::BoundingFrustum::CreateFromMatrix(DxFrustum, projectionMatrix.Xmm);
-		DxFrustum.Transform(DxFrustum, transformMatrix.Xmm);
+		DirectX::BoundingFrustum::CreateFromMatrix(DxBoundingFrustum, projectionMatrix.Xmm);
+		DxBoundingFrustum.Transform(DxBoundingFrustum, transformMatrix.Xmm);
 	}
 
 
 	inline FCornerPoints GetCornerPoints() const noexcept
 	{
 		DirectX::XMFLOAT3 tempPoints[8];
-		DxFrustum.GetCorners(tempPoints);
+		DxBoundingFrustum.GetCorners(tempPoints);
 
 		FCornerPoints corners;
 		corners.Points[0] = DirectX::XMLoadFloat3(&tempPoints[0]);
@@ -1272,17 +1278,17 @@ public:
 		DirectX::XMFLOAT3 aabbHalfExtents;
 		DirectX::XMStoreFloat3(&aabbHalfExtents, boundingAABB.GetHalfExtents().Xmm);
 
-		return DxFrustum.Intersects(DirectX::BoundingBox(aabbCenter, aabbHalfExtents));
+		return DxBoundingFrustum.Intersects(DirectX::BoundingBox(aabbCenter, aabbHalfExtents));
 	}
 
 
 	inline bool TestIntersectSphere(const RpgBoundingSphere& boundingSphere) const noexcept
 	{
 		DirectX::BoundingSphere dxSphere;
-		DirectX::XMStoreFloat3(&dxSphere.Center, boundingSphere.Center.Xmm);
-		dxSphere.Radius = boundingSphere.Radius;
+		DirectX::XMStoreFloat3(&dxSphere.Center, boundingSphere.GetCenter().Xmm);
+		dxSphere.Radius = boundingSphere.GetRadius();
 
-		return DxFrustum.Intersects(dxSphere);
+		return DxBoundingFrustum.Intersects(dxSphere);
 	}
 
 	
@@ -1293,7 +1299,7 @@ public:
 		DirectX::XMStoreFloat3(&box.Extents, boundingBox.HalfExtents.Xmm);
 		DirectX::XMStoreFloat4(&box.Orientation, boundingBox.Rotation.Xmm);
 
-		return DxFrustum.Intersects(box);
+		return DxBoundingFrustum.Intersects(box);
 	}
 
 
@@ -1305,12 +1311,12 @@ public:
 
 	inline bool TestIntersectFrustum(const RpgBoundingFrustum& frustum) const noexcept
 	{
-		return DxFrustum.Intersects(frustum.DxFrustum);
+		return DxBoundingFrustum.Intersects(frustum.DxBoundingFrustum);
 	}
 
 
 private:
-	DirectX::BoundingFrustum DxFrustum;
+	DirectX::BoundingFrustum DxBoundingFrustum;
 
 };
 

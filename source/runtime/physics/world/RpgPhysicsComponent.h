@@ -39,20 +39,10 @@ class RpgPhysicsComponent_Collision
 	RPG_COMPONENT_TYPE("RpgComponent (Physics) - Collision");
 
 public:
-	// Set true to simulate physics
-	bool bSimulate;
-
-	// Set true to enable collision
-	bool bCollisionEnabled;
-
-
-public:
 	RpgPhysicsComponent_Collision() noexcept
 	{
 		Shape = RpgPhysicsCollision::SHAPE_NONE;
 		bUpdateBounding = false;
-		bSimulate = false;
-		bCollisionEnabled = false;
 	}
 
 
@@ -93,8 +83,8 @@ public:
 
 
 private:
-	// Internal bounding AABB for broadphase
-	RpgBoundingAABB Bound;
+	// Internal bounding sphere for broadphase
+	RpgBoundingSphere Bound;
 
 	// - Sphere (X = Radius, Y = Radius, Z = Radius, W = Radius)
 	// - Box (XYZ = Half Extents, W = 0.0f)

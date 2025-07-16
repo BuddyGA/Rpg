@@ -16,7 +16,7 @@ namespace RpgPhysicsGJK
 	{
 		const RpgBoundingSphere* sphere = reinterpret_cast<const RpgBoundingSphere*>(obj);
 		const RpgVector3 direction(dir->v[0], dir->v[1], dir->v[2]);
-		const RpgVector3 farthestPoint = sphere->Center + direction.GetNormalize() * sphere->Radius;
+		const RpgVector3 farthestPoint = sphere->GetCenter() + direction.GetNormalize() * sphere->GetRadius();
 
 		ccdVec3Set(vec, farthestPoint.X, farthestPoint.Y, farthestPoint.Z);
 	}
@@ -140,15 +140,12 @@ namespace RpgPhysicsCollision
 				if (firstFilter.ResponseChannels[secondFilter.ObjectChannel] == secondFilter.ResponseChannels[firstFilter.ObjectChannel])
 				{
 					RpgPhysicsComponent_Collision* firstCollision = world->GameObject_GetComponent<RpgPhysicsComponent_Collision>(firstFilter.GameObject);
-					RPG_Check(firstCollision);
+					RPG_Check(firstCollision && firstCollision->GameObject == firstFilter.GameObject);
 
 					RpgPhysicsComponent_Collision* secondCollision = world->GameObject_GetComponent<RpgPhysicsComponent_Collision>(secondFilter.GameObject);
-					RPG_Check(secondCollision);
+					RPG_Check(secondCollision && secondCollision->GameObject == secondFilter.GameObject);
 
-					if (firstCollision->bCollisionEnabled && secondCollision->bCollisionEnabled)
-					{
-						out_Pairs.AddValue({ firstCollision, secondCollision });
-					}
+					out_Pairs.AddValue({ firstCollision, secondCollision });
 				}
 			}
 		}
@@ -173,16 +170,22 @@ namespace RpgPhysicsCollision
 // =========================================================================================================================================================== //
 	bool Narrowphase::TestOverlapSphereSphere(RpgBoundingSphere first, RpgBoundingSphere second, RpgPhysicsCollision::FContactResult* optOut_Result) noexcept
 	{
-		const RpgVector3 delta = second.Center - first.Center;
+		const RpgVector3 firstCenter = first.GetCenter();
+		const float firstRadius = first.GetRadius();
+
+		const RpgVector3 secondCenter = second.GetCenter();
+		const float secondRadius = second.GetRadius();
+
+		const RpgVector3 delta = secondCenter - firstCenter;
 		const float magSqr = delta.GetMagnitudeSqr();
-		const float radiusSqr = (first.Radius + second.Radius) * (first.Radius * second.Radius);
+		const float radiusSqr = (firstRadius + secondRadius) * (firstRadius * secondRadius);
 		const bool bOverlapped = magSqr <= radiusSqr;
 
 		if (bOverlapped && optOut_Result)
 		{
 			const RpgVector3 deltaNormalized = delta.GetNormalize();
 			optOut_Result->SeparationDirection = deltaNormalized;
-			optOut_Result->ContactPoint = deltaNormalized * second.Radius;
+			optOut_Result->ContactPoint = deltaNormalized * secondRadius;
 			optOut_Result->PenetrationDepth = RpgMath::Sqrt(magSqr);
 		}
 

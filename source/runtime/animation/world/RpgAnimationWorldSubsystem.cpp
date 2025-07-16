@@ -56,7 +56,7 @@ void RpgAnimationWorldSubsystem::TickUpdate(float deltaTime) noexcept
 	// Distribute tasks
 	int taskIndex = 0;
 
-	for (auto it = world->Component_CreateIterator<RpgAnimationComponent>(); it; ++it)
+	for (auto it = world->Component_CreateIterator<RpgAnimationComponent_AnimSkeletonPose>(); it; ++it)
 	{
 		RpgAnimationTask_TickPose& task = TaskTickPoses[taskIndex];
 		task.AnimationComponents.AddValue(&it.GetValue());
@@ -86,9 +86,9 @@ void RpgAnimationWorldSubsystem::Render(int frameIndex, RpgRenderer* renderer) n
 	{
 		RpgVertexPrimitiveBatchLine* debugLine = renderer->Debug_GetPrimitiveBatchLine(frameIndex, world, true);
 
-		for (auto it = world->Component_CreateIterator<RpgAnimationComponent>(); it; ++it)
+		for (auto it = world->Component_CreateIterator<RpgAnimationComponent_AnimSkeletonPose>(); it; ++it)
 		{
-			const RpgAnimationComponent& comp = it.GetValue();
+			const RpgAnimationComponent_AnimSkeletonPose& comp = it.GetValue();
 			if (!comp.Skeleton)
 			{
 				continue;

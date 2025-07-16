@@ -137,7 +137,7 @@ static void TestLevel_OBJ(RpgWorld* world, const RpgFilePath& sourceFilePath, fl
 		if (model->HasSkin())
 		{
 			RPG_Check(importedSkeleton);
-			RpgAnimationComponent* animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
+			RpgAnimationComponent_AnimSkeletonPose* animComp = world->GameObject_AddComponent<RpgAnimationComponent_AnimSkeletonPose>(gameObject);
 			animComp->SetSkeleton(importedSkeleton);
 			animComp->Clip = importedAnimations[0];
 			animComp->PlayRate = 1.0f;
@@ -289,7 +289,7 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 			meshComp->Model = models[modelIndex];
 			meshComp->bIsVisible = true;
 
-			RpgAnimationComponent* animComp = world->GameObject_AddComponent<RpgAnimationComponent>(gameObject);
+			RpgAnimationComponent_AnimSkeletonPose* animComp = world->GameObject_AddComponent<RpgAnimationComponent_AnimSkeletonPose>(gameObject);
 			animComp->SetSkeleton(skeletons[modelIndex]);
 			animComp->Clip = animationClips[modelIndex];
 			animComp->PlayRate = 1.5f;
@@ -306,14 +306,14 @@ static void TestLevel_Animations(RpgWorld* world) noexcept
 
 void RpgEngine::CreateTestLevel() noexcept
 {
-	TestLevel_Sponza(MainWorld);
+	//TestLevel_Sponza(MainWorld);
 
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/lost_empire/lost_empire.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/bunny/bunny.obj", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/RiggedFigure.glb", 100.0f);
 	//TestLevel_OBJ(MainWorld, RpgFileSystem::GetAssetRawDirPath() + "model/CesiumMilkTruck.glb", 100.0f);
 
-	//TestLevel_Animations(MainWorld);
+	TestLevel_Animations(MainWorld);
 
 	//TestLevel_PrimitiveShapes(MainWorld);
 }

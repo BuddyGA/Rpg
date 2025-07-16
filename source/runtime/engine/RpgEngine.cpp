@@ -49,11 +49,12 @@ RpgEngine::RpgEngine(const char* windowTitle) noexcept
 		MainWorld->Subsystem_Add<RpgRenderWorldSubsystem>(2);
 
 		// Components
+		MainWorld->Component_Register<RpgPhysicsComponent_Filter>();
 		MainWorld->Component_Register<RpgPhysicsComponent_Collision>();
 		MainWorld->Component_Register<RpgRenderComponent_Mesh>();
 		MainWorld->Component_Register<RpgRenderComponent_Light>();
 		MainWorld->Component_Register<RpgRenderComponent_Camera>();
-		MainWorld->Component_Register<RpgAnimationComponent>();
+		MainWorld->Component_Register<RpgAnimationComponent_AnimSkeletonPose>();
 	}
 
 
